@@ -30,6 +30,9 @@ This document is an **index of terms only**. It aggregates terminology from auth
 - **Prompt Hub** — Settings catalogue for OCR, cleanup, and detection prompts. See [contracts/prompt-definition.md](contracts/prompt-definition.md).
 - **Detector / DetectionFinding** — Prompt-backed scan and derived span finding. See [detection-definition.md](contracts/detection-definition.md) · [detection-finding.md](contracts/detection-finding.md).
 - **Visual declutter** — Import-time (and Settings re-apply) scanner-border / binding-gutter / edge-shadow crop; not OCR preprocess. See [contracts/source-asset.md](contracts/source-asset.md).
+- **Notebook order / page order** — The order of the `pages` array in `project.json`; `page_index` is only an on-disk locator and never changes on reorder. See [contracts/project-on-disk.md](contracts/project-on-disk.md#page-reorder) · [runtime/ocr.md](runtime/ocr.md#page-order).
+- **Date cluster** — Contiguous run of pages sharing one confirmed date; **Move to date cluster** splices a page after it. See [contracts/project-on-disk.md](contracts/project-on-disk.md#page-reorder).
+- **Import outcome buckets** — `imported` / `failed` / `duplicated` / `needs-review` summary over ImportRun items. See [contracts/import-run.md](contracts/import-run.md) · [user_guide.md](user_guide.md#bulk-import-and-batch-jobs).
 - **Library cover-grid paging** — `ui.archive_notebooks_initial` — cover cards before Show more (`0` = all). See [contracts/workspace-settings.md](contracts/workspace-settings.md).
 - **Overview cards** — `ui.overview_cards` — which Overview cards are visible (status strip always on). See [contracts/workspace-settings.md](contracts/workspace-settings.md).
 - **View Advanced expanders** — `ui.view_show_advanced` — show raw module JSON under **Advanced · …** on View pages (default off). See [contracts/workspace-settings.md](contracts/workspace-settings.md).

@@ -109,6 +109,24 @@ Otherwise it is a **different** plan and must not reuse another run’s committe
 - ImportRun files are **retained by default** (audit/resume). Deletion is an explicit operator action, not automatic GC on success.
 - Optional future compaction may archive terminal runs older than a configured age; compaction must not delete the only record of committed page provenance linkage (`import_run_id` on sources) without a documented export.
 
+## Outcome buckets (read-model)
+
+The UI summarises a finished or partial run into four counts. This is a derived
+read-model over each item's `state` and optional `skip_classification`; it adds no
+persisted field and does not change commit behaviour (`corpus.import_outcomes`).
+
+| Bucket | Items |
+|--------|-------|
+| **imported** | `committed`, except same bytes already in another notebook |
+| **failed** | `failed` |
+| **duplicated** | `skipped` with same bytes in the same notebook (and any unclassified skip) |
+| **needs-review** | `committed` with same bytes in another notebook; `skipped` as same filename with different bytes, or same bytes in another notebook; `pending` / `cancelled_pending` |
+
+A run whose status is `partial` always reports at least one needs-review item so
+that unfinished work is not summarised as clean. The Import → Batch page shows the
+summary with each run; **Scan inbox** only pre-fills the folder path from
+`TRANSCRIBE_INBOX_DIR` and does not import anything by itself.
+
 ## Intra-notebook ingest constraint
 
 Existing `.ingest-journal.json` permits **at most one active ingest transaction per notebook**. Bulk orchestration **must enforce** this: never start a second source commit against a notebook that has a live journal; never assume intra-notebook parallelism. Parallelism across notebooks is allowed only under [notebook-corpus.md](notebook-corpus.md) lock rules.

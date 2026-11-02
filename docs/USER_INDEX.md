@@ -13,6 +13,7 @@ First visit: [docs home](index.md) or [User guide](user_guide.md). Developers: [
 | [docs home](index.md) | Hosted docs start |
 | [PRODUCT.md](PRODUCT.md) | What Transcribe is and is not |
 | [User guide](user_guide.md) | Import → transcribe → review → analyse → export |
+| [Workflow tour](workflows.md) | The same path in screenshots and short GIFs |
 | [Known limitations](known_limitations.md) | Model quality, privacy, honesty |
 | [Terminology](TERMS.md) | Term index |
 

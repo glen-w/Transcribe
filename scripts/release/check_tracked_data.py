@@ -8,6 +8,7 @@ Covers:
 
 from __future__ import annotations
 
+import fnmatch
 import subprocess
 import sys
 from pathlib import Path
@@ -39,18 +40,26 @@ BINARY_SUFFIXES = (
 )
 
 
-def _load_allowlist() -> set[str]:
+def _load_allowlist() -> tuple[set[str], list[str]]:
+    """Return (exact paths, glob patterns). Each entry needs an owner and purpose."""
     data = tomllib.loads(ALLOWLIST.read_text(encoding="utf-8"))
-    paths = data.get("paths") or []
     out: set[str] = set()
-    for entry in paths:
+    for entry in data.get("paths") or []:
         path = str(entry.get("path") or "").strip()
         if not path:
             raise SystemExit(f"allowlist entry missing path: {entry!r}")
         if not entry.get("owner") or not entry.get("purpose"):
             raise SystemExit(f"allowlist entry missing owner/purpose: {path}")
         out.add(path)
-    return out
+    globs: list[str] = []
+    for entry in data.get("globs") or []:
+        pattern = str(entry.get("glob") or "").strip()
+        if not pattern:
+            raise SystemExit(f"allowlist glob entry missing glob: {entry!r}")
+        if not entry.get("owner") or not entry.get("purpose"):
+            raise SystemExit(f"allowlist glob entry missing owner/purpose: {pattern}")
+        globs.append(pattern)
+    return out, globs
 
 
 def _git_ls(*pathspecs: str) -> set[str]:
@@ -77,10 +86,16 @@ def _tracked_data_like() -> set[str]:
 
 
 def main() -> int:
-    allowed = _load_allowlist()
+    allowed, globs = _load_allowlist()
     tracked = _tracked_data_like()
-    extra = sorted(tracked - allowed)
+    covered = {p for p in tracked if any(fnmatch.fnmatchcase(p, g) for g in globs)}
+    extra = sorted(tracked - allowed - covered)
     missing = sorted(allowed - tracked)
+    missing += [
+        f"{g} (glob matches no tracked file)"
+        for g in globs
+        if not any(fnmatch.fnmatchcase(p, g) for p in tracked)
+    ]
     if extra or missing:
         if extra:
             print("ERROR: tracked data/binary paths not on allowlist:")
@@ -92,7 +107,7 @@ def main() -> int:
                 print(f"  {p}")
         print("Update scripts/release/tracked_data_allowlist.toml with owner + purpose.")
         return 1
-    print(f"OK: tracked data/binary allowlist ({len(allowed)} path(s))")
+    print(f"OK: tracked data/binary allowlist ({len(allowed)} path(s), {len(globs)} glob(s))")
     return 0
 
 

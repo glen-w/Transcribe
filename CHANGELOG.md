@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Workflow tour** ([docs/workflows.md](docs/workflows.md)): 20 screenshots and two short GIFs (a review pass; repairing an out-of-order page) of the real UI on an invented sample notebook, linked from the README, user guide, first-notebook guide, and the landing page. Regenerate with `make docs-media` (`scripts/docs/capture_docs_media.py`; Playwright, no real pages, no OCR). `tests/unit/test_docs_media.py` guards image links, orphans, and size budgets.
+- Tracked-binary allowlist accepts `[[globs]]` entries (`docs/images/*`, `website/images/*`).
+- Import-run contract documents the outcome buckets; TERMS gains notebook order, date cluster, and outcome buckets.
+
+### Fixed
+
+- The global stylesheet was sent once per session, but Streamlit drops elements a rerun does not re-emit, so after the first click the sidebar lost its styling and the Library cover showed two **Open** buttons. It is now re-sent each run (`inject_global_styles`).
+- Thumbnails showed the drag-and-drop bridge field (raw page ids) under the grid. It is now hidden; drag and the numbered Move controls are unchanged.
+- Docs: Detect is under **Workflow**, not View; CLI table lists `pages`; Review lane, Cleanup (v4), page-order, Discard & leave, Detect Stop, inbox scan, and hand-model bring-back are described where users look for them.
+
 ### Changed
 
 - GitHub repository display name is **Transcribe** (`glen-w/Transcribe`), matching the product name already used in the UI and docs. Python package, CLI (`transcribe` / `./transcribe.sh`), and Docker (`transcribe-web`) stay lowercase.

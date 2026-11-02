@@ -11,6 +11,14 @@ service.
 
 Not sure if this is the right tool? [What Transcribe is](docs/PRODUCT.md).
 
+![Review: the scan beside its transcription, with OCR evidence below](docs/images/review-transcription.png)
+
+A review pass in motion (invented sample pages, no real notebook):
+
+![Review loop: compare OCR readings, check date and tags, save and mark reviewed](docs/images/workflow-review.gif)
+
+More screens: [Workflow tour](docs/workflows.md).
+
 ## What can I do with it?
 
 - Turn scans into editable text
@@ -19,7 +27,7 @@ Not sure if this is the right tool? [What Transcribe is](docs/PRODUCT.md).
 - Spot poetry, lists, names, and other patterns
 - Export a notebook you can keep (Markdown, HTML, EPUB, PDF)
 
-Walkthrough: [User guide](docs/user_guide.md). Product definition: [docs/PRODUCT.md](docs/PRODUCT.md).
+Walkthrough: [User guide](docs/user_guide.md) · [Workflow tour](docs/workflows.md) (screenshots). Product definition: [docs/PRODUCT.md](docs/PRODUCT.md).
 
 ## On your machine
 

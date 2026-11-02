@@ -8,7 +8,8 @@ the page → optionally analyse → export.
 
 Product framing: [PRODUCT.md](PRODUCT.md). This page is the golden path in the
 UI. CLI one-liners sit under each step; flags and batch jobs live in the
-runtime guides.
+runtime guides. Prefer pictures? [Workflow tour](workflows.md) walks the same
+path with screenshots and short GIFs.
 
 ## From a scan to a readable notebook
 
@@ -29,9 +30,11 @@ then **View → Overview**.
 | Open the sample notebook | Home → **Open sample notebook** |
 | Import and transcribe a notebook | This page, then [OCR](runtime/ocr.md) |
 | Review and correct a page | [OCR — Review](runtime/ocr.md#review-after-ocr) |
+| Fix a page that is out of order | [Fix page order](#fix-page-order) |
 | Ignore pages in Reading | Review → **Ignore in Reader**; Reader can **Show ignored** |
 | Analyse a notebook | [Analysis](runtime/analysis.md) |
 | Detect poetry, lists, names, … | [Detect](runtime/analysis.md#detect) |
+| See each screen | [Workflow tour](workflows.md) |
 | Export Markdown / HTML / PDF | [Export](runtime/export.md) |
 | Export OCR or detection fine-tune packs | [Export — Fine-tune](runtime/export.md#fine-tune-export) |
 
@@ -42,6 +45,10 @@ or **Home → Open sample notebook**. **Open sample** (Home or New notebook)
 installs a short placeholder notebook with text already filled in, so you can
 try Reading and Analyse without OCR. First visit opens **Home**. Rename later
 from **Library** or **Workflow → Import**.
+
+![Home with a recent notebook and Ollama status](images/home.png)
+
+In **Library**, click a cover or the **Open** button under it to open that notebook.
 
 **CLI:**
 
@@ -58,8 +65,13 @@ Supported inputs: JPEG, PNG, PDF (unencrypted). PDFs become one PNG per page.
 **UI:** select a notebook → **Workflow → Import** → Target **This notebook** →
 upload → Import files. A live panel shows per-file status.
 
-Visual declutter (scanner-border / gutter / shadow crop) defaults **on**. Toggle or re-apply under
-**Settings → Configuration → Import** (does not re-run OCR).
+Visual declutter defaults **on**. It crops scanner beds, stark-white gutters,
+corner wedges, dark binding gutters, and edge shadows. It is conservative, so
+many pages are left alone. Toggle or re-apply under
+**Settings → Configuration → Import**, or use **Review → Cleanup** for one page
+(neither re-runs OCR). Existing notebooks only change when you re-apply.
+
+![Import into the selected notebook](images/import.png)
 
 **CLI:**
 
@@ -78,6 +90,8 @@ from the picker because they often return empty text.
 **UI:** **Workflow → Transcribe** → Target **This notebook** → choose a vision
 model → optional **Clean OCR with a text model** → Start transcription. Open
 **Model information** under the picker for size and OCR-fit notes.
+
+![Transcribe: pick a vision model and start](images/transcribe.png)
 
 Jobs show live per-page progress. After repeated timeouts or a model that will
 not load, remaining pages for **that** model are skipped so a bad tag does not
@@ -99,7 +113,10 @@ Caveats: [known limitations](known_limitations.md) · [model matrix](runtime/ocr
 at a time on the right (**Transcription**, **Date**, **Tags**, **OCR**,
 **Cleanup**, **Other**).
 
-Approve or edit the text, then **Save + Mark reviewed** to move on. Mark
+Approve or edit the text, then **Save + Mark reviewed** to move on. If two OCR
+attempts disagree, **OCR evidence** shows both and **Source disagreement** steps
+through the differing words. Moving to another page with unsaved changes asks
+you to **Stay** or **Discard & leave**. Mark
 uninteresting pages **Ignore in Reader** so Reading skips them by default
 (Settings → Configuration → Reading controls the default; Reader can
 **Show ignored**). The same pages are omitted from exported Markdown, HTML,
@@ -109,7 +126,26 @@ click the page button under a thumb to open that page. **Reading** is the same
 pages in chronological order, read-only. **Library** is the cover gallery;
 **Search** finds text across notebooks.
 
+![A review pass: compare readings, check date and tags, then Save and Mark reviewed](images/workflow-review.gif)
+
 Workbench detail, keyboard shortcuts, and re-run OCR: [OCR — Review](runtime/ocr.md#review-after-ocr).
+
+### Fix page order
+
+Notebook order is the notebook's page list, not the folder number on disk, so
+moving a page never renames files. In **Review → Other → Page order** use
+**Move up**, **Move down**, or **Move to position**. When a page's date breaks
+the order, **Review → Date → Move to date cluster** places it after the pages
+with the same confirmed date (or in date order if there are none). **Thumbnails**
+offers the same controls beside the grid; dragging thumbnails is a bonus where
+the browser allows it. Reorder is refused while OCR or analysis is running.
+
+![Move to date cluster repairs an out-of-order page](images/workflow-reorder-pages.gif)
+
+```bash
+./transcribe.sh cli pages reorder "$TRANSCRIBE_PROJECTS_DIR/my-notebook" PAGE_ID_1 PAGE_ID_2 …
+./transcribe.sh cli pages move-to-date-cluster "$TRANSCRIBE_PROJECTS_DIR/my-notebook" PAGE_ID
+```
 
 ```bash
 ./transcribe.sh cli status "$TRANSCRIBE_PROJECTS_DIR/my-notebook"
@@ -127,8 +163,10 @@ After pages have text, open **Workflow → Analyse**:
 and lists, not raw JSON. Mood includes **Moments**; Summaries includes **Ask**.
 **Jump to page** opens that page in Reading.
 
-**View → Detect** scans for poetry, lists, quotations, names, and similar.
-Accept or reject findings; accepted findings can apply page tags.
+**Workflow → Detect** scans for poetry, lists, quotations, names, and similar.
+A running scan can be stopped with **Stop after current window**. Accept or
+reject findings; accepted findings can apply page tags. A tag you removed from a
+page stays removed until you apply it again.
 
 Need a **text** Ollama model for LLM modules. Deterministic modules work without
 one. Presets, batch Analyse, and detector lists: [analysis](runtime/analysis.md).
@@ -137,6 +175,8 @@ one. Presets, batch Analyse, and detector lists: [analysis](runtime/analysis.md)
 
 **UI:** **Workflow → Export** — pick formats and typography.
 
+![Export formats and typography](images/export.png)
+
 Produces JSON, Markdown, plain text, HTML, EPUB, and/or PDF.
 
 ```bash
@@ -144,7 +184,8 @@ Produces JSON, Markdown, plain text, HTML, EPUB, and/or PDF.
 ```
 
 Formats, anthology, OCR fine-tune, and **detection** fine-tune packages:
-[export](runtime/export.md).
+[export](runtime/export.md). After training a hand-specific model elsewhere,
+the fine-tune export includes a bring-back checklist: [fine-tune export](finetune_export.md).
 
 ## Integrity, backup, and settings
 
@@ -160,8 +201,13 @@ Formats, anthology, OCR fine-tune, and **detection** fine-tune packages:
 ## Bulk import and batch jobs
 
 Everyday use is one notebook at a time. To ingest a folder of scans, or many
-folders as many notebooks: **Workflow → Import** → Target **Batch**. After a
+folders as many notebooks: **Workflow → Import** → Target **Batch**. **Scan inbox**
+fills the path from `TRANSCRIBE_INBOX_DIR`. Each run reports how many items were
+**imported**, **failed**, **duplicated**, or **needs-review** (same file in another
+notebook, a changed file with the same name, or work that did not finish). After a
 successful import, **Transcribe imported notebooks** opens batch OCR.
+
+![Batch import with Scan inbox](images/import-batch.png)
 
 **Workflow → Analyse → Batch** runs analysis across a list of notebooks.
 

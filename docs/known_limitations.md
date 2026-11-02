@@ -27,6 +27,16 @@ Operational guide: [runtime/ocr.md](runtime/ocr.md).
 - Some Ollama “vision” tags still **fail to load** on a given build (example: `llama3.2-vision:11b` → `unknown model architecture: 'mllama'` on Ollama 0.32.x — see [ollama#16547](https://github.com/ollama/ollama/issues/16547)). Transcribe classifies these as non-retriable `model_load` errors and **skips remaining pages for that model after the first failure** (same `circuit_open` path as timeouts). Prefer a working alternate family (for example `granite3.2-vision` or `minicpm-v`) until the host Ollama/model pair loads cleanly. Batch OCR inherits the same per-notebook circuit (one bad model does not keep calling every page in that notebook).
 - **Multipass compare** runs each selected vision model across the notebook, then a text-model **rank** (text-only v1) and optional **composite** merge. Cost scales with model count × pages plus rank/composite calls; on **Batch** multipass it also scales with notebook count. Composite is assistive, not ground truth. Rank failure falls back to chronological attempt order in Review. Vision phases **default cleanup off** (CLI `--cleanup` / UI “Clean OCR during compare” to opt in). The UI starts compare in a background thread like single-model Start; Stop cancels remaining pages of the current model and remaining models (and does not start remaining batch notebooks). Rank/composite still run for pages that already have ≥2 succeeded vision attempts
 
+## Page order
+
+- **Notebook order** is the `pages` list in `project.json`. The `pages/<source>/<index>/` folder number is only an on-disk locator and is never renumbered, so a reorder moves no files. Reorder is refused while an OCR or analysis lock is held, and the Review controls are disabled while the page has unsaved edits
+- **Drag-and-drop** on Thumbnails is best-effort (it depends on the browser letting the page script reach the grid). The numbered **Move up / Move down / Move to position** controls and the CLI are the supported route
+- **Move to date cluster** needs a dated page. Undated pages are refused. With no confirmed same-date pages it falls back to date order; dates that were only inferred are re-inferred after a move
+
+## Detect
+
+- **Stop after current window** ends a Detect run at the next window boundary: the in-progress model call finishes, remaining detectors do not start, and the run is recorded as cancelled
+
 ## Import / PDF
 
 - Encrypted PDFs are rejected

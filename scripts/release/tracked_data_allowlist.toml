@@ -36,3 +36,15 @@ purpose = "Product logo asset (navy wordmark for light backgrounds)"
 path = "src/transcribe/ui/assets/logo-dark.png"
 owner = "ui"
 purpose = "Product logo asset (white wordmark for dark backgrounds)"
+
+# Documentation media. Regenerate with scripts/docs/capture_docs_media.py
+# (synthetic notebook; no real pages). Globs need at least one tracked match.
+[[globs]]
+glob = "docs/images/*"
+owner = "docs"
+purpose = "Workflow screenshots and GIFs for the hosted guide and README"
+
+[[globs]]
+glob = "website/images/*"
+owner = "website"
+purpose = "Landing-page stills copied from docs/images"

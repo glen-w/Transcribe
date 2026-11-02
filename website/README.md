@@ -3,7 +3,7 @@
 Modest public landing (plain HTML/CSS, minimal JS for mobile nav). Product front door: hero → what the app does → outcomes → privacy → first path → install.
 
 - Open `index.html` locally, or deploy via GitHub Pages (`.github/workflows/pages.yml`).
-- Optional screenshots can live in [images/](images/) later (workflow stills); the landing ships without them.
+- Landing stills live in [images/](images/) and are copied from `docs/images/` by `make docs-media` (synthetic sample notebook; never real pages).
 - Footer version should match [pyproject.toml](../pyproject.toml) `version` (currently **1.0.1**).
 - Install snippet matches README: Docker first (`HOST_PROJECTS_DIR` + `docker compose up --build transcribe-web`); native `./transcribe.sh setup` / `ui` is advanced.
 - Docs CTAs point at the **Sphinx HTML guide** published beside this landing (`./guide/`), rebuilt from `docs/` on every qualifying `main` push.

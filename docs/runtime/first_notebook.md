@@ -43,7 +43,9 @@ docker compose up --build transcribe-web
 
 ## 3. A first notebook
 
-In the app:
+In the app (screens: [workflow tour](../workflows.md)):
+
+![Home: recent notebooks, Open sample notebook, Ollama status](../images/home.png)
 
 1. **Workflow → New notebook** — create one and import JPEG, PNG, or PDF pages,
    **or** click **Open sample** to copy a short placeholder notebook (text
@@ -51,6 +53,8 @@ In the app:
 2. **Workflow → Transcribe** — pick the vision model you pulled, then start.
 3. **Workflow → Review** — correct the text beside the scan.
 4. **Workflow → Export** — Markdown or HTML is enough for a first save.
+
+![Review: scan beside the text, OCR evidence below](../images/review-transcription.png)
 
 **System → Diagnostics** shows whether Ollama is reachable.
 

@@ -8,7 +8,7 @@ Active developer and maintainer docs. Historical material is listed only via [AR
 |-----|---------|
 | [developer_quickstart.md](developer_quickstart.md) | Mental model, venv, Makefile test lanes, extension points |
 | [dev/CONTRIBUTING.md](dev/CONTRIBUTING.md) | Docs authority model and sync checklist |
-| [dev/docs_architecture.md](dev/docs_architecture.md) | Docs surfaces map |
+| [dev/docs_architecture.md](dev/docs_architecture.md) | Docs surfaces map; [how screenshots and GIFs are generated](dev/docs_architecture.md#documentation-media) (`make docs-media`) |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System shape and ownership boundaries |
 | [PRODUCT.md](PRODUCT.md) | Product definition |
 | [CONTRACT_INDEX.md](CONTRACT_INDEX.md) | Concept → authoritative contract |

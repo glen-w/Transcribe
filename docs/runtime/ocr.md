@@ -38,9 +38,39 @@ for **that** model are skipped so a bad tag does not burn the notebook.
 Scan on the left; one lane at a time on the right: **Transcription**, **Date**,
 **Tags**, **OCR**, **Cleanup**, **Other**.
 
+![Review: scan on the left, Transcription lane on the right, OCR evidence below](../images/review-transcription.png)
+
+- **Transcription** — edit the text. **OCR evidence** lists each attempt; copy one
+  into the editor or make it current. **Source disagreement** steps through
+  differing words and lets you take either reading or type a correction.
+- **Date** — approve or set the page date. **Move to date cluster** appears when
+  the date breaks notebook order.
 - **OCR → Re-run OCR** — this page, all pages, or pages not marked reviewed
 - **Rank and merge** — build a merged draft from existing readings
-- **Cleanup** — re-apply visual declutter without re-running OCR
+- **Cleanup** — re-apply visual declutter (scanner beds, white gutters, corner
+  wedges, dark binding gutters, edge shadows) without re-running OCR
+- **Other** — **Ignore in Reader**, **Page order**, notebook cover, delete page
+
+Moving to another page with unsaved changes asks you to **Stay** or
+**Discard & leave**.
+
+### Page order
+
+Notebook order is the notebook's page list. The folder number on disk is only a
+locator and never changes, so moving a page does not rename or copy files. Use
+**Other → Page order** (**Move up**, **Move down**, **Move to position**), the
+same controls beside **Thumbnails**, or **Date → Move to date cluster**. Dates
+that were only inferred are re-inferred after a move; dates you approved are
+kept. Reorder is refused while OCR or analysis is running on the notebook.
+
+![Page order controls in the Other lane](../images/review-page-order.png)
+
+```bash
+./transcribe.sh cli pages reorder "$TRANSCRIBE_PROJECTS_DIR/my-notebook" PAGE_ID_1 PAGE_ID_2 …
+./transcribe.sh cli pages move-to-date-cluster "$TRANSCRIBE_PROJECTS_DIR/my-notebook" PAGE_ID
+```
+
+Walkthrough with pictures: [workflow tour](../workflows.md#fixing-page-order).
 
 **Reading** is the same pages chronologically, read-only. On Reading or Library,
 **Compare in Review** opens the workbench when several OCR attempts exist.

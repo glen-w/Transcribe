@@ -181,7 +181,7 @@ Full track plan: [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.
 | **I2** Release hygiene + governance | [x] | `scripts/release/*`, secrets/denylist, `release_governance.md`, dependency audit log |
 | **I3** Quality gates | [x] | Coverage fail-under, pre-commit, partial CI `release-checks` |
 | **I4** Hosted docs | [x] | Sphinx over existing Markdown, `.[docs]`, `.readthedocs.yml` scaffold, CI docs job |
-| **I5** Public landing | [x] | Modest `website/` + GitHub Pages assemble; optional workflow screenshot walkthroughs |
+| **I5** Public landing | [x] | Modest `website/` + GitHub Pages assemble; workflow tour with generated screenshots and GIFs (`make docs-media`) |
 | **I6** Sustaining lanes | [x] | Nightly acceptance/offline heavy, Docker smoke in release-checks, issue templates |
 
 Suggested cut order (historical): **I0+I1** (0.7.0) → **I2+I3** (0.8.0) → **I4** → **I5** (0.8.8) → **I6**. All tracks landed; U2 + I0–I6 enable the **0.9.0** package cut.

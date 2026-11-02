@@ -10,7 +10,7 @@ PYTHON ?= .venv/bin/python
 endif
 PYTEST ?= $(PYTHON) -m pytest
 
-.PHONY: help lint test-smoke test-fast test-contracts test-acceptance test-coverage docker-smoke docs docs-clean pages-site release-hygiene
+.PHONY: help lint test-smoke test-fast test-contracts test-acceptance test-coverage docker-smoke docs docs-media docs-clean pages-site release-hygiene
 
 help:
 	@echo "Transcribe Makefile"
@@ -29,6 +29,7 @@ help:
 	@echo ""
 	@echo "Docs:"
 	@echo "  docs              Build Sphinx HTML into docs/_build/html (requires .[docs])"
+	@echo "  docs-media        Regenerate docs/images screenshots + GIFs (Playwright, local Ollama)"
 	@echo "  docs-clean        Remove Sphinx build artifacts"
 	@echo "  pages-site        Assemble website/ + Sphinx guide into _site/ (GitHub Pages)"
 	@echo ""
@@ -79,6 +80,11 @@ release-hygiene:
 
 docs:
 	@bash scripts/release/build_docs.sh
+
+docs-media:
+	@$(PYTHON) scripts/docs/capture_docs_media.py
+	@mkdir -p website/images
+	@cp docs/images/review-transcription.png docs/images/home.png docs/images/workflow-review.gif website/images/
 
 docs-clean:
 	@echo "Cleaning Sphinx build artifacts..."

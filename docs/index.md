@@ -6,7 +6,7 @@ scans you already have, transcribe them on your machine, and keep the results.
 OCR uses a local [Ollama](https://ollama.com) vision model. Transcribe does
 **not** send pages to a cloud OCR service.
 
-**See how it works:** [user guide](user_guide.md) — import scans, transcribe, review beside the page.  
+**See how it works:** [user guide](user_guide.md) — import scans, transcribe, review beside the page. [Workflow tour](workflows.md) shows each screen.  
 **Everyday jobs:** import and transcribe, review, analyse, detect, export — [user guide](user_guide.md).  
 **Is this for me?** [What Transcribe is](PRODUCT.md).  
 **Privacy:** files stay on your computer; Ollama is local and off the public internet by default.
@@ -20,6 +20,7 @@ The GitHub [README](https://github.com/glen-w/Transcribe#readme) is the same fir
 
 PRODUCT
 user_guide
+workflows
 runtime/first_notebook
 runtime/installation
 runtime/docker

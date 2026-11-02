@@ -57,7 +57,7 @@ The Streamlit process only sees **container** paths. In **Workflow â†’ Import â†
 
 | Goal | Path to paste |
 |------|----------------|
-| Default inbox mount | `/mnt/inbox` (or a subfolder) |
+| Default inbox mount | `/mnt/inbox` (or a subfolder); **Scan inbox** fills this path from `TRANSCRIBE_INBOX_DIR` |
 | Extra scans mount (override) | `/mnt/notebooks` |
 
 Do **not** paste host paths such as `/Users/you/Documents/notebooks`. Those are invisible inside the container; relative resolution against `working_dir: /data` often surfaces as `not a directory: /data/Users/...`.

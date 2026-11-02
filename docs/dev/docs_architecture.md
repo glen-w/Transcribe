@@ -15,6 +15,7 @@
 | `docs/dev/` | Developer / programme / alignment notes | Developer |
 | `docs/reviews/` | Product and module reviews (critique; not contracts) | Product / GUIDE index |
 | `docs/archive/` | Historical (banners) | Historical |
+| [workflows.md](../workflows.md) + `docs/images/` | Picture-led tour (screenshots, GIFs) | GUIDE (generated media) |
 | Sphinx HTML (`make docs`) | Hosted view of the same Markdown | [docs_architecture.md](docs_architecture.md) |
 | `website/` + GitHub Pages (`make pages-site`) | Public landing + assembled `/guide/` | [website/README.md](../../website/README.md) |
 | Root `CHANGELOG.md` / `SECURITY.md` / `CONTRIBUTING.md` | Release notes, trust domain, pointer | Self / `docs/dev/CONTRIBUTING.md` |
@@ -34,7 +35,7 @@ Owned by infrastructure-wave **I4–I5** ([infrastructure_wave_0_9_plan.md](../i
 
 - [x] Sphinx / Read the Docs scaffold / CI docs job (**I4** — Markdown in-repo remains the corpus; Sphinx builds it; [rtd_go_live_checklist.md](rtd_go_live_checklist.md) for owner hostname go-live)
 - [x] Modest `website/` + GitHub Pages assemble (**I5** — `make pages-site`; `.github/workflows/pages.yml`)
-- [ ] Workflow walkthroughs with screenshots (**I5**, optional after Pages)
+- [x] Workflow walkthroughs with screenshots (**I5** — [workflows.md](../workflows.md); generated, see [Documentation media](#documentation-media))
 
 **Content parity:** Sphinx has no separate doc corpus — it builds the Markdown under `docs/` directly. `docs/index.md` uses glob toctrees for `contracts/` and `dev/` so new pages in those trees appear in the hosted nav; `tests/unit/test_sphinx_docs.py` fails if any live `.md` file is missing from that nav. Archive is excluded (`exclude_patterns`). `make docs` → [scripts/release/build_docs.sh](../../scripts/release/build_docs.sh). CI `docs` job uploads HTML. Do not publish a live Read the Docs hostname until the owner checklist is flipped.
 
@@ -45,6 +46,30 @@ README is the user entry, not a release brief. Do not put `Type:` / `Authority:`
 The public landing, README, and Sphinx “Start here” toctree should tell the same story: what it is → what you can do → privacy → first notebook → install.
 
 Three voices: **user guide** (README, website, Start here, runtime how-tos), **technical reference** (contracts, public surfaces), **maintainer** (ROADMAP, `docs/dev/`, archive, reviews).
+
+## Documentation media
+
+Screenshots and GIFs under `docs/images/` are generated, not hand-drawn, so they
+can be refreshed whenever the UI changes:
+
+```bash
+pip install playwright && playwright install chromium   # once
+make docs-media                                          # all shots and GIFs
+python scripts/docs/capture_docs_media.py --only home,review-transcription
+```
+
+`scripts/docs/capture_docs_media.py` seeds a throwaway workspace with an invented
+diary notebook (`scripts/docs/seed_demo_workspace.py`: rendered text on ruled paper,
+canned OCR attempts, no real pages), starts the app on **8510** (never 8501), drives
+it with Playwright in dark mode, and stops only the server it started. It needs a
+local Ollama only so Home and Transcribe show the reachable state; nothing is
+generated. Do not capture real notebooks.
+
+Rules: keep PNGs ≲ 300 KB and GIFs ≲ 1 MB (`tests/unit/test_docs_media.py` enforces
+existence and budgets); reference images from Markdown by relative path; list new
+tracked binaries under `docs/images/*` (already covered by a glob in
+`scripts/release/tracked_data_allowlist.toml`). The landing page copies a few stills
+into `website/images/` (`make docs-media` does this too).
 
 ## Related
 

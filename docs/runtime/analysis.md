@@ -14,6 +14,8 @@ First-time path: [user guide](../user_guide.md). Limits:
 2. Optionally enable an Ask-notebook question (Grounded, RAG, or Both when RAG is enabled under **Settings → Analysis**).
 3. Run analysis. On success, open **View → Overview**.
 
+![Analyse presets](../images/analyse.png)
+
 | Preset | What you get |
 |--------|----------------|
 | **Quick** | Fast lexical / structural modules — no LLM, no heavy modules, no detectors |
@@ -44,15 +46,20 @@ Chart notes: [visual compare](../dev/analysis_visual_compare.md).
 
 ## Detect
 
-**UI:** **View → Detect** — review findings (**Accept** / **Reject**, jump to
-source pages). Accept applies remaining page tags. Multi-page findings add
-per-page Accept / Reject; **Accept remaining** keeps the others.
+**UI:** **Workflow → Detect** — **Run Detection** to scan, **Findings** to review
+(**Accept** / **Reject**, jump to source pages). Accept applies remaining page
+tags. Multi-page findings add per-page Accept / Reject; **Accept remaining**
+keeps the others.
+
+![Detect: choose detectors, scope, and run](../images/detect.png)
+
+A running scan shows progress and **Stop after current window**. Stopping
+finishes the window in progress, starts no further detectors, and records the run
+as cancelled. It does not interrupt a window midway.
 
 Built-ins: poetry, to-do lists, other lists, quotations, beer labels,
 first-person `I` counts, swear-word counts, **names / people**, plus custom
 detectors. Count detectors show a per-page table instead of review cards.
-
-Ad-hoc runs still launch from **Detect → Run Detection**.
 
 ```bash
 ./transcribe.sh cli detect "$TRANSCRIBE_PROJECTS_DIR/my-notebook" --detector poetry
@@ -60,7 +67,7 @@ Ad-hoc runs still launch from **Detect → Run Detection**.
 ```
 
 **Tag matching pages** unions tags onto span pages; rejected findings are
-skipped. **Names / people** tags each detected person name rather than a generic
+skipped. A tag you removed from a page stays removed until you apply it again. **Names / people** tags each detected person name rather than a generic
 `names` tag.
 
 Manage prompts under **Settings → Prompts**; custom detectors under
