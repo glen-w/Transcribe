@@ -5,38 +5,26 @@ from __future__ import annotations
 import re
 import shutil
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 from pathlib import Path
 
 from transcribe.domain.dates import (
     ApproximateDate,
-    DATE_SOURCE_EXTRACTED,
-    DATE_SOURCE_INHERITED,
     DateRegression,
-    extract_page_date,
-    find_date_regressions,
-    looks_like_unparsed_date_stamp,
     normalize_tags,
 )
 from transcribe.domain.models import (
-    AttemptError,
     ComparisonRecord,
     DEFAULT_PREFER_MODE,
     EDIT_GATE_CHOICES,
     EFFECTIVE_TEXT_ORIGINS,
-    EMPTY_OUTPUT_CODE,
-    EMPTY_OUTPUT_MESSAGE,
     MAX_ATTEMPTS_RETAINED,
     OCRAttempt,
     OCRSettings,
     PREFER_MODES,
     REVIEW_STATUSES,
-    TOKEN_REPEAT_CODE,
-    TRUNCATED_REPEAT_MESSAGE,
     PageIndex,
     PageResult,
     Project,
-    page_label,
     prune_attempts,
 )
 from transcribe.domain.validation import validate_page_result, validate_project
@@ -48,6 +36,9 @@ from transcribe.persistence.locks import job_lock_held, mutation_lock
 from transcribe.persistence.schema import require_format
 from transcribe.ports import Clock, IdGenerator, to_iso
 from transcribe.runtime_paths import default_ollama_base_url
+from transcribe.services.project_dates import ProjectDateOps
+from transcribe.services.project_declutter import DeclutterReapplyStats, ProjectDeclutter
+from transcribe.services.project_review_repair import ProjectReviewRepair
 
 
 def _seed_ocr_settings() -> OCRSettings:
@@ -139,43 +130,6 @@ def _active_after_generation(
     return attempt.attempt_id
 
 
-def _review_fingerprints_match(result: PageResult | None) -> bool:
-    from transcribe.services.ocr_composite_state import (
-        evidence_fingerprint,
-        reviewed_text_fingerprint,
-    )
-
-    if result is None:
-        return False
-    if not result.reviewed_text_fingerprint or not result.reviewed_evidence_fingerprint:
-        return False
-    text = result.effective_text() or ""
-    return result.reviewed_text_fingerprint == reviewed_text_fingerprint(
-        text
-    ) and result.reviewed_evidence_fingerprint == evidence_fingerprint(result)
-
-
-def _review_should_invalidate(before: PageResult | None, after: PageResult) -> bool:
-    from transcribe.services.ocr_composite_state import evidence_fingerprint
-
-    if before is None:
-        return True
-    if (before.effective_text() or "") != (after.effective_text() or ""):
-        return True
-    if before.active_attempt_id != after.active_attempt_id:
-        return True
-    return evidence_fingerprint(before) != evidence_fingerprint(after)
-
-
-@dataclass
-class DeclutterReapplyStats:
-    pages_total: int = 0
-    pages_cropped: int = 0
-    pages_noop: int = 0
-    pages_unchanged: int = 0
-    pages_error: int = 0
-
-
 class ProjectService:
     def __init__(
         self,
@@ -189,6 +143,9 @@ class ProjectService:
         self.clock = clock
         self.ids = ids
         self.corpus_paths = corpus_paths
+        self._dates = ProjectDateOps(self)
+        self._review = ProjectReviewRepair(self)
+        self._declutter = ProjectDeclutter(self)
 
     def create(self, title: str = "Untitled notebook") -> Project:
         self.paths.ensure_layout()
@@ -227,6 +184,18 @@ class ProjectService:
         return project
 
     def load(self, *, reconcile: bool = True) -> Project:
+        """Load the on-disk notebook. Public read API; reconcile is explicit.
+
+        ``reconcile=True`` (default) is a **write** used on notebook open: recover
+        incomplete ingest, then mark orphaned running OCR attempts interrupted
+        when the job lock is free, then reconcile analysis/detection storage.
+        Mid-run UI, jobs, and nested analysis/detection loads must pass
+        ``reconcile=False``. That still recovers incomplete ingest before
+        trusting the manifest.
+
+        Does not change ``effective_text()`` semantics, fingerprints, or lock
+        order (mutation lock, then job-lock check inside OCR reconcile).
+        """
         # Finish or roll back a crash-interrupted ingest before trusting the manifest.
         if self.paths.ingest_journal.exists():
             from transcribe.ingest import IngestService
@@ -253,6 +222,21 @@ class ProjectService:
             AnalysisStorage(self.paths).reconcile_interrupted()
             DetectionStorage(self.paths).reconcile_interrupted()
         return project
+
+    def reconcile_interrupted(self) -> None:
+        """Explicit reopen path: interrupt orphaned OCR/analysis/detection runs.
+
+        ``load(reconcile=True)`` already performs this. Callers that loaded with
+        ``reconcile=False`` can invoke this when the notebook is opened and
+        long-running locks are free. No-ops while the OCR job lock is held.
+        """
+        with mutation_lock(self.paths.mutation_lock):
+            self._reconcile_interrupted_locked()
+        from transcribe.analysis.storage import AnalysisStorage
+        from transcribe.detection.storage import DetectionStorage
+
+        AnalysisStorage(self.paths).reconcile_interrupted()
+        DetectionStorage(self.paths).reconcile_interrupted()
 
     def content_revision(self, project: Project | None = None) -> str:
         """Compute notebook content_revision from a coherent on-disk snapshot."""
@@ -447,213 +431,26 @@ class ProjectService:
         page_id: str,
         date: ApproximateDate | None,
     ) -> tuple[Project, bool]:
-        """Atomically set human-approved date (approved=True, source=None).
-
-        When the date **value** changes, re-infers unapproved downstream pages
-        (and the cover page when applicable) so inherited suggestions stay aligned
-        with the new upstream date.
-
-        Returns (project, date_value_changed) for the approved page only.
-        """
-        with mutation_lock(self.paths.mutation_lock):
-            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-            current = Project.from_dict(payload)
-            page = self._require_page(current, page_id)
-            idx = next(i for i, p in enumerate(current.pages) if p.page_id == page_id)
-            old = page.date
-            page.set_date_state(date, approved=True, source=None)
-            date_value_changed = old != page.date
-            if date_value_changed:
-                self._reinfer_unapproved_page_dates(
-                    current.pages,
-                    cover_page_id=current.cover_page_id,
-                    start_idx=idx + 1,
-                    cover_look_ahead=False,
-                    skip_cover_post_pass_for_idx=idx,
-                )
-            current.updated_at = to_iso(self.clock.now())
-            validate_project(current)
-            write_json_atomic(self.paths.manifest, current.as_dict())
-            return current, date_value_changed
+        return self._dates.approve_page_date(page_id, date)
 
     def list_date_regressions(self, project: Project | None = None) -> list[DateRegression]:
-        """Notebook-order date regressions for bulk-approve honesty."""
-        current = project if project is not None else self.load(reconcile=False)
-        return find_date_regressions([(page.page_id, page.date) for page in current.pages])
+        return self._dates.list_date_regressions(project)
 
     def approve_all_suggested_dates(
         self,
         *,
         confirm_regressions: bool = False,
     ) -> tuple[Project, int, list[DateRegression]]:
-        """Approve every unapproved suggested date in notebook order.
-
-        Returns ``(project, approved_count, regressions)``. When regressions
-        exist and ``confirm_regressions`` is false, writes nothing and returns
-        count 0 so the UI can confirm.
-        """
-        with mutation_lock(self.paths.mutation_lock):
-            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-            current = Project.from_dict(payload)
-            regressions = find_date_regressions(
-                [(page.page_id, page.date) for page in current.pages]
-            )
-            if regressions and not confirm_regressions:
-                return current, 0, regressions
-            changed = 0
-            for page in current.pages:
-                if page.date is None or page.date_approved:
-                    continue
-                page.set_date_state(page.date, approved=True, source=None)
-                changed += 1
-            if changed:
-                current.updated_at = to_iso(self.clock.now())
-                validate_project(current)
-                write_json_atomic(self.paths.manifest, current.as_dict())
-            return current, changed, regressions
+        return self._dates.approve_all_suggested_dates(confirm_regressions=confirm_regressions)
 
     def ignore_all_suggested_dates(self) -> tuple[Project, int]:
-        """Clear every unapproved suggested date (human ignore)."""
-        with mutation_lock(self.paths.mutation_lock):
-            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-            current = Project.from_dict(payload)
-            changed = 0
-            for page in current.pages:
-                if page.date is None or page.date_approved:
-                    continue
-                page.set_date_state(None, approved=True, source=None)
-                changed += 1
-            if changed:
-                current.updated_at = to_iso(self.clock.now())
-                validate_project(current)
-                write_json_atomic(self.paths.manifest, current.as_dict())
-            return current, changed
+        return self._dates.ignore_all_suggested_dates()
 
     def suggest_page_date(self, page_id: str) -> bool:
-        """Suggest date from effective_text or previous page. Returns True if date value changed.
-
-        Reloads on-disk project under the mutation lock (never a job-start snapshot).
-        Never overwrites an approved date.
-        """
-        with mutation_lock(self.paths.mutation_lock):
-            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-            current = Project.from_dict(payload)
-            page = self._require_page(current, page_id)
-            if page.date is not None and page.date_approved:
-                return False
-            idx = next(i for i, p in enumerate(current.pages) if p.page_id == page_id)
-            old_date = page.date
-            old_approved = page.date_approved
-            old_source = page.date_source
-            result = self._load_page_result_unlocked(page_id)
-            text = result.effective_text() if result else None
-            self._apply_suggestion(current.pages, idx, text, cover_page_id=current.cover_page_id)
-            page = current.pages[idx]
-            value_changed = old_date != page.date
-            state_changed = (
-                value_changed
-                or old_approved != page.date_approved
-                or old_source != page.date_source
-            )
-            if state_changed:
-                current.updated_at = to_iso(self.clock.now())
-                validate_project(current)
-                write_json_atomic(self.paths.manifest, current.as_dict())
-            return value_changed
+        return self._dates.suggest_page_date(page_id)
 
     def fill_page_dates_ordered(self) -> int:
-        """Walk pages in order; apply extract→inherit; one manifest write.
-
-        Cover page (explicit ``cover_page_id``, else first page) inherits from the
-        first dated page when it has no extractable stamp — done in a post-pass
-        so later pages can donate a date.
-
-        Returns number of pages whose date **value** changed.
-        """
-        with mutation_lock(self.paths.mutation_lock):
-            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-            current = Project.from_dict(payload)
-            value_changed, any_change = self._reinfer_unapproved_page_dates(
-                current.pages,
-                cover_page_id=current.cover_page_id,
-                start_idx=0,
-            )
-            if any_change:
-                current.updated_at = to_iso(self.clock.now())
-                validate_project(current)
-                write_json_atomic(self.paths.manifest, current.as_dict())
-            return value_changed
-
-    def _reinfer_unapproved_page_dates(
-        self,
-        pages: list[PageIndex],
-        *,
-        cover_page_id: str | None,
-        start_idx: int = 0,
-        cover_look_ahead: bool = True,
-        skip_cover_post_pass_for_idx: int | None = None,
-    ) -> tuple[int, bool]:
-        """Re-run extract→inherit for unapproved pages from ``start_idx`` (+ cover post-pass).
-
-        ``cover_look_ahead`` (default true) lets undated approved cover pages inherit
-        from the first dated page during a full ordered fill. Partial cascades after
-        human date edits disable this so explicitly undated covers stay undated.
-
-        Returns (date_value_changed_count, any_state_changed).
-        """
-        value_changed = 0
-        any_change = False
-        cascade_mode = not cover_look_ahead
-
-        def _note(page: PageIndex, old_date, old_approved, old_source) -> None:
-            nonlocal value_changed, any_change
-            if old_date != page.date:
-                value_changed += 1
-            if (
-                old_date != page.date
-                or old_approved != page.date_approved
-                or old_source != page.date_source
-            ):
-                any_change = True
-
-        for idx in range(start_idx, len(pages)):
-            page = pages[idx]
-            if page.date_approved and (cascade_mode or page.date is not None):
-                continue
-            old_date = page.date
-            old_approved = page.date_approved
-            old_source = page.date_source
-            result = self._load_page_result_unlocked(page.page_id)
-            text = result.effective_text() if result else None
-            self._apply_suggestion(
-                pages,
-                idx,
-                text,
-                cover_page_id=cover_page_id,
-            )
-            _note(pages[idx], old_date, old_approved, old_source)
-
-        cover_idx = self._cover_page_index(pages, cover_page_id)
-        if cover_idx is not None and cover_idx != skip_cover_post_pass_for_idx:
-            cover = pages[cover_idx]
-            should_refresh = not cover.date_approved
-            if cover_look_ahead and cover.date is None and cover.date_approved:
-                should_refresh = True
-            if should_refresh:
-                old_date = cover.date
-                old_approved = cover.date_approved
-                old_source = cover.date_source
-                result = self._load_page_result_unlocked(cover.page_id)
-                text = result.effective_text() if result else None
-                self._apply_suggestion(
-                    pages,
-                    cover_idx,
-                    text,
-                    cover_page_id=cover_page_id,
-                )
-                _note(pages[cover_idx], old_date, old_approved, old_source)
-
-        return value_changed, any_change
+        return self._dates.fill_page_dates_ordered()
 
     @staticmethod
     def _require_page(project: Project, page_id: str) -> PageIndex:
@@ -661,49 +458,6 @@ class ProjectService:
             if page.page_id == page_id:
                 return page
         raise ProjectError(f"unknown page_id: {page_id}")
-
-    @staticmethod
-    def _cover_page_index(pages: list[PageIndex], cover_page_id: str | None) -> int | None:
-        if not pages:
-            return None
-        if cover_page_id:
-            for i, page in enumerate(pages):
-                if page.page_id == cover_page_id:
-                    return i
-        return 0
-
-    def _apply_suggestion(
-        self,
-        pages: list[PageIndex],
-        idx: int,
-        text: str | None,
-        *,
-        cover_page_id: str | None = None,
-    ) -> None:
-        page = pages[idx]
-        if page.date is not None and page.date_approved:
-            return
-        extracted = extract_page_date(text)
-        if extracted is not None:
-            page.set_date_state(extracted, approved=False, source=DATE_SOURCE_EXTRACTED)
-            return
-        # Failed-looking stamp: stay undated for Review (do not inherit).
-        if looks_like_unparsed_date_stamp(text):
-            page.set_date_state(None, approved=True, source=None)
-            return
-        for prev in reversed(pages[:idx]):
-            if prev.date is not None:
-                page.set_date_state(prev.date, approved=False, source=DATE_SOURCE_INHERITED)
-                return
-        # Cover pages rarely carry a diary stamp; inherit the first dated page.
-        cover_idx = self._cover_page_index(pages, cover_page_id)
-        if cover_idx == idx:
-            for other in pages:
-                if other.page_id == page.page_id or other.date is None:
-                    continue
-                page.set_date_state(other.date, approved=False, source=DATE_SOURCE_INHERITED)
-                return
-        page.set_date_state(None, approved=True, source=None)
 
     def update_notebook_metadata(
         self,
@@ -975,129 +729,13 @@ class ProjectService:
             return self._write_review_status_unlocked(page_id, status)
 
     def repair_empty_successes(self, page_id: str) -> PageResult | None:
-        """Demote succeeded-but-empty vision attempts and restore a good active.
-
-        Historical empty ``succeeded`` writes (e.g. DeepSeek-OCR + faithful prompt)
-        become ``failed`` / ``empty_output``. If the active attempt has no text and
-        another succeeded-with-text exists, that reading becomes current.
-        """
-        with mutation_lock(self.paths.mutation_lock):
-            existing = self._load_page_result_unlocked(page_id)
-            if existing is None:
-                return None
-            before = PageResult.from_dict(existing.as_dict())
-            changed = False
-            for i, attempt in enumerate(existing.attempts):
-                if (attempt.attempt_kind or "vision") != "vision":
-                    continue
-                if attempt.status != "succeeded":
-                    continue
-                if (attempt.raw_text or "").strip():
-                    continue
-                attempt.status = "failed"
-                attempt.error = AttemptError(
-                    code=EMPTY_OUTPUT_CODE,
-                    message=EMPTY_OUTPUT_MESSAGE,
-                    retriable=False,
-                )
-                existing.attempts[i] = attempt
-                changed = True
-            active = existing.active_attempt()
-            prior = _latest_succeeded_with_text(existing.attempts)
-            if prior is not None and (
-                active is None
-                or active.status != "succeeded"
-                or not (active.raw_text or "").strip()
-            ):
-                existing.active_attempt_id = prior.attempt_id
-                if existing.edited_text is None:
-                    existing.effective_text_origin = _origin_from_active(existing)
-                changed = True
-            if not changed:
-                return existing
-            existing.updated_at = to_iso(self.clock.now())
-            validate_page_result(existing, expected_page_id=page_id)
-            write_json_atomic(self.paths.result_path(page_id), existing.as_dict())
-            self._invalidate_review_unlocked(page_id, before=before, after=existing)
-            return existing
+        return self._review.repair_empty_successes(page_id)
 
     def repair_truncated_repetition_successes(self, page_id: str) -> PageResult | None:
-        """Demote truncated+looping vision successes so they do not skip forever.
-
-        Pre-hardening attempts could hit ``num_predict`` with repeated text and
-        still store ``succeeded``. Those fingerprints would skip on the next job.
-        Demote to ``failed`` / ``token_repeat`` (same code as live truncated+rep
-        fails). If the active reading was one of them, restore another succeeded
-        vision attempt with text when available.
-        """
-        from transcribe.services.review_signals import (
-            text_echoes_prompt,
-            text_has_long_repetition,
-            text_has_repetition,
-        )
-
-        with mutation_lock(self.paths.mutation_lock):
-            existing = self._load_page_result_unlocked(page_id)
-            if existing is None:
-                return None
-            before = PageResult.from_dict(existing.as_dict())
-            changed = False
-            for i, attempt in enumerate(existing.attempts):
-                if (attempt.attempt_kind or "vision") != "vision":
-                    continue
-                if attempt.status != "succeeded":
-                    continue
-                meta = attempt.provider_metadata or {}
-                if not bool(meta.get("truncated")):
-                    continue
-                raw = attempt.raw_text or ""
-                prompt = ""
-                if attempt.provenance is not None:
-                    prompt = attempt.provenance.prompt_text or ""
-                looping = text_has_repetition(raw) or text_has_long_repetition(raw)
-                leaked = text_echoes_prompt(raw, prompt)
-                if not (looping or leaked):
-                    continue
-                attempt.status = "failed"
-                attempt.error = AttemptError(
-                    code=TOKEN_REPEAT_CODE,
-                    message=TRUNCATED_REPEAT_MESSAGE,
-                    retriable=False,
-                )
-                existing.attempts[i] = attempt
-                changed = True
-            active = existing.active_attempt()
-            prior = _latest_succeeded_with_text(existing.attempts)
-            if prior is not None and (
-                active is None
-                or active.status != "succeeded"
-                or not (active.raw_text or "").strip()
-            ):
-                existing.active_attempt_id = prior.attempt_id
-                if existing.edited_text is None:
-                    existing.effective_text_origin = _origin_from_active(existing)
-                changed = True
-            if not changed:
-                return existing
-            existing.updated_at = to_iso(self.clock.now())
-            validate_page_result(existing, expected_page_id=page_id)
-            write_json_atomic(self.paths.result_path(page_id), existing.as_dict())
-            self._invalidate_review_unlocked(page_id, before=before, after=existing)
-            return existing
+        return self._review.repair_truncated_repetition_successes(page_id)
 
     def repair_review_validity(self, page_id: str) -> str:
-        """If status is reviewed but fingerprints mismatch, move to needs_attention."""
-        with mutation_lock(self.paths.mutation_lock):
-            project = Project.from_dict(
-                require_format(read_json(self.paths.manifest), "transcribe.project")
-            )
-            page = self._require_page(project, page_id)
-            status = page.review_status or "unreviewed"
-            result = self._load_page_result_unlocked(page_id)
-            if status == "reviewed" and not _review_fingerprints_match(result):
-                self._write_review_status_unlocked(page_id, "needs_attention")
-                return "needs_attention"
-            return status
+        return self._review.repair_review_validity(page_id)
 
     def _invalidate_review_unlocked(
         self,
@@ -1106,27 +744,10 @@ class ProjectService:
         before: PageResult | None,
         after: PageResult,
     ) -> None:
-        if not after.reviewed_text_fingerprint and not (
-            before and before.reviewed_text_fingerprint
-        ):
-            return
-        payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-        project = Project.from_dict(payload)
-        page = next((p for p in project.pages if p.page_id == page_id), None)
-        if page is None or (page.review_status or "unreviewed") != "reviewed":
-            return
-        if _review_should_invalidate(before, after):
-            self._write_review_status_unlocked(page_id, "needs_attention")
+        self._review._invalidate_review_unlocked(page_id, before=before, after=after)
 
     def _write_review_status_unlocked(self, page_id: str, status: str) -> Project:
-        payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-        current = Project.from_dict(payload)
-        page = self._require_page(current, page_id)
-        page.review_status = status
-        current.updated_at = to_iso(self.clock.now())
-        validate_project(current)
-        write_json_atomic(self.paths.manifest, current.as_dict())
-        return current
+        return self._review._write_review_status_unlocked(page_id, status)
 
     def cache_alignment_signals(
         self,
@@ -1153,147 +774,11 @@ class ProjectService:
         on_progress: Callable[[int, int, str], None] | None = None,
         page_ids: Sequence[str] | None = None,
     ) -> DeclutterReapplyStats:
-        """Re-run visual declutter on active renders; replace cropped pages.
-
-        ``page_ids`` limits the run to those pages (notebook order of the given
-        ids). ``None`` means every page. Creates a new ``render_id`` when pixels
-        change. Provenance-only updates keep the existing render when bytes are
-        unchanged. Refuses while an OCR job lock is held. Never restores
-        already-cropped margins when ``enabled`` is False — that only records
-        ``disabled`` provenance on current pixels.
-        """
-        from transcribe.declutter import apply_declutter
-        from transcribe.domain.fingerprint import sha256_bytes
-        from transcribe.domain.models import RenderProvenance
-        from transcribe.persistence.atomic import write_bytes_atomic
-
-        if job_lock_held(self.paths.job_lock):
-            raise JobConflictError("cannot re-apply visual declutter while an OCR job is running")
-
-        stats = DeclutterReapplyStats()
-        with mutation_lock(self.paths.mutation_lock):
-            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
-            current = Project.from_dict(payload)
-            if page_ids is None:
-                targets = list(current.pages)
-            else:
-                wanted = list(dict.fromkeys(page_ids))
-                if not wanted:
-                    raise ProjectError("page_ids must not be empty")
-                by_id = {p.page_id: p for p in current.pages}
-                missing = next((pid for pid in wanted if pid not in by_id), None)
-                if missing is not None:
-                    raise ProjectError(f"unknown page_id: {missing}")
-                targets = [by_id[pid] for pid in wanted]
-            stats.pages_total = len(targets)
-            old_files: list[Path] = []
-            thumb_files: list[Path] = []
-
-            for index, page in enumerate(targets):
-                if on_progress is not None:
-                    on_progress(
-                        index,
-                        stats.pages_total,
-                        f"Decluttering {page_label(current, page.page_id)}…",
-                    )
-                old = current.renders.get(page.active_render_id)
-                if old is None:
-                    stats.pages_error += 1
-                    continue
-                try:
-                    img_path = self.paths.resolve_contained(old.image_relpath)
-                    png = img_path.read_bytes()
-                    result = apply_declutter(png, enabled=enabled)
-                except Exception:  # noqa: BLE001 — keep going; count as error
-                    stats.pages_error += 1
-                    continue
-
-                if result.state == "enabled_cropped":
-                    stats.pages_cropped += 1
-                elif result.state == "enabled_noop":
-                    stats.pages_noop += 1
-                elif result.state == "error_fallback":
-                    stats.pages_error += 1
-                else:
-                    stats.pages_noop += 1
-
-                pixels_changed = result.image_bytes != png
-                if not pixels_changed:
-                    stats.pages_unchanged += 1
-                    updated = RenderProvenance(
-                        render_id=old.render_id,
-                        source_sha256=old.source_sha256,
-                        pdf_page_index=old.pdf_page_index,
-                        render_dpi=old.render_dpi,
-                        renderer=old.renderer,
-                        renderer_version=old.renderer_version,
-                        rendered_image_sha256=old.rendered_image_sha256,
-                        width=old.width,
-                        height=old.height,
-                        image_relpath=old.image_relpath,
-                        **result.provenance_dict(),
-                    )
-                    current.renders[old.render_id] = updated
-                    continue
-
-                new_rid = self.ids.new_id()
-                new_path = self.paths.page_render_path(page.source_id, page.page_index, new_rid)
-                write_bytes_atomic(new_path, result.image_bytes)
-                new_rel = self.paths.relativize(new_path)
-                new_render = RenderProvenance(
-                    render_id=new_rid,
-                    source_sha256=old.source_sha256,
-                    pdf_page_index=old.pdf_page_index,
-                    render_dpi=old.render_dpi,
-                    renderer=old.renderer,
-                    renderer_version=old.renderer_version,
-                    rendered_image_sha256=sha256_bytes(result.image_bytes),
-                    width=result.width,
-                    height=result.height,
-                    image_relpath=new_rel,
-                    **result.provenance_dict(),
-                )
-                current.renders[new_rid] = new_render
-                del current.renders[old.render_id]
-                page.active_render_id = new_rid
-                page.width = result.width
-                page.height = result.height
-                old_files.append(img_path)
-                thumb = self.paths.thumb_path(page.page_id)
-                if thumb.exists():
-                    thumb_files.append(thumb)
-                grid_thumb = self.paths.grid_thumb_path(page.page_id)
-                if grid_thumb.exists():
-                    thumb_files.append(grid_thumb)
-
-            current.updated_at = to_iso(self.clock.now())
-            validate_project(current)
-            write_json_atomic(self.paths.manifest, current.as_dict())
-
-            for path in old_files:
-                try:
-                    path.unlink(missing_ok=True)
-                except OSError:
-                    pass
-            for path in thumb_files:
-                try:
-                    path.unlink(missing_ok=True)
-                except OSError:
-                    pass
-            # Active renders changed — rebuild disposable cover + grid thumbs.
-            try:
-                from transcribe.services.thumbnails import ThumbnailService
-
-                ThumbnailService(self.paths).ensure_thumbs_for_pages(current)
-            except Exception:  # noqa: BLE001
-                pass
-            if on_progress is not None:
-                on_progress(
-                    stats.pages_total,
-                    stats.pages_total,
-                    f"Finished → cropped {stats.pages_cropped}, unchanged {stats.pages_unchanged}",
-                )
-            return stats
+        return self._declutter.reapply_visual_declutter(
+            enabled=enabled,
+            on_progress=on_progress,
+            page_ids=page_ids,
+        )
 
     def _reconcile_interrupted_locked(self) -> None:
         if job_lock_held(self.paths.job_lock):

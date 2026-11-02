@@ -62,6 +62,14 @@ Extract `render_page_viewer` into nav-resolve / chrome / body. Split Review so `
 
 Date / review-repair / declutter become collaborators that `ProjectService` delegates to. `load()` remains the public API; reconcile stays explicit and documented. Do not change `effective_text()`, fingerprints, or lock order.
 
+| Item | Acceptance |
+|------|------------|
+| Dates | `project_dates.ProjectDateOps`; `approve_page_date` / suggest / fill still on `ProjectService` |
+| Review repair | `project_review_repair.ProjectReviewRepair`; empty/truncated/validity repairs still on `ProjectService` |
+| Declutter | `project_declutter.ProjectDeclutter` + `DeclutterReapplyStats` re-exported from `project.py` |
+| load() | Still the public API; default `reconcile=True` unchanged; docstring names `reconcile=False` as the mid-run read |
+| reconcile | Public `reconcile_interrupted()` is the explicit reopen path; lock order unchanged |
+
 ---
 
 ## Wrap-up

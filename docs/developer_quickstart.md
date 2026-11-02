@@ -53,7 +53,7 @@ Offline multi-component detector tests belong under `tests/services/` (or `tests
 |------|--------|
 | CLI | `transcribe.__main__` (dispatch) + `transcribe.cli` (parser and commands) |
 | UI | `transcribe.ui.app` · batch picker `transcribe.ui.batch_source_picker` (`tx_*` / `ax_*`) |
-| Project RMW | `transcribe.services.project` |
+| Project RMW | `transcribe.services.project` (`load(reconcile=False)` mid-run; dates/review/declutter collaborators) |
 | Ingest | `transcribe.ingest` |
 | OCR jobs | `transcribe.services.job` |
 | Export | `transcribe.services.export` |

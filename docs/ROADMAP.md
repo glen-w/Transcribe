@@ -1018,11 +1018,11 @@ Not on the critical path to the **0.9.0** tag (U2 + I0–I6 already landed). Evi
 
 | ID | Outcome | Review | Notes |
 |----|---------|--------|-------|
-| **L2** | `ProjectService.load` is a read by default; reconcile interrupted attempts is an explicit reopen path | P2 #3, L2 **partial** | Detection already skips reconcile when either long lock is held. Changing the load default touches every caller of `load()`. |
+| **L2** | `ProjectService.load` is a read by default; reconcile interrupted attempts is an explicit reopen path | P2 #3, L2 **partial** | `load()` documents `reconcile=False` as the mid-run read; `reconcile_interrupted()` is the explicit reopen path. Default remains `reconcile=True` (changing it still touches every caller). |
 | **L3** | Names / people detector consumes **published** NER only — no nested `AnalysisRunner.run_module("ner")` | P2 #4, L3 | **[x] done** — Detect returns `unavailable_dependency` when NER is missing/stale. |
 | **L4** | One schema registry for every written `format` (including job-record, settings, profiles, interface-menus) | P2 #7, L4 | **[x] done** — `SUPPORTED` lists settings, profile, job-record, interface-menus, geocode-cache. Settings/profile still load via `ConfigError`; interface-menus on-disk files may omit `format`. |
 | **P1 leftover** | Cleanup LLM failure must not seal cleanup into the OCR skip fingerprint while the page keeps raw text | P1 #2 | **[x] done** — `cleanup_fingerprint_for_attempt` omits cleanup on `provider_failed`. |
-| **P2 split** | Split `ProjectService` along SoT I/O vs review / dates / declutter / reconcile | P2 #6 | High blast radius; not a Review workbench rewrite and not a database. |
+| **P2 split** | Split `ProjectService` along SoT I/O vs review / dates / declutter / reconcile | P2 #6 | **[x] done** — dates / review-repair / declutter collaborators; `load()` remains the public API. |
 | **Detect cancel** | Detect can be stopped like OCR/Analyse | P3 | Detect is request-synchronous today; Analyse+detect lock behaviour already tightened. |
 | **Confirms** | Confirm before Reset whole workspace settings and Re-apply visual declutter | P3 | **[x] done** — Settings confirmation step before both actions. |
 | **Cover Open** | Library cover Open is a visible control | P3 | Opacity-0 overlay today. |
