@@ -65,6 +65,11 @@ from transcribe.ui.corpus_listing_cache import (
     invalidate_listing_key_prefix,
     invalidate_listing_keys,
 )
+from transcribe.ui.batch_source_picker import (
+    BatchSourceHooks,
+    BatchSourcePickerSpec,
+    render_batch_notebook_source,
+)
 from transcribe.ui.shell import set_ui_mode
 from transcribe.ui.targets import (
     PENDING_TRANSCRIBE_TARGET_KEY,
@@ -754,6 +759,37 @@ def _multipass_default_selection(available: list[str]) -> list[str]:
     return [m for m in configured if m in avail]
 
 
+_OCR_SOURCE_SPEC = BatchSourcePickerSpec(
+    prefix="tx",
+    queued_source_key=TRANSCRIBE_BATCH_SOURCE_KEY,
+    queued_run_key=TRANSCRIBE_BATCH_IMPORT_RUN_KEY,
+    queued_ids_key=TRANSCRIBE_BATCH_NOTEBOOK_IDS_KEY,
+    source_options=("pending", "import_run", "pick"),
+    source_labels={
+        "pending": "Notebooks with pending pages",
+        "import_run": "From an import run",
+        "pick": "Pick notebooks",
+    },
+    pending_button_help=(
+        "Re-scan the corpus for notebooks with untranscribed or failed pages."
+    ),
+)
+
+
+def _ocr_pending_caption(selected: list) -> None:
+    st.caption(
+        f"{len(selected)} notebook(s) with untranscribed or failed pages "
+        f"({sum(c.pages_pending for c in selected)} page(s))."
+    )
+
+
+def _ocr_import_caption(selected: list) -> None:
+    st.caption(
+        f"{len(selected)} committed notebook(s) · "
+        f"{sum(c.pages_pending for c in selected)} pending page(s)."
+    )
+
+
 def _render_batch_notebook_source(
     runtime: RuntimePaths,
     *,
@@ -762,82 +798,23 @@ def _render_batch_notebook_source(
     """Notebook source picker; page-result scan only for pending pages."""
     _ = project
     corpus = CorpusPaths.from_runtime(runtime)
-    source_options = ["pending", "import_run", "pick"]
-    queued_source = st.session_state.pop(TRANSCRIBE_BATCH_SOURCE_KEY, None)
-    if queued_source in source_options and "tx_batch_source" not in st.session_state:
-        st.session_state["tx_batch_source"] = queued_source
-    source = st.radio(
-        "Notebooks",
-        options=source_options,
-        format_func=lambda s: {
-            "pending": "Notebooks with pending pages",
-            "import_run": "From an import run",
-            "pick": "Pick notebooks",
-        }[s],
-        key="tx_batch_source",
-        horizontal=True,
+    selected, import_run_id = render_batch_notebook_source(
+        _OCR_SOURCE_SPEC,
+        BatchSourceHooks(
+            load_pending=lambda force=False: select_pending(
+                _cached_ocr_candidates(corpus, force=force)
+            ),
+            pending_caption=_ocr_pending_caption,
+            load_import_runs=lambda: _cached_import_runs(corpus),
+            load_picker=lambda: _cached_light_picker(corpus),
+            select_from_import=lambda run_id, picker: _cached_import_enriched(
+                corpus, run_id, picker
+            ),
+            import_caption=_ocr_import_caption,
+            pick_label=lambda c: c.title,
+            select_picked=select_by_ids,
+        ),
     )
-    selected: list = []
-    import_run_id: str | None = None
-    if source == "pending":
-        refresh = st.button(
-            "Refresh list",
-            key="tx_batch_pending_refresh",
-            help="Re-scan the corpus for notebooks with untranscribed or failed pages.",
-            icon=ic.REFRESH,
-        )
-        candidates = _cached_ocr_candidates(corpus, force=refresh)
-        selected = select_pending(candidates)
-        st.caption(
-            f"{len(selected)} notebook(s) with untranscribed or failed pages "
-            f"({sum(c.pages_pending for c in selected)} page(s))."
-        )
-    elif source == "import_run":
-        picker = _cached_light_picker(corpus)
-        runs = _cached_import_runs(corpus)
-        queued_run = st.session_state.pop(TRANSCRIBE_BATCH_IMPORT_RUN_KEY, None)
-        labels = {r.import_run_id: f"{r.import_run_id} · {r.status}" for r in runs}
-        run_ids = [r.import_run_id for r in runs]
-        if queued_run in run_ids:
-            st.session_state["tx_batch_import_run"] = queued_run
-        if not run_ids:
-            st.info("No import runs yet. Batch-import folders under Import → Batch.")
-        else:
-            chosen = st.selectbox(
-                "Import run",
-                options=run_ids,
-                format_func=lambda rid: labels.get(rid, rid),
-                key="tx_batch_import_run",
-            )
-            import_run_id = str(chosen) if chosen else None
-            if import_run_id:
-                try:
-                    selected = _cached_import_enriched(corpus, import_run_id, picker)
-                    st.caption(
-                        f"{len(selected)} committed notebook(s) · "
-                        f"{sum(c.pages_pending for c in selected)} pending page(s)."
-                    )
-                except (TranscribeError, ValidationError) as exc:
-                    st.error(str(exc))
-    else:
-        picker = _cached_light_picker(corpus)
-        queued_ids = st.session_state.pop(TRANSCRIBE_BATCH_NOTEBOOK_IDS_KEY, None)
-        options = [c.notebook_id for c in picker]
-        labels = {c.notebook_id: c.title for c in picker}
-        default = [nid for nid in (queued_ids or []) if nid in options]
-        if default and "tx_batch_pick" not in st.session_state:
-            st.session_state["tx_batch_pick"] = default
-        picked = st.multiselect(
-            "Notebooks",
-            options=options,
-            format_func=lambda nid: labels.get(nid, nid),
-            key="tx_batch_pick",
-        )
-        if picked:
-            try:
-                selected = select_by_ids(picker, list(picked))
-            except TranscribeError as exc:
-                st.error(str(exc))
     st.session_state[_OCR_SELECTED_KEY] = selected
     st.session_state[_OCR_IMPORT_RUN_KEY] = import_run_id
 

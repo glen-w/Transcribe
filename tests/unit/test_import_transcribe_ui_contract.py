@@ -12,6 +12,9 @@ SHELL = Path("src/transcribe/ui/shell.py").read_text(encoding="utf-8")
 IMPORT = Path("src/transcribe/ui/run_import.py").read_text(encoding="utf-8")
 TRANSCRIBE = Path("src/transcribe/ui/run_transcribe.py").read_text(encoding="utf-8")
 INBOX = Path("src/transcribe/ui/import_inbox.py").read_text(encoding="utf-8")
+BATCH_PICKER = Path("src/transcribe/ui/batch_source_picker.py").read_text(
+    encoding="utf-8"
+)
 
 
 def test_inbox_is_not_a_sidebar_mode() -> None:
@@ -67,7 +70,9 @@ def test_import_and_transcribe_use_target_switcher() -> None:
     assert "_render_batch_notebook_source" in TRANSCRIBE
     assert "_render_batch_launch_actions" in TRANSCRIBE
     assert "batch_source_panel" in TRANSCRIBE
-    assert "Refresh list" in TRANSCRIBE
+    assert "Refresh list" in BATCH_PICKER
+    assert 'prefix="tx"' in TRANSCRIBE
+    assert "render_batch_notebook_source" in TRANSCRIBE
     assert "corpus_listing_cache" in TRANSCRIBE
     assert "({c.pages_pending} pending / {c.pages_total})" not in TRANSCRIBE
     assert "_cached_import_runs" in TRANSCRIBE

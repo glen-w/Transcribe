@@ -36,6 +36,13 @@ Split `__main__.py` into `transcribe.cli` (parser + one module per command famil
 
 Extract the pending / import-run / pick radio from `run_transcribe.py` and `run_analysis_batch.py` into a shared widget parameterized by purpose. Keep `BatchOcrCoordinator` and `BatchAnalysisCoordinator` separate. Session-key prefixes stay (`tx_*` / `ax_*`).
 
+| Item | Acceptance |
+|------|------------|
+| Shared widget | `ui.batch_source_picker.render_batch_notebook_source` owns radio / import-run select / pick multiselect |
+| Callers | Thin `_render_batch_notebook_source` wrappers remain in Transcribe and Analyse batch pages |
+| Keys | Widget keys stay `tx_batch_*` / `ax_batch_*`; queued Inbox hops still use `targets.py` constants |
+| Coordinators | `BatchOcrCoordinator` and `BatchAnalysisCoordinator` stay separate |
+
 ---
 
 ## Wave 4 — Decompose Review / Reading / View

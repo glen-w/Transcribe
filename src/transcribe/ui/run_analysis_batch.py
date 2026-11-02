@@ -51,6 +51,11 @@ from transcribe.ui.corpus_listing_cache import (
     get_cached_listing,
     invalidate_listing_keys,
 )
+from transcribe.ui.batch_source_picker import (
+    BatchSourceHooks,
+    BatchSourcePickerSpec,
+    render_batch_notebook_source,
+)
 from transcribe.ui.shell import set_ui_mode
 from transcribe.ui.targets import (
     ANALYSE_BATCH_IMPORT_RUN_KEY,
@@ -292,143 +297,102 @@ def _render_batch_complete_actions(
                 st.rerun()
 
 
+_ANALYSE_SOURCE_SPEC = BatchSourcePickerSpec(
+    prefix="ax",
+    queued_source_key=ANALYSE_BATCH_SOURCE_KEY,
+    queued_run_key=ANALYSE_BATCH_IMPORT_RUN_KEY,
+    queued_ids_key=ANALYSE_BATCH_NOTEBOOK_IDS_KEY,
+    source_options=("pick", "pending", "import_run"),
+    source_labels={
+        "pick": "Pick notebooks",
+        "pending": "Notebooks needing analysis",
+        "import_run": "From an import run",
+    },
+    default_source="pick",
+    radio_help=(
+        "Pick notebooks to choose a list. Needing analysis scans for missing or stale results."
+    ),
+    pending_button_help="Re-scan the corpus for notebooks that need analysis.",
+    pending_empty=(
+        "Nothing currently needs analysis. Use Pick notebooks to choose notebooks anyway."
+    ),
+    pick_label="Select notebooks",
+    pick_placeholder="Choose notebooks to analyse",
+    pick_help=(
+        "Each name shows whether published analysis exists yet "
+        "(no analysis, existing analysis, degraded, failed, …). "
+        "Out-of-date results are listed under Notebooks needing analysis."
+    ),
+    hide_pick_when_empty=True,
+    require_pick=True,
+)
+
+
+def _analyse_pending_caption(selected: list) -> None:
+    st.caption(
+        f"{len(selected)} notebook(s) needing analysis "
+        f"({sum(c.pages_with_text for c in selected)} page(s) with text)."
+    )
+    if selected:
+        with st.expander(
+            f"Included notebooks ({len(selected)})",
+            expanded=len(selected) <= 12,
+        ):
+            for cand in selected:
+                st.caption(
+                    f"- {cand.title} ({cand.pages_with_text} with text · "
+                    f"{analyse_picker_status_phrase(cand.analysis_aggregate)})"
+                )
+
+
+def _analyse_import_caption(selected: list) -> None:
+    st.caption(f"{len(selected)} committed notebook(s) from this import.")
+    if selected:
+        with st.expander(
+            f"Included notebooks ({len(selected)})",
+            expanded=len(selected) <= 12,
+        ):
+            for cand in selected:
+                st.caption(
+                    "- "
+                    + format_analyse_picker_label(cand.title, cand.analysis_aggregate)
+                )
+
+
 def _render_batch_notebook_source(
     corpus: CorpusPaths,
     *,
     project: Any | None = None,
 ) -> tuple[list, str | None]:
     """Notebook picker first; expensive health scan only for 'needing analysis'."""
-    source_options = ["pick", "pending", "import_run"]
-    queued_source = st.session_state.pop(ANALYSE_BATCH_SOURCE_KEY, None)
-    if queued_source in source_options:
-        st.session_state["ax_batch_source"] = queued_source
-    elif "ax_batch_source" not in st.session_state:
-        st.session_state["ax_batch_source"] = "pick"
-    source = st.radio(
-        "Notebooks",
-        options=source_options,
-        format_func=lambda s: {
-            "pick": "Pick notebooks",
-            "pending": "Notebooks needing analysis",
-            "import_run": "From an import run",
-        }[s],
-        key="ax_batch_source",
-        horizontal=True,
-        help=(
-            "Pick notebooks to choose a list. Needing analysis scans for missing or stale results."
+
+    def _default_pick_ids(picker: list) -> list[str]:
+        if project is not None and getattr(project, "id", None) in {
+            c.notebook_id for c in picker
+        }:
+            return [project.id]
+        return []
+
+    selected, import_run_id = render_batch_notebook_source(
+        _ANALYSE_SOURCE_SPEC,
+        BatchSourceHooks(
+            load_pending=lambda force=False: _cached_needing_analysis(
+                corpus, force=force
+            ),
+            pending_caption=_analyse_pending_caption,
+            load_import_runs=lambda: _cached_import_runs(corpus),
+            load_picker=lambda: _cached_light_picker(corpus),
+            select_from_import=lambda run_id, picker: select_from_import_run(
+                corpus, run_id, picker, purpose="analyse"
+            ),
+            import_caption=_analyse_import_caption,
+            pick_label=lambda c: format_analyse_picker_label(
+                c.title, c.analysis_aggregate
+            ),
+            select_picked=select_by_ids,
+            default_pick_ids=_default_pick_ids,
         ),
     )
-    selected: list = []
-    import_run_id: str | None = None
-    if source == "pending":
-        refresh = st.button(
-            "Refresh list",
-            key="ax_batch_pending_refresh",
-            help="Re-scan the corpus for notebooks that need analysis.",
-            icon=ic.REFRESH,
-        )
-        selected = _cached_needing_analysis(corpus, force=refresh)
-        st.caption(
-            f"{len(selected)} notebook(s) needing analysis "
-            f"({sum(c.pages_with_text for c in selected)} page(s) with text)."
-        )
-        if selected:
-            with st.expander(
-                f"Included notebooks ({len(selected)})",
-                expanded=len(selected) <= 12,
-            ):
-                for cand in selected:
-                    st.caption(
-                        f"- {cand.title} ({cand.pages_with_text} with text · "
-                        f"{analyse_picker_status_phrase(cand.analysis_aggregate)})"
-                    )
-        else:
-            st.info(
-                "Nothing currently needs analysis. Use Pick notebooks to choose notebooks anyway."
-            )
-    elif source == "import_run":
-        runs = _cached_import_runs(corpus)
-        queued_run = st.session_state.pop(ANALYSE_BATCH_IMPORT_RUN_KEY, None)
-        labels = {r.import_run_id: f"{r.import_run_id} · {r.status}" for r in runs}
-        run_ids = [r.import_run_id for r in runs]
-        if queued_run in run_ids:
-            st.session_state["ax_batch_import_run"] = queued_run
-        if not run_ids:
-            st.info("No import runs yet. Batch-import folders under Import → Batch.")
-        else:
-            chosen_run = st.selectbox(
-                "Import run",
-                options=run_ids,
-                format_func=lambda rid: labels.get(rid, rid),
-                key="ax_batch_import_run",
-            )
-            import_run_id = str(chosen_run) if chosen_run else None
-            if import_run_id:
-                try:
-                    picker = _cached_light_picker(corpus)
-                    selected = select_from_import_run(
-                        corpus,
-                        import_run_id,
-                        picker,
-                        purpose="analyse",
-                    )
-                    st.caption(f"{len(selected)} committed notebook(s) from this import.")
-                    if selected:
-                        with st.expander(
-                            f"Included notebooks ({len(selected)})",
-                            expanded=len(selected) <= 12,
-                        ):
-                            for cand in selected:
-                                st.caption(
-                                    "- "
-                                    + format_analyse_picker_label(
-                                        cand.title, cand.analysis_aggregate
-                                    )
-                                )
-                except (TranscribeError, ValidationError) as exc:
-                    st.error(str(exc))
-    else:
-        picker = _cached_light_picker(corpus)
-        queued_ids = st.session_state.pop(ANALYSE_BATCH_NOTEBOOK_IDS_KEY, None)
-        options = [c.notebook_id for c in picker]
-        labels = {
-            c.notebook_id: format_analyse_picker_label(c.title, c.analysis_aggregate)
-            for c in picker
-        }
-        default = [nid for nid in (queued_ids or []) if nid in options]
-        if default and "ax_batch_pick" not in st.session_state:
-            st.session_state["ax_batch_pick"] = default
-        elif (
-            "ax_batch_pick" not in st.session_state
-            and project is not None
-            and getattr(project, "id", None) in options
-        ):
-            st.session_state["ax_batch_pick"] = [project.id]
-        if not options:
-            st.info(
-                "No notebooks yet. Create one under Workflow → New notebook, "
-                "or batch-import folders."
-            )
-        else:
-            picked = st.multiselect(
-                "Select notebooks",
-                options=options,
-                format_func=lambda nid: labels.get(nid, nid),
-                placeholder="Choose notebooks to analyse",
-                key="ax_batch_pick",
-                help=(
-                    "Each name shows whether published analysis exists yet "
-                    "(no analysis, existing analysis, degraded, failed, …). "
-                    "Out-of-date results are listed under Notebooks needing analysis."
-                ),
-            )
-            if picked:
-                try:
-                    selected = select_by_ids(picker, list(picked))
-                except TranscribeError as exc:
-                    st.error(str(exc))
-            else:
-                st.caption("Select at least one notebook.")
     st.session_state[_SELECTED_FOR_LAUNCH_KEY] = selected
     st.session_state[_IMPORT_RUN_FOR_LAUNCH_KEY] = import_run_id
     return selected, import_run_id

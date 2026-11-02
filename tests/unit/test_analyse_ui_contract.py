@@ -252,6 +252,9 @@ def test_analyse_batch_target_and_progress_wiring():
     from transcribe.ui.shell import is_open_notebook_workflow
 
     batch = Path("src/transcribe/ui/run_analysis_batch.py").read_text(encoding="utf-8")
+    picker = Path("src/transcribe/ui/batch_source_picker.py").read_text(
+        encoding="utf-8"
+    )
     nav = Path("src/transcribe/ui/navigation.py").read_text(encoding="utf-8")
     targets = Path("src/transcribe/ui/targets.py").read_text(encoding="utf-8")
     panel = Path("src/transcribe/ui/components/progress_panel.py").read_text(
@@ -272,7 +275,7 @@ def test_analyse_batch_target_and_progress_wiring():
     assert "list_analyse_picker_candidates" in batch
     assert "format_analyse_picker_label" in batch
     assert "no analysis" in batch
-    assert "Refresh list" in batch
+    assert "Refresh list" in picker
     assert "invalidate_batch_analyse_caches" in batch
     assert "@st.fragment" in batch
     assert "corpus_listing_cache" in batch
@@ -282,7 +285,9 @@ def test_analyse_batch_target_and_progress_wiring():
     assert "ax_batch_import_runs" in batch
     assert "ax_batch_analyse_recent" in batch
     assert 'f"{c.title} ({c.pages_total} pages)"' not in batch
-    assert 'st.session_state["ax_batch_source"] = "pick"' in batch
+    assert 'default_source="pick"' in batch
+    assert 'prefix="ax"' in batch
+    assert "render_batch_notebook_source" in batch
     assert "Select notebooks" in batch
     assert "_render_batch_notebook_source" in batch
     assert "_render_batch_preset_and_launch" in batch

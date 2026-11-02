@@ -37,6 +37,7 @@ CLI (`transcribe.cli`) ─┘              │
 | Portable interchange | Export snapshot — [contracts/notebook-export.md](contracts/notebook-export.md) |
 | OCR HTTP | `VisionOCRProvider` (Ollama implementation) |
 | Chart palettes (`ui.chart_colors`) | `transcribe.config.chart_colors` — UI renders only |
+| Batch notebook source radio | `ui.batch_source_picker` — OCR (`tx_*`) and Analyse (`ax_*`); coordinators stay separate |
 | UI widgets | `transcribe.ui` only — must not invent OCR/persistence rules |
 | Organisation tag catalog (slugs, labels, colours) | [contracts/tag-catalog.md](contracts/tag-catalog.md) |
 | Workspace search/timeline | `ArchiveService` over rebuildable SQLite |
