@@ -27,9 +27,9 @@ Library cover Open is a visible control under the thumb (`tx_open_cover_*`). Rev
 
 Additive `suppressed_auto_tags` on `PageIndex`. Re-running auto-tag does not re-apply slugs the user removed. `transcribe.detection-auto-tag` v1 stays detector defaults.
 
-## Wave 3 — Detect cancel
+## Wave 3 — Detect cancel — [x]
 
-Standalone Detect can Stop after the current window (thread + `cancel_check`). No new job-status enum.
+Standalone Detect can Stop after the current window (`DetectionRunCoordinator` + `cancel_check`). No new job-status enum.
 
 ## Wave 4 — U4 Inbox polish
 

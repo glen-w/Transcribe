@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Roadmap honesty: **Now** is [1.1 deepen-in-place](docs/dev/deepen_waves_1_1.md); 0.9.0 / 1.0 / Track C are signed off as landed. Stale active-backlog ranks (0.9.0 cut, Track C) no longer look open.
 - Library cover Open is a labelled control under the thumbnail. Review unsaved navigation uses Stay / Discard & leave instead of a second Prev/Next click.
 - Auto-tag no longer re-applies slugs the user removed (`PageIndex.suppressed_auto_tags`). Explicit Apply can clear the tombstone.
+- Standalone Detect can Stop after the current window (background coordinator, same cancel path Analyse already used).
 
 ## [1.0.1] - 2026-11-02
 

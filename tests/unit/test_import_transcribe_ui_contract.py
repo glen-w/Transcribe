@@ -87,6 +87,9 @@ def test_import_and_transcribe_use_target_switcher() -> None:
     export = Path("src/transcribe/ui/export_panel.py").read_text(encoding="utf-8")
     assert "@st.fragment" in detect
     assert "@st.fragment" in export
+    assert "get_detection_coordinator" in detect
+    assert "Stop after current window" in detect
+    assert "request_cancel" in detect
 
 
 def test_create_notebook_does_not_clear_all_cache_resources() -> None:

@@ -125,7 +125,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 |------|------|--------|------|--------|
 | 1 | **Cover Open + dirty leave** | [x] | W1 | Visible Library cover Open; Review Discard & leave (not second Prev/Next) |
 | 2 | **Auto-tag suppression** | [x] | W2 | Re-run does not re-apply slugs the user removed |
-| 3 | **Detect cancel** | [ ] | W3 | Stop after current window; kernel `cancel_check` already exists |
+| 3 | **Detect cancel** | [x] | W3 | Stop after current window; kernel `cancel_check` already exists |
 | 4 | **U4 Inbox polish** | [?] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
 | 5 | **Visual declutter expansion** | [?] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
 | 6 | **Page reorder / date repair** | [?] | W6–W7 | `pages` array permute + date-cluster action; drag/drop island optional |
@@ -1030,7 +1030,7 @@ Not on the critical path to the **0.9.0** tag (U2 + I0–I6 already landed). Evi
 | **L4** | One schema registry for every written `format` (including job-record, settings, profiles, interface-menus) | P2 #7, L4 | **[x] done** — `SUPPORTED` lists settings, profile, job-record, interface-menus, geocode-cache. Settings/profile still load via `ConfigError`; interface-menus on-disk files may omit `format`. |
 | **P1 leftover** | Cleanup LLM failure must not seal cleanup into the OCR skip fingerprint while the page keeps raw text | P1 #2 | **[x] done** — `cleanup_fingerprint_for_attempt` omits cleanup on `provider_failed`. |
 | **P2 split** | Split `ProjectService` along SoT I/O vs review / dates / declutter / reconcile | P2 #6 | **[x] done** — dates / review-repair / declutter collaborators; `load()` remains the public API. |
-| **Detect cancel** | Detect can be stopped like OCR/Analyse | P3 | Detect is request-synchronous today; Analyse+detect lock behaviour already tightened. |
+| **Detect cancel** | Detect can be stopped like OCR/Analyse | P3 | **[x] done** — `DetectionRunCoordinator` + Stop after current window. |
 | **Confirms** | Confirm before Reset whole workspace settings and Re-apply visual declutter | P3 | **[x] done** — Settings confirmation step before both actions. |
 | **Cover Open** | Library cover Open is a visible control | P3 | **[x] done** — labelled Open under the thumb (`tx_open_cover_*`); click-on-image overlay stays transparent. |
 | **Dirty leave** | Review dirty-leave does not require a second Prev/Next to discard | P3 | **[x] done** — Stay / Discard & leave (`rw_pending_leave`). |

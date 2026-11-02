@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 
 import streamlit as st
@@ -12,7 +13,9 @@ from transcribe.detection.findings import DetectionFinding
 from transcribe.detection.lexical import lexical_page_count_rows
 from transcribe.detection.registry import list_all_detectors
 from transcribe.markdown_plain import escape_markdown_plain
-from transcribe.services.project import ProjectService
+from transcribe.detection.coordinator import DetectionRunCoordinator
+from transcribe.ports import SystemClock, UuidGenerator
+from transcribe.services.project import ProjectService, open_project_paths
 from transcribe.ui import icons as ic
 from transcribe.ui.detection_tag_review import (
     render_finding_tag_actions,
@@ -21,6 +24,13 @@ from transcribe.ui.detection_tag_review import (
 from transcribe.ui.page_series_charts import maybe_jump, render_clickable_page_series
 from transcribe.ui.page_viewer import open_page_context
 from transcribe.ui.shell import render_page_shell
+
+
+@st.cache_resource
+def get_detection_coordinator(project_root: str) -> DetectionRunCoordinator:
+    paths = open_project_paths(project_root)
+    projects = ProjectService(paths, clock=SystemClock(), ids=UuidGenerator())
+    return DetectionRunCoordinator(projects)
 
 
 def render_detection_workspace(
@@ -54,14 +64,14 @@ def render_detection_workspace(
             label = choices[0]
             st.session_state[key] = label
         if label == "Run Detection":
-            _render_run(projects, project_id=project_id)
+            _render_run(projects, project_id=project_id, project_root=project_root)
         else:
             _render_findings(projects, project_root, project_id=project_id)
 
     _detect_body()
 
 
-def _render_run(projects: ProjectService, *, project_id: str) -> None:
+def _render_run(projects: ProjectService, *, project_id: str, project_root: str) -> None:
     svc = DetectionService(projects)
     dets = list_all_detectors()
     options = {f"{d.title} ({d.detector_id})": d.detector_id for d in dets}
@@ -109,48 +119,45 @@ def _render_run(projects: ProjectService, *, project_id: str) -> None:
         key=auto_key,
         help="Add tags to pages in published findings (additive). Most detectors use "
         "their finding type; Names / people tags each detected person name. "
-        "Does not change detection cache identity. Re-running re-adds tags you removed.",
+        "Does not change detection cache identity. Removed slugs stay off until you Apply them again.",
     )
-    progress = st.empty()
-    status = st.empty()
+    coord = get_detection_coordinator(str(project_root))
+    progress = coord.get_progress()
+    if coord.is_running() or progress.status == "running":
+        poll = timedelta(seconds=1)
+
+        @st.fragment(run_every=poll)
+        def _detect_status() -> None:
+            live = coord.get_progress()
+            frac = min(1.0, live.completed / max(1, live.total))
+            st.progress(frac, text=live.message or f"{live.completed}/{live.total}")
+            if live.current_detector_id:
+                st.caption(f"Current: `{live.current_detector_id}`")
+            if not coord.is_running() and live.status != "running":
+                st.rerun()
+
+        _detect_status()
+        if st.button(
+            "Stop after current window",
+            key=f"detect_stop_{project_id}",
+            icon=ic.STOP,
+        ):
+            coord.request_cancel()
+            st.info("Stopping after the current window.")
+        return
+
+    if progress.status in {"completed", "cancelled", "failed"}:
+        st.caption(progress.message or progress.status)
+        for did, outcome in progress.outcomes.items():
+            st.caption(f"`{did}` → **{outcome}**")
 
     if st.button("Run detection", type="primary", width="stretch", key=f"detect_run_{project_id}", icon=ic.SEARCH_CHECK):
         if not selected_labels:
             st.warning("Select at least one detector.")
             return
-        st.info(
-            "Detection prints progress in the server terminal as "
-            "`[transcribe:detection] …` lines. Vision-model detectors can "
-            "take several minutes per window while Ollama loads the model."
-        )
-        for label in selected_labels:
-            did = options[label]
-            status.info(f"Running `{did}`…")
-
-            def _progress(done: int, total: int, _did: str = did) -> None:
-                progress.progress(
-                    min(1.0, done / max(1, total)),
-                    text=f"{_did}: {done}/{total} windows",
-                )
-
-            try:
-                result = svc.run_detector(
-                    did,
-                    page_ids=page_ids,
-                    force=force,
-                    progress_callback=_progress,
-                    auto_tag=auto_tag,
-                )
-                n = len(result.get("findings") or [])
-                outcome = result.get("outcome")
-                tagged = result.get("auto_tagged_pages")
-                extra = f", tagged {tagged} page(s)" if auto_tag and tagged is not None else ""
-                status.success(f"`{did}` → {outcome}, {n} finding(s){extra}")
-                if result.get("warnings"):
-                    with st.expander(f"Warnings ({did})"):
-                        st.json(result["warnings"])
-            except Exception as exc:  # noqa: BLE001
-                status.error(f"`{did}` failed: {exc}")
+        ids = [options[label] for label in selected_labels]
+        coord.start(ids, page_ids=page_ids, force=force, auto_tag=auto_tag)
+        st.rerun()
 
     st.divider()
     st.markdown("#### Freshness")
