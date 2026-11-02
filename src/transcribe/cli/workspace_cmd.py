@@ -27,6 +27,7 @@ def _cmd_search(args: argparse.Namespace) -> int:
         places=_split(args.places),
         include_archived=bool(args.include_archived),
         collection_id=str(args.collection or ""),
+        bookmarked_only=bool(args.bookmarked),
     )
     if args.saved:
         saved = SavedSearchStore(runtime).get(args.saved)
@@ -153,6 +154,20 @@ def _cmd_quality(args: argparse.Namespace, *, clock, ids) -> int:
         )
         print(rating.rating_id)
         return 0
+    if args.quality_cmd == "scoreboard":
+        from transcribe.services.quality import build_scoreboard
+
+        rows = build_scoreboard(runtime_paths(), project_id=args.project)
+        if not rows:
+            print("scoreboard: no corrected pages")
+            return 0
+        for row in rows:
+            cer = f"{row.mean_cer:.4f}" if row.mean_cer is not None else "—"
+            print(
+                f"{row.kind}\t{row.model_name}\t{row.model_digest}\t"
+                f"verified={row.verified}\tpages={row.pages}\tcer={cer}"
+            )
+        return 0
     return 2
 
 
@@ -169,6 +184,8 @@ def _cmd_workspace_doctor(args: argparse.Namespace) -> int:
             print(f"  {finding.severity}: [{finding.code}] {finding.message}")
     for root, error in sorted(result.failures.items()):
         print(f"ERROR: {root}: {error}")
+    for finding in result.census_findings:
+        print(f"census {finding.severity}: [{finding.code}] {finding.path}: {finding.message}")
     print(
         f"workspace-doctor: {'ok' if result.ok else 'FAILED'} "
         f"({result.notebook_count} notebook(s))"

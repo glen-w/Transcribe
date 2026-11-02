@@ -36,6 +36,7 @@ class TimelineEntry:
     detail: str = ""  # model / modules / detector label
     valid: bool = True
     error: str = ""
+    outcome: str = ""
 
 
 def _int(payload: dict[str, Any], key: str) -> int:
@@ -64,6 +65,9 @@ def _ocr_entries(paths: ProjectPaths) -> list[TimelineEntry]:
                 )
             )
             continue
+        from transcribe.services.job_outcome import outcome_from_record
+
+        outcome = outcome_from_record(payload)
         entries.append(
             TimelineEntry(
                 correlation_id=str(payload.get("job_id") or path.stem),
@@ -77,6 +81,7 @@ def _ocr_entries(paths: ProjectPaths) -> list[TimelineEntry]:
                 skipped=_int(payload, "skipped"),
                 message=str(payload.get("message") or ""),
                 detail=str(payload.get("model_name") or ""),
+                outcome=outcome.outcome,
             )
         )
     return entries

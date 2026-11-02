@@ -209,10 +209,18 @@ available to the reader instead of the curated list.
   NER for it.
 - **Click a scan** in Reading or Review to view it fullscreen on black;
   Esc or a click closes it.
+- **Bookmarks and marginal notes** — Review → Other. A bookmark is a flag.
+  A note sits beside the page and is not part of the transcription. Reading
+  can show **Bookmarks only**. Search has the same filter. Exports include
+  notes only when you ask for reading notes.
+- **Do not OCR** — Review → Other. The page stays in the notebook as an image.
+  Jobs skip it. Reading export uses the note, not an OCR reading.
+- **Batch page metadata** — Library → **Batch page metadata**, or
+  `transcribe pages batch`. It previews until you confirm or pass `--apply`.
 
 ## Integrity, backup, and settings
 
-- **System → Diagnostics** — workspace health, notebook health when one is selected, a **job timeline** (recent OCR / Analyse / Detect runs), and the local **quality** summary (OCR samples from your Review corrections; nothing is sent anywhere). CLI equivalents: `transcribe workspace-doctor`, `transcribe quality summary`, `transcribe verify-export <export-dir>`.
+- **System → Diagnostics** — workspace health, notebook health when one is selected, a **job timeline** (recent OCR / Analyse / Detect runs; a finished job that opened the circuit shows completed-with-gaps), the local **quality** summary, and a **scoreboard** of character error rate against pages you corrected. Nothing is sent anywhere. CLI: `transcribe workspace-doctor`, `transcribe quality summary`, `transcribe quality scoreboard`, `transcribe verify-export <export-dir>`.
 - **Settings → Configuration → Backup** — full-workspace ZIP. Guide: [backup and restore](backup_and_restore.md).
 - **Settings** tabs: Configuration · Analysis · Detection · Tags · Prompts · Interface · Models · Profiles · Export. [Settings](runtime/settings.md).
 

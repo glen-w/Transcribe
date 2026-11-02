@@ -5,6 +5,29 @@ All notable changes to Transcribe will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Roadmap: **Now** is [1.3–1.5 The durable notebook](docs/dev/durable_notebook_1_3.md) (correction practice, a shelf that scores an external hand model, per-notebook restore). Package **1.2.0** stays the shipped release. Autobiography’s old 1.3–1.5 labels are not these package numbers.
+
+## [1.3.0] - 2026-11-02
+
+Durability and OCR truth ([docs/dev/expansion_hardening_wave_1_3.md](docs/dev/expansion_hardening_wave_1_3.md)). This package version is the notebook workbench after 1.2.0. It is not the parked autobiography “People” row.
+
+### Added
+
+- **Restore one notebook:** `transcribe backup restore-notebook` extracts a single notebook from a workspace ZIP (`--dry-run`, `--force` replaces that folder only). A failure before rename leaves the live folder in place.
+- **Archive hot path:** TTL refresh skips `ProjectService.load` when a stat-only signature still matches. Nightly scale lane adds a 100×40 budget; the smaller fixture stays on the PR suite.
+- **Format census** in `workspace-doctor`: unknown formats and schema versions are reported and left untouched. There is still no migrator.
+- **Job outcome read-model:** `completed` plus `circuit_open` is reported as completed-with-gaps. On-disk status stays `completed`. `transcribe run --retry-failed` schedules failed, interrupted, and empty-output pages only.
+- **Correction scoreboard:** `transcribe quality scoreboard` and Diagnostics score succeeded readings against human corrections. Local only.
+- **Review cleanup judgement:** accept or reject writes the existing cleanup quality rating and does not delete the attempt.
+- **Reading marks:** per-notebook bookmarks and marginal notes (`transcribe.reading-marks`). They do not enter the transcription. Search can filter bookmarked pages.
+- **Do-not-OCR pages:** optional `ocr_policy: skip`. Those pages are not scheduled and their export text is the marginal note, not OCR.
+- **Batch metadata:** `transcribe pages batch` dry-runs unless `--apply` (approve dates, ignore, unignore, add or remove a tag). Empty selections are refused.
+- **Declutter v6:** punch-hole margins and scanner calibration stripes, still outside the page interior.
+
 ## [1.2.0] - 2026-11-02
 
 Expansion & hardening wave ([docs/dev/expansion_hardening_wave_1_2.md](docs/dev/expansion_hardening_wave_1_2.md)): balanced-max hardening (H1–H4) and expansion (E1–E5) on shipped surfaces, folding in the 1.1 deepen waves below. No separate 1.1.0 tag was cut.

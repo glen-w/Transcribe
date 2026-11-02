@@ -181,6 +181,38 @@ BINDING_GUTTER_PARAMS = BindingGutterParams()
 EDGE_SHADOW_PARAMS = EdgeShadowParams()
 LID_SLIVER_PARAMS = LidSliverParams()
 
+
+@dataclass(frozen=True)
+class PunchHoleParams:
+    """Blank outer strip that contains a dark punch hole. Interior stays."""
+
+    min_dimension_px: int = 64
+    min_band_px: int = 14
+    max_band_px: int = 36
+    dark_max: int = 70
+    min_dark_pixels: int = 12
+    paper_mean_min: float = 210.0
+    paper_var_max: float = 400.0
+
+
+@dataclass(frozen=True)
+class CalibrationStripeParams:
+    """Edge-anchored high-contrast bar. Does not crop interior bars."""
+
+    min_dimension_px: int = 64
+    min_px: int = 8
+    max_px: int = 28
+    dark_max: int = 50
+    light_min: int = 200
+    min_run_px: int = 4
+    min_runs: int = 4
+    paper_mean_min: float = 180.0
+    paper_var_max: float = 250.0
+
+
+PUNCH_HOLE_PARAMS = PunchHoleParams()
+CALIBRATION_STRIPE_PARAMS = CalibrationStripeParams()
+
 # Multi-pass budget: L-shaped grey+white overscan needs a second crop after the
 # first edge type is removed so full-strip stats become uniform again. Extra
 # passes cover binding gutter / residual edge shadow after beds are gone.
@@ -1096,6 +1128,135 @@ def detect_corner_wedge_insets(
     )
 
 
+def _mean_var(values: list[int]) -> tuple[float, float]:
+    if not values:
+        return 0.0, 0.0
+    mean = sum(values) / len(values)
+    var = sum((value - mean) ** 2 for value in values) / len(values)
+    return mean, var
+
+
+def _punch_band(gray: Image.Image, *, edge: str, params: PunchHoleParams) -> int:
+    width, height = gray.size
+    for band in range(params.max_band_px, params.min_band_px - 1, -1):
+        if edge == "left":
+            xs = range(0, band)
+            inner_x = band
+        else:
+            xs = range(width - band, width)
+            inner_x = width - band - 1
+        if inner_x < 0 or inner_x >= width:
+            continue
+        row_dark = []
+        for y in range(height):
+            row_dark.append(
+                sum(1 for x in xs if int(gray.getpixel((x, y))) <= params.dark_max)
+            )
+        hole_limit = max(6, int(band * 0.4))
+        hole_rows = [count >= 4 and count <= hole_limit for count in row_dark]
+        best_start = best_end = -1
+        y = 0
+        while y < height:
+            if not hole_rows[y]:
+                y += 1
+                continue
+            end = y
+            while end < height and hole_rows[end]:
+                end += 1
+            if end - y > best_end - best_start:
+                best_start, best_end = y, end
+            y = end
+        span = best_end - best_start
+        if span < 8 or span > 40:
+            continue
+        nearby = range(max(0, best_start - 8), min(height, best_end + 8))
+        paper = [
+            int(gray.getpixel((x, yy)))
+            for yy in nearby
+            if yy < best_start or yy >= best_end
+            for x in list(xs)[::2]
+        ]
+        mean, var = _mean_var(paper)
+        if mean < params.paper_mean_min or var > params.paper_var_max:
+            continue
+        inner = [int(gray.getpixel((inner_x, yy))) for yy in range(best_start, best_end)]
+        inner_mean, inner_var = _mean_var(inner)
+        if inner_mean < params.paper_mean_min or inner_var > params.paper_var_max:
+            continue
+        return band
+    return 0
+
+
+def detect_punch_hole_insets(
+    gray: Image.Image,
+    params: PunchHoleParams = PUNCH_HOLE_PARAMS,
+) -> tuple[tuple[int, int, int, int] | None, str]:
+    width, height = gray.size
+    if width < params.min_dimension_px or height < params.min_dimension_px:
+        return None, "noop: image below minimum dimension"
+    left = _punch_band(gray, edge="left", params=params)
+    right = _punch_band(gray, edge="right", params=params)
+    if left == 0 and right == 0:
+        return None, "noop: no punch-hole margin"
+    return (left, 0, right, 0), ""
+
+
+def _calibration_depth(gray: Image.Image, *, edge: str, params: CalibrationStripeParams) -> int:
+    width, height = gray.size
+    for depth in range(params.max_px, params.min_px - 1, -1):
+        if edge == "top":
+            rows = range(0, depth)
+            probe = depth
+        else:
+            rows = range(height - depth, height)
+            probe = height - depth - 1
+        if probe < 0 or probe >= height:
+            continue
+        samples: list[int] = []
+        for x in range(width):
+            samples.append(int(sum(int(gray.getpixel((x, y))) for y in rows) / depth))
+        dark_runs = 0
+        light_runs = 0
+        state: str | None = None
+        length = 0
+        for value in samples:
+            kind = "d" if value <= params.dark_max else "l" if value >= params.light_min else "m"
+            if kind == "m" or kind != state:
+                if state == "d" and length >= params.min_run_px:
+                    dark_runs += 1
+                elif state == "l" and length >= params.min_run_px:
+                    light_runs += 1
+                state = None if kind == "m" else kind
+                length = 0 if kind == "m" else 1
+            else:
+                length += 1
+        if state == "d" and length >= params.min_run_px:
+            dark_runs += 1
+        elif state == "l" and length >= params.min_run_px:
+            light_runs += 1
+        if dark_runs < 2 or light_runs < 2:
+            continue
+        probe_vals = [int(gray.getpixel((x, probe))) for x in range(0, width, max(1, width // 32))]
+        mean, var = _mean_var(probe_vals)
+        if mean >= params.paper_mean_min and var <= params.paper_var_max:
+            return depth
+    return 0
+
+
+def detect_calibration_stripe_insets(
+    gray: Image.Image,
+    params: CalibrationStripeParams = CALIBRATION_STRIPE_PARAMS,
+) -> tuple[tuple[int, int, int, int] | None, str]:
+    width, height = gray.size
+    if width < params.min_dimension_px or height < params.min_dimension_px:
+        return None, "noop: image below minimum dimension"
+    top = _calibration_depth(gray, edge="top", params=params)
+    bottom = _calibration_depth(gray, edge="bottom", params=params)
+    if top == 0 and bottom == 0:
+        return None, "noop: no calibration stripe"
+    return (0, top, 0, bottom), ""
+
+
 def detect_declutter_border_insets(
     gray: Image.Image,
     *,
@@ -1105,6 +1266,8 @@ def detect_declutter_border_insets(
     gutter_params: BindingGutterParams = BINDING_GUTTER_PARAMS,
     shadow_params: EdgeShadowParams = EDGE_SHADOW_PARAMS,
     lid_params: LidSliverParams = LID_SLIVER_PARAMS,
+    punch_params: PunchHoleParams = PUNCH_HOLE_PARAMS,
+    stripe_params: CalibrationStripeParams = CALIBRATION_STRIPE_PARAMS,
 ) -> tuple[tuple[int, int, int, int] | None, str]:
     """Detect scanner beds, binding gutters, and residual edge shadows (multi-pass).
 
@@ -1147,6 +1310,10 @@ def detect_declutter_border_insets(
         merged = _merge_insets(merged, shadow_insets)
         lid_insets, lid_reason = detect_lid_sliver_insets(working, lid_params)
         merged = _merge_insets(merged, lid_insets)
+        punch_insets, punch_reason = detect_punch_hole_insets(working, punch_params)
+        merged = _merge_insets(merged, punch_insets)
+        stripe_insets, stripe_reason = detect_calibration_stripe_insets(working, stripe_params)
+        merged = _merge_insets(merged, stripe_insets)
         if merged == (0, 0, 0, 0):
             for reason in (
                 grey_reason,
@@ -1155,6 +1322,8 @@ def detect_declutter_border_insets(
                 gutter_reason,
                 shadow_reason,
                 lid_reason,
+                punch_reason,
+                stripe_reason,
             ):
                 if reason != "noop: no border detected":
                     last_reason = reason

@@ -92,6 +92,6 @@ Details: [installation](docs/runtime/installation.md). Docker notes: [docker](do
 
 - [User docs sitemap](docs/USER_INDEX.md) · [Docs hub](docs/index.md)
 - Public landing (GitHub Pages): [website/](website/) — local assemble: `make pages-site` → `_site/`
-- [Developer docs](docs/DEV_INDEX.md) · [Roadmap](docs/ROADMAP.md) · [Usability wave](docs/usability_wave_plan.md)
+- [Developer docs](docs/DEV_INDEX.md) · [Roadmap](docs/ROADMAP.md) · [Durable notebook (now)](docs/dev/durable_notebook_1_3.md) · [Usability wave](docs/usability_wave_plan.md)
 - [Architecture](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · License: MIT

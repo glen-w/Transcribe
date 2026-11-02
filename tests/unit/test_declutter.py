@@ -303,7 +303,7 @@ def test_enabled_ops_include_uniform_overscan() -> None:
 
 
 def test_identity_version_5_differs_from_v3() -> None:
-    assert DECLUTTER_VERSION == 5
+    assert DECLUTTER_VERSION == 6
     v3 = identity_payload(
         enabled=True,
         version=3,

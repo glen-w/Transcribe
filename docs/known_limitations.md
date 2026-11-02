@@ -27,6 +27,15 @@ Operational guide: [runtime/ocr.md](runtime/ocr.md).
 - Some Ollama “vision” tags still **fail to load** on a given build (example: `llama3.2-vision:11b` → `unknown model architecture: 'mllama'` on Ollama 0.32.x — see [ollama#16547](https://github.com/ollama/ollama/issues/16547)). Transcribe classifies these as non-retriable `model_load` errors and **skips remaining pages for that model after the first failure** (same `circuit_open` path as timeouts). Prefer a working alternate family (for example `granite3.2-vision` or `minicpm-v`) until the host Ollama/model pair loads cleanly. Batch OCR inherits the same per-notebook circuit (one bad model does not keep calling every page in that notebook).
 - **Multipass compare** runs each selected vision model across the notebook, then a text-model **rank** (text-only v1) and optional **composite** merge. Cost scales with model count × pages plus rank/composite calls; on **Batch** multipass it also scales with notebook count. Composite is assistive, not ground truth. Rank failure falls back to chronological attempt order in Review. Vision phases **default cleanup off** (CLI `--cleanup` / UI “Clean OCR during compare” to opt in). The UI starts compare in a background thread like single-model Start; Stop cancels remaining pages of the current model and remaining models (and does not start remaining batch notebooks). Rank/composite still run for pages that already have ≥2 succeeded vision attempts
 
+## Durability and OCR truth (1.3)
+
+- **Restore one notebook** replaces that folder only. It does not merge page edits and it does not restore config or other notebooks.
+- **Scoreboard** character error rate is against pages you have corrected. Unedited pages are not scored. Nothing is uploaded.
+- **Marginal notes** are not part of the transcription. Default exports omit them. Turn on reading notes to include them.
+- **Do-not-OCR** pages are skipped by jobs. Any earlier OCR text stays on disk but is not exported as the page text.
+- **Batch metadata** without `--apply` changes nothing. An empty page list is refused.
+- **Declutter v6** adds punch-hole margins and calibration stripes. Existing notebooks are not rewritten until re-apply.
+
 ## Organisation, search, and quality (1.2)
 
 - **Collections / archived** live in `data/config/notebook-collections.json`. Archiving hides a notebook from default lists; it does not delete, compress, or exclude it from backup. The SQLite search cache carries derived flags only and rebuilds from that file.

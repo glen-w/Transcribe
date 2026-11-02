@@ -13,7 +13,9 @@ from transcribe.declutter.borders import (
     BINDING_GUTTER_PARAMS,
     CORNER_WEDGE_PARAMS,
     EDGE_SHADOW_PARAMS,
+    CALIBRATION_STRIPE_PARAMS,
     LID_SLIVER_PARAMS,
+    PUNCH_HOLE_PARAMS,
     SCAN_BORDER_PARAMS,
     UNIFORM_OVERSCAN_PARAMS,
     BindingGutterParams,
@@ -27,8 +29,8 @@ from transcribe.declutter.borders import (
 )
 from transcribe.domain.fingerprint import canonical_json_bytes
 
-# v4: remove_binding_gutter + remove_edge_shadows; v5: + remove_lid_slivers.
-DECLUTTER_VERSION = 5
+# v5: lid slivers. v6: punch-hole margins + calibration stripes.
+DECLUTTER_VERSION = 6
 
 DECLUTTER_STATES = frozenset({"disabled", "enabled_noop", "enabled_cropped", "error_fallback"})
 
@@ -41,6 +43,8 @@ ENABLED_OPS: tuple[str, ...] = (
     "remove_binding_gutter",
     "remove_edge_shadows",
     "remove_lid_slivers",
+    "remove_punch_hole_margins",
+    "remove_calibration_stripes",
 )
 
 NOTE_MAX_LEN = 200
@@ -110,6 +114,8 @@ def _default_params_block() -> dict[str, Any]:
         "remove_binding_gutter": asdict(BINDING_GUTTER_PARAMS),
         "remove_edge_shadows": asdict(EDGE_SHADOW_PARAMS),
         "remove_lid_slivers": asdict(LID_SLIVER_PARAMS),
+        "remove_punch_hole_margins": asdict(PUNCH_HOLE_PARAMS),
+        "remove_calibration_stripes": asdict(CALIBRATION_STRIPE_PARAMS),
     }
 
 

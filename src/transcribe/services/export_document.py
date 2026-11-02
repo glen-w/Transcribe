@@ -6,7 +6,7 @@ import base64
 import hashlib
 import mimetypes
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -24,6 +24,7 @@ class ExportSnapshot:
     results: dict[str, PageResult | None]
     content_revision: str = ""
     cover_image_path: Path | None = None
+    reading_notes: dict[str, str] = field(default_factory=dict)
 
 
 def resolve_cover_image_path(paths: ProjectPaths, project: Project) -> Path | None:
@@ -157,18 +158,28 @@ def build_part_from_snapshot(
         if options.exclude_tags and set(options.exclude_tags) & page_tags:
             continue
         result = snapshot.results.get(page.page_id)
-        text = (result.effective_text() if result else None) or ""
-        stripped = text.strip()
+        note = (snapshot.reading_notes.get(page.page_id) or "").strip()
+        if page.ocr_policy == "skip":
+            # Image-only pages must not export OCR text as if it were a transcription.
+            stripped = note
+        else:
+            text = (result.effective_text() if result else None) or ""
+            stripped = text.strip()
+            if options.include_reading_notes and note:
+                stripped = f"{stripped}\n\n{note}".strip() if stripped else note
         blank = not stripped
         if blank and not options.include_blank_pages:
             continue
         date_label = None
         if options.include_dates:
             date_label = format_page_date(_page_date_dict(page))
+        label = f"Page {i + 1}"
+        if page.ocr_policy == "skip":
+            label = f"{label} (image only)"
         sections.append(
             ExportSection(
                 page_id=page.page_id,
-                label=f"Page {i + 1}",
+                label=label,
                 text=stripped,
                 date_label=date_label,
                 blank=blank,

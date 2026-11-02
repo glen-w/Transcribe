@@ -9,7 +9,7 @@ import zipfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from transcribe import __version__
 from transcribe.corpus.paths import CorpusPaths
@@ -48,6 +48,16 @@ class VerifyResult:
     ok: bool
     manifest: dict[str, Any]
     messages: list[str] = field(default_factory=list)
+
+
+@dataclass
+class NotebookRestoreResult:
+    ok: bool
+    notebook_id: str
+    dest: Path | None
+    messages: list[str] = field(default_factory=list)
+    dry_run: bool = False
+    replaced: bool = False
 
 
 @dataclass
@@ -462,6 +472,184 @@ class WorkspaceBackupService:
             messages=messages,
             dry_run=False,
         )
+
+    def restore_notebook(
+        self,
+        runtime: RuntimePaths,
+        archive: Path,
+        notebook_id: str,
+        *,
+        force: bool = False,
+        dry_run: bool = False,
+        before_commit: Callable[[Path], None] | None = None,
+    ) -> NotebookRestoreResult:
+        """Extract one notebook from a workspace ZIP.
+
+        This is not a merge. ``--force`` replaces the live folder for that id
+        only, via a temp tree and rename. A failure before that rename leaves
+        the live folder untouched. Other notebooks, config, and corpus stay.
+        """
+        notebook_id = str(notebook_id or "").strip()
+        if not notebook_id:
+            raise BackupError("notebook_id is required")
+        archive = Path(archive)
+        verify = self.verify_backup(archive)
+        messages = list(verify.messages)
+
+        with zipfile.ZipFile(archive, mode="r") as zf:
+            members = [
+                info
+                for info in zf.infolist()
+                if not info.filename.endswith("/") and info.filename != MANIFEST_NAME
+            ]
+            for info in members:
+                self._assert_safe_member(info.filename)
+            matches = self._zip_notebook_members(zf, members, notebook_id)
+            if not matches:
+                raise BackupError(f"notebook {notebook_id!r} is not in this archive")
+            if len(matches) > 1:
+                raise BackupError(
+                    f"notebook {notebook_id!r} appears {len(matches)} times in the archive"
+                )
+            member = matches[0]
+            rel = member[len("projects/") :]
+            folder_rel = Path(rel).parent.as_posix()
+            if folder_rel in ("", "."):
+                raise BackupError(f"notebook {notebook_id!r} is not inside a project folder")
+            prefix = f"projects/{folder_rel}/"
+            packed = [info for info in members if info.filename.startswith(prefix)]
+            if not packed:
+                raise BackupError(f"archive has no files for notebook {notebook_id!r}")
+
+            live = self._live_notebook_dirs(runtime.projects_dir, notebook_id)
+            if len(live) > 1:
+                raise BackupError(
+                    f"notebook {notebook_id!r} exists in {len(live)} folders; refusing"
+                )
+            replaced = bool(live)
+            if replaced and not force:
+                raise BackupError(
+                    f"notebook {notebook_id!r} already exists at {live[0]} "
+                    "(pass --force to replace that folder only)"
+                )
+            if replaced:
+                dest = live[0]
+            else:
+                dest = (runtime.projects_dir / folder_rel).resolve()
+            projects_root = runtime.projects_dir.resolve()
+            try:
+                dest.resolve().relative_to(projects_root)
+            except ValueError as exc:
+                raise BackupError(f"restore destination escapes projects dir: {dest}") from exc
+
+            if replaced:
+                if job_lock_held(dest / ".transcribe.job.lock"):
+                    raise BackupError(f"OCR job lock held for notebook at {dest}")
+                if analysis_lock_held(dest / ".transcribe.analysis.lock"):
+                    raise BackupError(f"analysis job lock held for notebook at {dest}")
+
+            messages.append(
+                f"notebook {notebook_id} → {dest} "
+                f"({'replace' if replaced else 'create'}, {len(packed)} files)"
+            )
+            if dry_run:
+                messages.append("dry_run: no changes written")
+                return NotebookRestoreResult(
+                    ok=True,
+                    notebook_id=notebook_id,
+                    dest=dest,
+                    messages=messages,
+                    dry_run=True,
+                    replaced=replaced,
+                )
+
+            uncompressed = sum(int(info.file_size) for info in packed)
+            _ensure_disk_budget(dest.parent, additional=uncompressed)
+            tmp = dest.parent / f".{dest.name}.restore-tmp"
+            if tmp.exists():
+                shutil.rmtree(tmp)
+            tmp.mkdir(parents=True)
+            try:
+                self._extract_prefix(zf, packed, prefix, tmp)
+                if before_commit is not None:
+                    before_commit(tmp)
+                self._commit_restored_tree(tmp, dest)
+            except BackupError:
+                raise
+            except Exception as exc:
+                raise BackupError(
+                    f"restore-notebook failed before the live folder was replaced: {exc}"
+                ) from exc
+
+        from transcribe.services.archive import bump_archive_generation
+
+        bump_archive_generation(runtime)
+        messages.append("archive generation bumped; other notebooks were not replaced")
+        return NotebookRestoreResult(
+            ok=True,
+            notebook_id=notebook_id,
+            dest=dest,
+            messages=messages,
+            dry_run=False,
+            replaced=replaced,
+        )
+
+    @staticmethod
+    def _zip_notebook_members(
+        zf: zipfile.ZipFile,
+        members: list[zipfile.ZipInfo],
+        notebook_id: str,
+    ) -> list[str]:
+        found: list[str] = []
+        for info in members:
+            name = info.filename
+            if not name.startswith("projects/") or not name.endswith("/project.json"):
+                continue
+            try:
+                payload = json.loads(zf.read(info))
+            except (json.JSONDecodeError, OSError, UnicodeError) as exc:
+                raise BackupError(f"unreadable project.json in archive: {name}") from exc
+            if isinstance(payload, dict) and str(payload.get("id") or "") == notebook_id:
+                found.append(name)
+        return found
+
+    @staticmethod
+    def _live_notebook_dirs(projects_root: Path, notebook_id: str) -> list[Path]:
+        if not projects_root.is_dir():
+            return []
+        found: list[Path] = []
+        for path in projects_root.rglob("project.json"):
+            if not path.is_file():
+                continue
+            if any(part.startswith(".") for part in path.relative_to(projects_root).parts):
+                continue
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError):
+                continue
+            if isinstance(payload, dict) and str(payload.get("id") or "") == notebook_id:
+                found.append(path.parent)
+        return found
+
+    @staticmethod
+    def _commit_restored_tree(tmp: Path, dest: Path) -> None:
+        """Rename ``tmp`` onto ``dest``. Live ``dest`` is moved aside first."""
+        if not dest.exists():
+            tmp.rename(dest)
+            return
+        previous = dest.with_name(dest.name + ".restore-previous")
+        if previous.exists():
+            shutil.rmtree(previous)
+        dest.rename(previous)
+        try:
+            tmp.rename(dest)
+        except Exception:
+            if dest.exists():
+                shutil.rmtree(dest, ignore_errors=True)
+            if not dest.exists() and previous.exists():
+                previous.rename(dest)
+            raise
+        shutil.rmtree(previous, ignore_errors=True)
 
     def _refuse_busy(self, runtime: RuntimePaths) -> None:
         corpus = CorpusPaths.from_runtime(runtime)

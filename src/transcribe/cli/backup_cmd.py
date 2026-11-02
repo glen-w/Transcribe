@@ -40,6 +40,21 @@ def _cmd_backup(args: argparse.Namespace) -> int:
                 + ", ".join(f"{key}={value}" for key, value in sorted(includes.items()))
             )
             return 0
+        if args.backup_cmd == "restore-notebook":
+            result = service.restore_notebook(
+                runtime,
+                Path(args.archive),
+                args.notebook_id,
+                force=bool(args.force),
+                dry_run=bool(args.dry_run),
+            )
+            for message in result.messages:
+                print(message)
+            print(
+                f"ok: notebook={result.notebook_id} dest={result.dest} "
+                f"replaced={result.replaced} dry_run={result.dry_run}"
+            )
+            return 0
         if args.backup_cmd == "verify":
             result = service.verify_backup(Path(args.archive))
             for message in result.messages:

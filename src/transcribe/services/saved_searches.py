@@ -39,6 +39,7 @@ def filters_to_dict(filters: ArchiveFilters) -> dict[str, Any]:
         "places": list(filters.places),
         "include_archived": filters.include_archived,
         "collection_id": filters.collection_id,
+        "bookmarked_only": filters.bookmarked_only,
     }
 
 
@@ -74,6 +75,7 @@ def filters_from_dict(data: Any) -> ArchiveFilters:
         places=_tuple("places"),
         include_archived=bool(data.get("include_archived", False)),
         collection_id=str(data.get("collection_id") or ""),
+        bookmarked_only=bool(data.get("bookmarked_only", False)),
     )
 
 

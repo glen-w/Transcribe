@@ -49,18 +49,29 @@ def _runtime(tmp_path: Path) -> RuntimePaths:
 
 
 def test_archive_search_and_listing_at_scale(tmp_path: Path, monkeypatch):
+    _assert_archive_budget(tmp_path, monkeypatch, notebooks=NOTEBOOKS, pages=PAGES_PER_NOTEBOOK)
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(300)
+def test_archive_search_and_listing_at_nightly_scale(tmp_path: Path, monkeypatch):
+    """100 notebooks x 40 pages. Nightly only (`slow` keeps it out of the PR suite)."""
+    _assert_archive_budget(tmp_path, monkeypatch, notebooks=100, pages=40)
+
+
+def _assert_archive_budget(tmp_path: Path, monkeypatch, *, notebooks: int, pages: int) -> None:
     runtime = _runtime(tmp_path)
     monkeypatch.setenv("TRANSCRIBE_DATA_DIR", str(runtime.data_dir))
     monkeypatch.setenv("TRANSCRIBE_PROJECTS_DIR", str(runtime.projects_dir))
     clock, ids = FakeClock(), SequentialIds("scale")
     png = _png_bytes()
-    for nb in range(NOTEBOOKS):
+    for nb in range(notebooks):
         root = runtime.projects_dir / f"nb{nb:02d}"
         paths = open_project_paths(root)
         projects = ProjectService(paths, clock=clock, ids=ids)
         projects.create(f"Notebook {nb}")
         ingest = IngestService(paths, clock=clock, ids=ids)
-        for _ in range(PAGES_PER_NOTEBOOK):
+        for _ in range(pages):
             ingest.import_bytes("p.png", png)
         project = projects.load()
         for i, page in enumerate(project.pages):
@@ -77,12 +88,12 @@ def test_archive_search_and_listing_at_scale(tmp_path: Path, monkeypatch):
     # but the plain text search must find every page mentioning Anna.
     assert result.total_matched == 0
     plain = service.search("Anna")
-    assert plain.total_matched == NOTEBOOKS * PAGES_PER_NOTEBOOK
+    assert plain.total_matched == notebooks * pages
     assert search_s < SEARCH_BUDGET_S
 
     start = time.monotonic()
-    notebooks = service.list_notebooks()
+    listed = service.list_notebooks()
     list_s = time.monotonic() - start
-    assert len(notebooks) == NOTEBOOKS
-    assert all(n.page_count == PAGES_PER_NOTEBOOK for n in notebooks)
+    assert len(listed) == notebooks
+    assert all(item.page_count == pages for item in listed)
     assert list_s < LIST_BUDGET_S

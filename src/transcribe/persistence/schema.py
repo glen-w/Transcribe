@@ -42,6 +42,8 @@ SUPPORTED: dict[str, int] = {
     "transcribe.saved-searches": 1,
     "transcribe.notebook-collections": 1,
     "transcribe.quality-ratings": 1,
+    # 1.3: per-notebook bookmarks and marginal notes. Absent file is valid.
+    "transcribe.reading-marks": 1,
 }
 
 

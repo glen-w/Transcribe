@@ -650,6 +650,22 @@ def _resolve_viewer_session(
                 st.rerun()
             return None, project
 
+    if st.session_state.get("viewer_bookmarks_only") and entries:
+        from transcribe.services.reading_marks import ReadingMarksStore
+
+        marked: set[str] = set()
+        for root_name in {e.get("project_root") for e in entries}:
+            if not root_name:
+                continue
+            marked |= ReadingMarksStore(open_project_paths(Path(root_name))).bookmarked_ids()
+        entries = [e for e in entries if e.get("page_id") in marked]
+        if not entries:
+            st.info("No bookmarked pages in this view.")
+            if st.button("Show all pages", key="pv_clear_bookmarks_empty"):
+                st.session_state["viewer_bookmarks_only"] = False
+                st.rerun()
+            return None, project
+
     st.session_state["view_entries"] = entries
     page_ids_flat = [e["page_id"] for e in entries]
     if page_id not in page_ids_flat:
@@ -846,6 +862,11 @@ def _render_viewer_chrome(session: _ViewerSession) -> bool:
         st.caption("Notebook")
         render_tag_chips(project.tags, catalog)
 
+    st.checkbox(
+        "Bookmarks only",
+        key="viewer_bookmarks_only",
+        help="Show only pages bookmarked in this notebook.",
+    )
     required_slugs = [
         str(s) for s in (st.session_state.get("viewer_tag_filter") or []) if str(s).strip()
     ]
@@ -1019,9 +1040,31 @@ def _render_viewer_body(session: _ViewerSession) -> None:
                     st.caption(body)
             elif cu.execution_status == "skipped_empty_source":
                 st.caption("Cleanup: skipped empty OCR source")
-            if cu.pre_cleanup_text is not None and not read_only:
-                with st.expander("Pre-cleanup OCR text", expanded=False):
-                    st.text(cu.pre_cleanup_text)
+            if cu.pre_cleanup_text is not None and attempt and attempt.raw_text and not read_only:
+                vision_col, cleanup_col = st.columns(2)
+                vision_col.caption("Vision text")
+                vision_col.text(cu.pre_cleanup_text)
+                cleanup_col.caption("Cleanup candidate")
+                cleanup_col.text(attempt.raw_text)
+                st.caption(f"Validator: {cu.acceptance_status}")
+            if not read_only and cu.execution_status != "disabled":
+                accept_col, reject_col = st.columns(2)
+                from transcribe.services.quality import QualityRatingStore
+
+                def _rate_cleanup(verdict: str) -> None:
+                    QualityRatingStore().record(
+                        "cleanup",
+                        verdict,
+                        project_id=project.id,
+                        page_id=page.page_id,
+                        notes=cu.acceptance_status or "",
+                    )
+                    st.toast(f"Cleanup marked {verdict}")
+
+                if accept_col.button("Accept cleanup", key=f"cu_accept_{page.page_id}"):
+                    _rate_cleanup("accept")
+                if reject_col.button("Reject cleanup", key=f"cu_reject_{page.page_id}"):
+                    _rate_cleanup("reject")
 
         _render_compare_in_review(
             project=project,

@@ -19,7 +19,7 @@ entrypoints.
 | `init <project>` | Create a new project directory |
 | `import <project> <source>` | Import JPEG/PNG/PDF (`--dpi` for PDFs) |
 | `models` | List vision-capable Ollama models (`--base-url`, `--all`, `--refresh`, `--prefs`) |
-| `run <project> --model …` | Run OCR (`--force`, `--workers 1|2`, `--base-url`, `--allow-remote-ollama`) |
+| `run <project> --model …` | Run OCR (`--force`, `--retry-failed`, `--workers 1|2`, `--base-url`, `--allow-remote-ollama`) |
 | `bulk-run pending\|import-run\|notebooks` | Batch OCR across notebooks (repeat `--model` for multipass; `--force`, `--workers`, `--text-model`, `--no-auto-composite`, `--cleanup`) |
 | `bulk-run status\|resume <ocr_run_id>` | Inspect or resume an OcrBatchRun |
 | `bulk-analyse pending\|import-run\|notebooks` | Batch Analyse across notebooks (`--preset`, optional `--module` / `--question` / `--text-model`) |
@@ -37,6 +37,7 @@ entrypoints.
 | `corpus-doctor` | Workspace corpus integrity (`--deep` also doctors each notebook) |
 | `backup create` | Full-workspace ZIP to `{EXPORT}/backups/` (`--dest`, `--force`, `--include-inbox`, `--include-exports`) |
 | `backup verify <archive.zip>` | Verify manifest + file index without changing the workspace |
+| `backup restore-notebook <archive.zip> <notebook_id>` | Extract one notebook (`--dry-run`, `--force` replaces that folder only) |
 | `restore <archive.zip>` | Replace-only restore (`--yes` required; `--dry-run`; `--no-safety-backup`) |
 
 ### UI modes

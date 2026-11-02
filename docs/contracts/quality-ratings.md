@@ -30,6 +30,10 @@ mean CER over OCR samples, cleanup acceptance ratio, and analysis up ratio.
 Diagnostics shows the workspace summary. Sampled pages for a manual review
 pass can be drawn deterministically with `sample_page_ids`.
 
+## Scoreboard
+
+`transcribe quality scoreboard` (and Diagnostics, when a notebook is open) scores succeeded attempts against `edited_text` with the same character error rate. Rows are grouped by model tag, digest, and whether the text is the vision reading or an applied cleanup. The scoreboard is computed on read. It does not copy OCR text into `quality-ratings.json` and it does not upload anything.
+
 This is the user-facing OCR-quality surface. A dedicated `ocr_quality`
 analysis module remains deferred (see ROADMAP); improving text stays with
 second-pass cleanup / verification and human review.

@@ -64,6 +64,7 @@ usability_wave_plan
 infrastructure_wave_0_9_plan
 dev/refactor_waves_1_0_1
 dev/deepen_waves_1_1
+dev/durable_notebook_1_3
 INTEGRATION_SEAM
 ```
 

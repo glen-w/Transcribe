@@ -69,7 +69,8 @@ def test_hardening_checklist_splits_phase6_items():
 
 def test_roadmap_now_is_usability_wave():
     text = (DOCS / "ROADMAP.md").read_text(encoding="utf-8")
-    assert "## Now — 1.1 deepen-in-place" in text
+    assert "## Now — 1.3–1.5 The durable notebook" in text
+    assert "durable_notebook_1_3.md" in text
     assert "## Usability wave — [x] done" in text
     assert "deepen_waves_1_1.md" in text
     assert "**U0**" in text and "**U1**" in text

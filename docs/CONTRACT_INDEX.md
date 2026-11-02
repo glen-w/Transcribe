@@ -25,7 +25,8 @@ Truth hierarchy: **on-disk project + page results** are authoritative for each n
 | Organisation tag catalog (slugs / labels / colours; TX copy-boundary) | [contracts/tag-catalog.md](contracts/tag-catalog.md) |
 | Notebook collections & archived state (1.2) | [contracts/notebook-collections.md](contracts/notebook-collections.md) |
 | Saved searches & published-NER entity filters (1.2) | [contracts/saved-searches.md](contracts/saved-searches.md) |
-| Quality ratings & evaluation loop (1.2) | [contracts/quality-ratings.md](contracts/quality-ratings.md) |
+| Quality ratings & evaluation loop (1.2); correction scoreboard (1.3) | [contracts/quality-ratings.md](contracts/quality-ratings.md) |
+| Reading marks (bookmarks and marginal notes, 1.3) | [contracts/reading-marks.md](contracts/reading-marks.md) |
 | Detector definitions, scope, candidate strategy | [contracts/detection-definition.md](contracts/detection-definition.md) |
 | Detection findings, cross-page spans, review status | [contracts/detection-finding.md](contracts/detection-finding.md) |
 | Detection result envelope, outcomes, capability | [contracts/detection-result.md](contracts/detection-result.md) |

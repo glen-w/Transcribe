@@ -233,6 +233,97 @@ class QualityRatingStore:
         }
 
 
+@dataclass(frozen=True)
+class ScoreboardRow:
+    """CER of one model identity against human ``edited_text``."""
+
+    model_name: str
+    model_digest: str
+    verified: bool
+    kind: str  # "raw" | "cleanup"
+    pages: int
+    mean_cer: float | None
+
+
+def build_scoreboard(
+    runtime: RuntimePaths,
+    *,
+    project_id: str | None = None,
+) -> list[ScoreboardRow]:
+    """Score succeeded attempts against human corrections.
+
+    Computed on read from page results. Nothing is uploaded and nothing is
+    written back onto the quality-ratings file. Unedited pages are skipped.
+    """
+    from transcribe.ports import SystemClock, UuidGenerator
+    from transcribe.services.archive import discover_corpus_project_roots
+    from transcribe.services.project import ProjectService, open_project_paths
+
+    buckets: dict[tuple[str, str, bool, str], list[float]] = {}
+    for root in discover_corpus_project_roots(runtime):
+        paths = open_project_paths(root)
+        projects = ProjectService(paths, clock=SystemClock(), ids=UuidGenerator())
+        try:
+            project = projects.load()
+        except Exception:
+            continue
+        if project_id and project.id != project_id:
+            continue
+        for page in project.pages:
+            result = projects.load_page_result(page.page_id)
+            if result is None or result.edited_text is None:
+                continue
+            reference = result.edited_text
+            for attempt in result.attempts:
+                if attempt.status != "succeeded":
+                    continue
+                if (attempt.attempt_kind or "vision") not in ("vision", "composite"):
+                    continue
+                provenance = attempt.provenance
+                name = provenance.model_name if provenance else ""
+                digest = (provenance.model_digest or "") if provenance else ""
+                verified = bool(provenance.model_identity_verified) if provenance else False
+                cleanup = attempt.cleanup
+                raw_hypothesis = attempt.raw_text
+                if cleanup is not None and cleanup.pre_cleanup_text is not None:
+                    raw_hypothesis = cleanup.pre_cleanup_text
+                if raw_hypothesis is not None and name:
+                    cer = character_error_rate(reference, raw_hypothesis)
+                    if cer is not None:
+                        buckets.setdefault((name, digest, verified, "raw"), []).append(cer)
+                if (
+                    cleanup is not None
+                    and cleanup.acceptance_status == "applied"
+                    and cleanup.pre_cleanup_text is not None
+                    and attempt.raw_text is not None
+                    and cleanup.model_name
+                ):
+                    cer = character_error_rate(reference, attempt.raw_text)
+                    if cer is not None:
+                        buckets.setdefault(
+                            (
+                                str(cleanup.model_name),
+                                str(cleanup.model_digest or ""),
+                                bool(cleanup.model_digest),
+                                "cleanup",
+                            ),
+                            [],
+                        ).append(cer)
+    rows = [
+        ScoreboardRow(
+            model_name=key[0],
+            model_digest=key[1],
+            verified=key[2],
+            kind=key[3],
+            pages=len(values),
+            mean_cer=(sum(values) / len(values)) if values else None,
+        )
+        for key, values in buckets.items()
+    ]
+    rows.sort(key=lambda row: (row.kind, row.mean_cer if row.mean_cer is not None else 9e9, row.model_name))
+    return rows
+
+
 def _acceptance(ratings: list[QualityRating], kind: str, positive: str = "accept") -> float | None:
     rows = [r for r in ratings if r.kind == kind]
     if not rows:
@@ -244,6 +335,8 @@ __all__ = [
     "FORMAT",
     "QualityRating",
     "QualityRatingStore",
+    "ScoreboardRow",
+    "build_scoreboard",
     "character_error_rate",
     "edit_distance",
     "sample_page_ids",

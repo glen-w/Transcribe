@@ -17,9 +17,11 @@ Active developer and maintainer docs. Historical material is listed only via [AR
 
 | Doc | Purpose |
 |-----|---------|
-| [ROADMAP.md](ROADMAP.md) | Product roadmap: notebook contract through 1.0; **Now** is the 1.2 expansion & hardening wave. Autobiography write-up is on file for a future separate product (scope lean 24 Sep 2026), not this repo’s backlog |
+| [ROADMAP.md](ROADMAP.md) | Product roadmap. **1.3.0** shipped durability and OCR truth. The longer durable-notebook programme is still open. Autobiography write-up is on file, not this repo’s backlog |
+| [dev/expansion_hardening_wave_1_3.md](dev/expansion_hardening_wave_1_3.md) | 1.3.0 durability and OCR truth (restore one notebook, scoreboard, reading marks, skip-OCR, declutter v6) |
+| [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md) | Remaining 1.3–1.5 waves: miss desk, confirmed spellings, hand shelf, continue-reading |
 | [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place waves (Inbox, declutter v4, reorder, hand-model bring-back, leftover architecture) — folded into 1.2 |
-| [dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md) | 1.2 expansion & hardening wave (H1–H4, E1–E5, Q) — the current release programme |
+| [dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md) | 1.2 expansion & hardening wave (H1–H4, E1–E5, Q) — shipped as **1.2.0** |
 | [usability_wave_plan.md](usability_wave_plan.md) | Usability-wave tracks U0–U4 (done; Inbox polish may continue) |
 | [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) | 0.9 infrastructure wave: **I0–I6** landed |
 | [runtime/install_verification_matrix.md](runtime/install_verification_matrix.md) | Tag evidence cells (Docker / native / Ollama) |

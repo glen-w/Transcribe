@@ -15,6 +15,49 @@ from transcribe.services.job import build_coordinator, cli_run_exit_code
 from transcribe.services.project import ProjectService, open_project_paths
 
 
+def _cmd_pages_batch(args: argparse.Namespace, projects: ProjectService) -> int:
+    from transcribe.runtime_paths import build_runtime_paths
+    from transcribe.services.archive import ArchiveService
+    from transcribe.services.batch_metadata import apply_batch_metadata, filters_are_empty
+    from transcribe.services.saved_searches import SavedSearchStore
+
+    page_ids = list(args.page_ids or [])
+    runtime = build_runtime_paths()
+    if args.saved:
+        store = SavedSearchStore(runtime)
+        saved = store.get(args.saved) or next(
+            (row for row in store.list() if row.name == args.saved),
+            None,
+        )
+        if saved is None:
+            print(f"error: no saved search {args.saved!r}", file=sys.stderr)
+            return 2
+        if filters_are_empty(saved.filters):
+            print("error: saved search has an empty filter", file=sys.stderr)
+            return 2
+        project = projects.load()
+        hits = ArchiveService(runtime).search("", filters=saved.filters, limit=500)
+        page_ids.extend(
+            hit.page_id for hit in hits.hits if hit.project_id == project.id
+        )
+    if not page_ids:
+        print("error: batch metadata refuses an empty page selection", file=sys.stderr)
+        return 2
+    result = apply_batch_metadata(
+        projects,
+        page_ids,
+        args.action,
+        tag=args.tag or "",
+        dry_run=not bool(args.apply),
+        runtime=runtime,
+    )
+    print(
+        f"{'dry-run' if result.dry_run else 'applied'}: "
+        f"action={result.action} selected={result.selected} changed={result.changed}"
+    )
+    return 0
+
+
 def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
     """Return an exit code for notebook commands, or None to fall through."""
     if args.cmd == "init":
@@ -30,6 +73,8 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
             project = projects.reorder_pages(args.page_ids)
         elif args.pages_cmd == "move-to-date-cluster":
             project = projects.move_page_to_date_cluster(args.page_id)
+        elif args.pages_cmd == "batch":
+            return _cmd_pages_batch(args, projects)
         else:
             return None
         print(" ".join(page.page_id for page in project.pages))
@@ -147,7 +192,28 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
         project = projects.save_settings(project, settings)
         coord.provider = OllamaVisionProvider(settings.base_url)
 
-        progress = coord.run_blocking(force=args.force)
+        if args.retry_failed:
+            from transcribe.services.job_outcome import retry_failed_page_ids
+
+            project = projects.load()
+            page_ids = retry_failed_page_ids(project, projects)
+            if not page_ids:
+                print("no failed, interrupted, or empty_output pages to retry")
+                return 0
+            progress = coord.run_blocking(page_ids=page_ids, force=args.force)
+        else:
+            progress = coord.run_blocking(force=args.force)
+        from transcribe.services.job_outcome import classify_job_outcome
+
+        outcome = classify_job_outcome(
+            status=progress.status,
+            circuit_open=progress.circuit_open,
+            failed_pages=progress.failed,
+        )
+        print(
+            f"outcome={outcome.outcome} status={outcome.status} "
+            f"failed={progress.failed} skipped={progress.skipped}"
+        )
         return cli_run_exit_code(progress)
 
     if args.cmd == "multipass":

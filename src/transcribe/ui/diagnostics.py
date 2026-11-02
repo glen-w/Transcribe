@@ -144,6 +144,22 @@ def render_diagnostics(runtime: RuntimePaths, *, root: str | None) -> None:
             f"**{quality['ocr_samples']}** · Mean character error rate: "
             f"**{quality['mean_cer'] if quality['mean_cer'] is not None else '—'}**"
         )
+        if root:
+            from transcribe.services.project import ProjectService, open_project_paths
+            from transcribe.services.quality import build_scoreboard
+
+            try:
+                scored_project = ProjectService(open_project_paths(Path(root))).load()
+                rows = build_scoreboard(runtime, project_id=scored_project.id)
+            except Exception:  # noqa: BLE001
+                rows = []
+            if rows:
+                st.caption("Scoreboard: character error rate against your corrections.")
+                for row in rows[:8]:
+                    cer = f"{row.mean_cer:.3f}" if row.mean_cer is not None else "—"
+                    st.markdown(
+                        f"- {row.kind} `{row.model_name}` · {row.pages} pages · CER {cer}"
+                    )
 
     if root:
         from transcribe.services.job_timeline import build_job_timeline
@@ -167,8 +183,9 @@ def render_diagnostics(runtime: RuntimePaths, *, root: str | None) -> None:
                 if entry.total
                 else "—"
             )
+            shown = entry.outcome or entry.status
             label = (
-                f"**{entry.kind}** `{entry.status}` · {when} · {counts}"
+                f"**{entry.kind}** `{shown}` · {when} · {counts}"
                 f" · `{entry.correlation_id[:12]}`"
             )
             if entry.detail:

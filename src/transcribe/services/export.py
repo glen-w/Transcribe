@@ -53,11 +53,19 @@ class ExportService:
             for page in snap_project.pages:
                 results[page.page_id] = self.projects._load_page_result_unlocked(page.page_id)
             rev = content_revision_hex(snap_project, results)
+            from transcribe.services.reading_marks import ReadingMarksStore
+
+            notes = {
+                page_id: mark.note
+                for page_id, mark in ReadingMarksStore(self.paths).load().items()
+                if mark.note
+            }
             return ExportSnapshot(
                 project=snap_project,
                 results=results,
                 content_revision=rev,
                 cover_image_path=resolve_cover_image_path(self.paths, snap_project),
+                reading_notes=notes,
             )
 
     @staticmethod

@@ -30,6 +30,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--model", required=True)
     p_run.add_argument("--base-url", default=None)
     p_run.add_argument("--force", action="store_true")
+    p_run.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="Only pages whose latest attempt failed, was interrupted, or returned no text",
+    )
     p_run.add_argument("--workers", type=int, default=1)
     p_run.add_argument("--allow-remote-ollama", action="store_true")
     p_run.add_argument(
@@ -212,6 +217,30 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_pages_move.add_argument("project", type=Path)
     p_pages_move.add_argument("page_id")
+    p_pages_batch = pages_sub.add_parser(
+        "batch",
+        help="Apply one metadata change to selected pages (dry-run unless --apply)",
+    )
+    p_pages_batch.add_argument("project", type=Path)
+    p_pages_batch.add_argument(
+        "--page",
+        dest="page_ids",
+        action="append",
+        default=[],
+        help="Page id (repeatable). Or pass --saved.",
+    )
+    p_pages_batch.add_argument("--saved", default=None, help="Saved search id or name")
+    p_pages_batch.add_argument(
+        "--action",
+        required=True,
+        choices=["approve_dates", "ignore", "unignore", "add_tag", "remove_tag"],
+    )
+    p_pages_batch.add_argument("--tag", default="")
+    p_pages_batch.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write the change. Without this flag the command is a dry run.",
+    )
 
     p_status = sub.add_parser("status", help="Show project page statuses")
     p_status.add_argument("project", type=Path)
@@ -347,6 +376,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verify a workspace backup ZIP without changing the workspace",
     )
     p_backup_verify.add_argument("archive", type=Path)
+    p_backup_one = backup_sub.add_parser(
+        "restore-notebook",
+        help="Extract one notebook from a workspace ZIP (does not replace the workspace)",
+    )
+    p_backup_one.add_argument("archive", type=Path)
+    p_backup_one.add_argument("notebook_id")
+    p_backup_one.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace the live folder for that notebook id only",
+    )
+    p_backup_one.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Verify and describe the extract without writing",
+    )
 
     p_restore = sub.add_parser(
         "restore",
@@ -520,6 +565,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--people", default=None, help="Comma-separated published-NER people")
     p_search.add_argument("--places", default=None, help="Comma-separated published-NER places")
     p_search.add_argument("--include-archived", action="store_true")
+    p_search.add_argument(
+        "--bookmarked",
+        action="store_true",
+        help="Only pages bookmarked in reading-marks.json",
+    )
     p_search.add_argument("--collection", default=None, help="Collection id to search within")
     p_search.add_argument("--saved", default=None, help="Saved search id or name")
     p_search.add_argument("--order", choices=["oldest", "newest"], default="oldest")
@@ -570,6 +620,11 @@ def build_parser() -> argparse.ArgumentParser:
     quality_sub = p_quality.add_subparsers(dest="quality_cmd", required=True)
     p_quality_summary = quality_sub.add_parser("summary", help="Summarise local ratings")
     p_quality_summary.add_argument("--project", default=None, help="Filter by project id")
+    p_quality_board = quality_sub.add_parser(
+        "scoreboard",
+        help="CER of succeeded OCR against human corrections (local, read-only)",
+    )
+    p_quality_board.add_argument("--project", default=None, help="Filter by project id")
     p_quality_rate = quality_sub.add_parser("rate", help="Record a local rating")
     p_quality_rate.add_argument(
         "kind", choices=["ocr_sample", "cleanup", "analysis"]

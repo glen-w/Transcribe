@@ -67,7 +67,16 @@ Checks the manifest, rejects zip-slip / unexpected top-level members, and recomp
 
 ## Restore (replace-only)
 
-Restore **replaces** notebooks, `data/config`, and `data/corpus` from the archive (plus inbox/exports when those were packed). There is no merge or per-notebook restore in v1.
+Restore **replaces** notebooks, `data/config`, and `data/corpus` from the archive (plus inbox/exports when those were packed). There is no page-level merge.
+
+To put back **one** notebook and leave the rest of the workspace alone:
+
+```bash
+./transcribe.sh cli backup restore-notebook /path/to/workspace.zip NOTEBOOK_ID --dry-run
+./transcribe.sh cli backup restore-notebook /path/to/workspace.zip NOTEBOOK_ID --force
+```
+
+`--force` replaces that notebook’s folder only. A failure before the folder is renamed leaves the live notebook unchanged. Other notebooks, config, and the corpus index are not replaced.
 
 ```bash
 # Preview only

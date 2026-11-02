@@ -429,6 +429,8 @@ class PageIndex:
     ignored: bool = False
     review_status: str = "unreviewed"
     suppressed_auto_tags: list[str] = field(default_factory=list)
+    # Absent on disk means transcribe. ``skip`` pages are not scheduled for OCR.
+    ocr_policy: str = "transcribe"
 
     def as_dict(self) -> dict[str, Any]:
         date, approved, source = canonicalize_page_date_state(
@@ -455,6 +457,8 @@ class PageIndex:
         status = self.review_status or "unreviewed"
         if status != "unreviewed":
             payload["review_status"] = status
+        if self.ocr_policy == "skip":
+            payload["ocr_policy"] = "skip"
         return payload
 
     @classmethod
@@ -478,6 +482,7 @@ class PageIndex:
             ignored=bool(data.get("ignored", False)),
             review_status=status,
             suppressed_auto_tags=normalize_tags(data.get("suppressed_auto_tags")),
+            ocr_policy="skip" if data.get("ocr_policy") == "skip" else "transcribe",
         )
 
     def set_date_state(

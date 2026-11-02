@@ -443,6 +443,8 @@ class JobCoordinator:
             "skipped": progress.skipped,
             "message": progress.message,
         }
+        if progress.circuit_open:
+            payload["circuit_open"] = True
         # Preserve started_at across updates when file exists
         path = self.paths.jobs_dir / f"{plan.job_id}.json"
         if path.exists():
@@ -480,7 +482,11 @@ class JobCoordinator:
         from transcribe.services.model_selection import validate_ocr_vision_model
 
         validate_ocr_vision_model(provider, resolved_model)
-        targets = tuple(page_ids or [p.page_id for p in project.pages])
+        skip_ocr = {p.page_id for p in project.pages if p.ocr_policy == "skip"}
+        if page_ids is None:
+            targets = tuple(p.page_id for p in project.pages if p.page_id not in skip_ocr)
+        else:
+            targets = tuple(pid for pid in page_ids if pid not in skip_ocr)
         custom = settings.custom_prompt
         from transcribe.services.ocr_model_recipes import recipe_for_model, recipe_prompt
 

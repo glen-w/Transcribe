@@ -1750,6 +1750,42 @@ def _render_other_tab(paths, projects, project, page) -> None:
             help="Hidden in Reading and omitted from exported reading formats by default.",
         )
     )
+    from transcribe.services.reading_marks import ReadingMarksStore
+
+    marks = ReadingMarksStore(paths)
+    current_mark = marks.load().get(page.page_id)
+    want_bookmark = st.checkbox(
+        "Bookmark",
+        value=bool(current_mark and current_mark.bookmarked),
+        key=f"rw_bookmark_{page.page_id}",
+    )
+    if want_bookmark != bool(current_mark and current_mark.bookmarked):
+        marks.set_mark(page.page_id, bookmarked=want_bookmark)
+        bump_archive_generation(build_runtime_paths())
+        st.rerun()
+    note_value = st.text_area(
+        "Marginal note",
+        value=(current_mark.note if current_mark else ""),
+        key=f"rw_note_{page.page_id}",
+        help="Kept beside the page. Not part of the transcription.",
+    )
+    if st.button("Save note", key=f"rw_note_save_{page.page_id}"):
+        marks.set_mark(page.page_id, note=note_value)
+        st.rerun()
+    want_skip = st.checkbox(
+        "Do not OCR this page",
+        value=page.ocr_policy == "skip",
+        key=f"rw_skip_ocr_{page.page_id}",
+        help="Image-only page. It is not scheduled, and its scan text is not exported as a transcription.",
+    )
+    if want_skip != (page.ocr_policy == "skip"):
+        try:
+            projects.set_ocr_policy(page.page_id, "skip" if want_skip else "transcribe")
+            bump_archive_generation(build_runtime_paths())
+            st.rerun()
+        except TranscribeError as exc:
+            st.error(str(exc))
+
     if wanted_ignored != bool(page.ignored):
         try:
             projects.update_page_metadata(page.page_id, ignored=wanted_ignored)

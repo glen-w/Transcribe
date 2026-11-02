@@ -42,6 +42,7 @@ _FTS_SCHEMA_VERSION = 2
 _CACHE_SCHEMA_VERSION = 1
 _BUSY_TIMEOUT_MS = 5000
 _GENERATION_FILENAME = "archive.generation"
+_SIGNATURE_CACHE_FILENAME = "archive.signatures.json"
 
 
 def archive_generation_path(runtime: RuntimePaths) -> Path:
@@ -54,6 +55,57 @@ def read_archive_generation(runtime: RuntimePaths) -> int:
     try:
         return int(path.read_text(encoding="utf-8").strip() or "0")
     except (OSError, ValueError):
+        return 0
+
+
+def signature_cache_path(runtime: RuntimePaths) -> Path:
+    return runtime.data_dir / "cache" / _SIGNATURE_CACHE_FILENAME
+
+
+def cheap_project_stat(root: Path, *, org_mtime_ns: int) -> str:
+    """Stat-only fingerprint. Does not parse project or page JSON.
+
+    Result content changes show up as the newest ``results/*.json`` mtime.
+    File count alone would miss in-place edits. ``ProjectService.load`` stays
+    on the path only when this string differs from the cached one.
+    """
+    project_json = root / "project.json"
+    try:
+        stat_result = project_json.stat()
+        project_part = f"{stat_result.st_mtime_ns}:{stat_result.st_size}"
+    except OSError:
+        project_part = "missing"
+    results = root / "results"
+    count = 0
+    newest = 0
+    if results.is_dir():
+        for path in results.glob("*.json"):
+            try:
+                newest = max(newest, path.stat().st_mtime_ns)
+                count += 1
+            except OSError:
+                continue
+    ner = root / "analysis" / "ner" / "published.json"
+    marks = root / "reading-marks.json"
+    try:
+        ner_mtime = ner.stat().st_mtime_ns
+    except OSError:
+        ner_mtime = 0
+    try:
+        marks_mtime = marks.stat().st_mtime_ns
+    except OSError:
+        marks_mtime = 0
+    return (
+        f"pj={project_part}|n={count}|mx={newest}|ner={ner_mtime}"
+        f"|marks={marks_mtime}|org={org_mtime_ns}"
+    )
+
+
+def _org_mtime_ns(runtime: RuntimePaths) -> int:
+    path = runtime.data_dir / "config" / "notebook-collections.json"
+    try:
+        return path.stat().st_mtime_ns
+    except OSError:
         return 0
 
 
@@ -89,6 +141,7 @@ class ArchiveFilters:
     # 1.2: archived notebooks are hidden unless explicitly included.
     include_archived: bool = False
     collection_id: str = ""
+    bookmarked_only: bool = False
 
 
 @dataclass
@@ -338,6 +391,37 @@ class ArchiveService:
                 pass
         self._validated_at = None
         self._validated_generation = None
+        try:
+            signature_cache_path(self.runtime).unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    def _read_signature_cache(self) -> dict[str, dict[str, str]]:
+        path = signature_cache_path(self.runtime)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            if path.exists():
+                path.unlink(missing_ok=True)
+            return {}
+        if not isinstance(payload, dict) or payload.get("schema_version") != 1:
+            path.unlink(missing_ok=True)
+            return {}
+        entries = payload.get("entries")
+        if not isinstance(entries, dict):
+            path.unlink(missing_ok=True)
+            return {}
+        return {str(key): value for key, value in entries.items() if isinstance(value, dict)}
+
+    def _write_signature_cache(self, entries: dict[str, dict[str, str]]) -> None:
+        path = signature_cache_path(self.runtime)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".json.tmp")
+        tmp.write_text(
+            json.dumps({"schema_version": 1, "entries": entries}, sort_keys=True),
+            encoding="utf-8",
+        )
+        tmp.replace(path)
 
     def _ensure_schema(self, conn: sqlite3.Connection) -> None:
         conn.executescript("""
@@ -370,6 +454,7 @@ class ArchiveService:
               tags_json TEXT NOT NULL,
               project_tags_json TEXT NOT NULL DEFAULT '[]',
               entities_json TEXT NOT NULL DEFAULT '[]',
+              bookmarked INTEGER NOT NULL DEFAULT 0,
               text TEXT NOT NULL,
               FOREIGN KEY(project_id) REFERENCES notebooks(project_id) ON DELETE CASCADE
             );
@@ -387,6 +472,10 @@ class ArchiveService:
         if "entities_json" not in cols_pg:
             conn.execute(
                 "ALTER TABLE pages ADD COLUMN entities_json TEXT NOT NULL DEFAULT '[]'"
+            )
+        if "bookmarked" not in cols_pg:
+            conn.execute(
+                "ALTER TABLE pages ADD COLUMN bookmarked INTEGER NOT NULL DEFAULT 0"
             )
         row = conn.execute("SELECT value FROM meta WHERE key = 'cache_schema_version'").fetchone()
         if row is not None:
@@ -479,7 +568,34 @@ class ArchiveService:
                         for row in conn.execute("SELECT project_id, signature, root FROM notebooks")
                     }
                     seen: set[str] = set()
+                    cache = {} if force else self._read_signature_cache()
+                    org_mtime = _org_mtime_ns(self.runtime)
+                    updated_cache: dict[str, dict[str, str]] = {}
                     for root in roots:
+                        cheap = cheap_project_stat(root, org_mtime_ns=org_mtime)
+                        cache_key = str(Path(root).resolve())
+                        hit = cache.get(cache_key)
+                        if (
+                            not force
+                            and isinstance(hit, dict)
+                            and hit.get("cheap") == cheap
+                            and hit.get("signature")
+                            and hit.get("project_id")
+                        ):
+                            prev_hit = known.get(str(hit["project_id"]))
+                            if (
+                                prev_hit is not None
+                                and prev_hit[0] == hit["signature"]
+                                and prev_hit[1] == str(root)
+                            ):
+                                seen.add(str(hit["project_id"]))
+                                updated_cache[cache_key] = {
+                                    "cheap": cheap,
+                                    "project_id": str(hit["project_id"]),
+                                    "signature": str(hit["signature"]),
+                                    "root": str(root),
+                                }
+                                continue
                         try:
                             paths = open_project_paths(root)
                             projects = ProjectService(
@@ -490,6 +606,12 @@ class ArchiveService:
                             continue
                         sig = self._project_signature(root, project)
                         seen.add(project.id)
+                        updated_cache[cache_key] = {
+                            "cheap": cheap,
+                            "project_id": project.id,
+                            "signature": sig,
+                            "root": str(root),
+                        }
                         prev = known.get(project.id)
                         # Folder renames keep content signature stable but must
                         # refresh the stored root — stale roots break Open/actions.
@@ -501,6 +623,7 @@ class ArchiveService:
                         ):
                             continue
                         self._reindex_project(conn, root, project, projects, sig)
+                    self._write_signature_cache(updated_cache)
                     stale = set(known) - seen
                     for project_id in stale:
                         conn.execute("DELETE FROM pages_fts WHERE project_id = ?", (project_id,))
@@ -572,6 +695,9 @@ class ArchiveService:
             ),
         )
         entities_by_page = self._published_ner_entities(root)
+        from transcribe.services.reading_marks import ReadingMarksStore
+
+        bookmarked_ids = ReadingMarksStore(projects.paths).bookmarked_ids()
         for ord_i, page in enumerate(project.pages):
             result = projects.load_page_result(page.page_id)
             text = (result.effective_text() if result else None) or ""
@@ -590,8 +716,8 @@ class ArchiveService:
                 INSERT INTO pages(
                   page_id, project_id, page_ord, source_id, media_type,
                   date_json, sort_key, tags_json, project_tags_json, text,
-                  entities_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  entities_json, bookmarked
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     page.page_id,
@@ -605,6 +731,7 @@ class ArchiveService:
                     json.dumps(project.tags),
                     text,
                     json.dumps(entities_by_page.get(page.page_id, [])),
+                    1 if page.page_id in bookmarked_ids else 0,
                 ),
             )
             conn.execute(
@@ -791,6 +918,7 @@ class ArchiveService:
             places=filters.places,
             include_archived=filters.include_archived,
             collection_id=filters.collection_id,
+            bookmarked_only=filters.bookmarked_only,
         )
         with self._connect() as conn:
             return self._type_counts_from_rows(self._load_page_rows(conn), base)
@@ -845,6 +973,7 @@ class ArchiveService:
                 places=filters.places,
                 include_archived=filters.include_archived,
                 collection_id=filters.collection_id,
+                bookmarked_only=filters.bookmarked_only,
             )
             return TimelineResult(
                 bins=bins,
@@ -999,6 +1128,7 @@ class ArchiveService:
             places=base.places,
             include_archived=base.include_archived,
             collection_id=base.collection_id,
+            bookmarked_only=base.bookmarked_only,
         )
         limit = max(1, min(int(limit), 500))
         offset = max(0, int(offset))
@@ -1056,6 +1186,8 @@ class ArchiveService:
             if merged.collection_id:
                 where.append("n.collections_json LIKE ?")
                 params.append(f'%"{merged.collection_id}"%')
+            if merged.bookmarked_only:
+                where.append("p.bookmarked = 1")
 
             # Published-NER mention filters (AND across requested surfaces).
             # entities_json rows are {"surface": ..., "label": ...} in that order.
@@ -1135,6 +1267,7 @@ class ArchiveService:
                     places=merged.places,
                     include_archived=merged.include_archived,
                     collection_id=merged.collection_id,
+                    bookmarked_only=merged.bookmarked_only,
                 )
                 all_rows = self._load_page_rows(conn)
                 matched = [r for r in all_rows if self._row_matches(r, sub)]

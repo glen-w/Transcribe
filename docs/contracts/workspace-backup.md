@@ -112,9 +112,20 @@ If replace fails after a safety backup was written, errors include the safety ar
 
 Dry-run: perform verify + lock checks + archive-location guard + describe replacements (counts and mapped paths); write nothing.
 
+## Restore one notebook
+
+`transcribe backup restore-notebook <zip> <notebook_id>` extracts that notebook only.
+
+- Default refuses when the id already exists. `--force` replaces that live folder only, via a temp tree and rename. Other notebooks, config, and corpus are not replaced.
+- `--dry-run` describes the destination and writes nothing.
+- Refuses while that notebook's OCR or analysis lock is held.
+- A failure before the rename leaves the live folder unchanged.
+- This is not a merge: page conflicts are not reconciled.
+- On success the archive generation token is bumped so search rebuilds.
+
 ## Non-goals (v1)
 
-- Merge / per-notebook restore
+- Page-level merge restore
 - Incremental or differential backups
 - Encryption or cloud upload
 - Treating `archive.sqlite` as backup authority

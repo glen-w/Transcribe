@@ -857,9 +857,78 @@ def _render_collections_manager(runtime: RuntimePaths, archive: ArchiveService) 
             c2.caption("Archived" if archived_now else "Active")
 
 
+def _render_page_batch_panel(runtime: RuntimePaths, archive: ArchiveService) -> None:
+    """Library confirm step for one metadata change. Dry-run until confirmed."""
+    from transcribe.errors import JobConflictError, ProjectError
+    from transcribe.services.batch_metadata import apply_batch_metadata, filters_are_empty
+    from transcribe.services.project import ProjectService, open_project_paths
+    from transcribe.services.saved_searches import SavedSearchStore
+
+    with st.expander("Batch page metadata", expanded=False):
+        st.caption(
+            "One change for pages matched by a saved search. "
+            "Dry run until you confirm. Does not delete pages."
+        )
+        saved = SavedSearchStore(runtime).list()
+        if not saved:
+            st.caption("Save a search first, or use `transcribe pages batch`.")
+            return
+        name = st.selectbox("Saved search", [row.name for row in saved], key="lib_batch_saved")
+        action = st.selectbox(
+            "Action",
+            ["approve_dates", "ignore", "unignore", "add_tag", "remove_tag"],
+            key="lib_batch_action",
+        )
+        tag = ""
+        if action in ("add_tag", "remove_tag"):
+            tag = st.text_input("Tag", key="lib_batch_tag")
+        chosen = next(row for row in saved if row.name == name)
+        if filters_are_empty(chosen.filters):
+            st.warning("That saved search has no filter. It will not match the whole corpus.")
+            return
+        dry_run = st.checkbox("Dry run", value=True, key="lib_batch_dry")
+        confirm = st.checkbox("I confirm this metadata change", key="lib_batch_confirm")
+        if not st.button("Run batch", key="lib_batch_go"):
+            return
+        if not dry_run and not confirm:
+            st.error("Confirm the change, or leave Dry run on.")
+            return
+        hits = archive.search("", filters=chosen.filters, limit=500)
+        grouped: dict[str, list[str]] = {}
+        for hit in hits.hits:
+            grouped.setdefault(str(hit.project_root), []).append(hit.page_id)
+        if not grouped:
+            st.warning("No pages matched.")
+            return
+        lines: list[str] = []
+        for root, page_ids in grouped.items():
+            projects = ProjectService(
+                open_project_paths(Path(root)),
+                clock=SystemClock(),
+                ids=UuidGenerator(),
+            )
+            try:
+                result = apply_batch_metadata(
+                    projects,
+                    page_ids,
+                    action,
+                    tag=tag,
+                    dry_run=dry_run or not confirm,
+                    runtime=runtime,
+                )
+            except (JobConflictError, ProjectError) as exc:
+                st.error(str(exc))
+                return
+            lines.append(
+                f"{Path(root).name}: selected {result.selected}, changed {result.changed}"
+            )
+        st.success(" · ".join(lines))
+
+
 def render_library(runtime: RuntimePaths, archive: ArchiveService) -> None:
     archive.ensure_index()
     _render_collections_manager(runtime, archive)
+    _render_page_batch_panel(runtime, archive)
     view = _library_view()
     if not archive.list_notebooks(order="newest"):
         st.info(
@@ -1045,6 +1114,7 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
     include_archived = st.checkbox(
         "Include archived notebooks", value=False, key="search_include_archived"
     )
+    bookmarked_only = st.checkbox("Bookmarked pages only", value=False, key="search_bookmarked")
     people_raw = st.text_input(
         "People (published NER, comma-separated)", key="search_people"
     )
@@ -1062,7 +1132,7 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
     filter_sig = (
         f"{query}|{order}|{tags}|{selected_media}|{include_undated}|"
         f"{period_key}|{year}|{range_start}|{range_end}|"
-        f"{people}|{places}|{include_archived}|{applied_id}"
+        f"{people}|{places}|{include_archived}|{bookmarked_only}|{applied_id}"
     )
     if st.session_state.get("search_filter_sig") != filter_sig:
         st.session_state["search_filter_sig"] = filter_sig
@@ -1081,6 +1151,7 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
         include_archived=include_archived,
         people=people,
         places=places,
+        bookmarked_only=bookmarked_only,
     )
     if applied_filters is not None:
         filters = applied_filters

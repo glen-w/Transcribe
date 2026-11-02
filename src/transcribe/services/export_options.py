@@ -345,6 +345,7 @@ class ExportOptions:
     # JSON (transcribe.notebook) always keeps the full notebook.
     include_tags: tuple[str, ...] = ()
     exclude_tags: tuple[str, ...] = ()
+    include_reading_notes: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -358,6 +359,7 @@ class ExportOptions:
             "typography": self.typography.as_dict(),
             "include_tags": list(self.include_tags),
             "exclude_tags": list(self.exclude_tags),
+            "include_reading_notes": self.include_reading_notes,
         }
 
     @classmethod
@@ -389,6 +391,7 @@ class ExportOptions:
             typography=ExportTypography.from_dict(data.get("typography")),
             include_tags=tuple(normalize_tags(data.get("include_tags"))),
             exclude_tags=tuple(normalize_tags(data.get("exclude_tags"))),
+            include_reading_notes=bool(data.get("include_reading_notes", False)),
         )
 
     def wants(self, fmt: ExportFormat) -> bool:
@@ -409,6 +412,7 @@ class ExportConfig:
     typography: ExportTypography = field(default_factory=ExportTypography)
     include_tags: tuple[str, ...] = ()
     exclude_tags: tuple[str, ...] = ()
+    include_reading_notes: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -422,6 +426,7 @@ class ExportConfig:
             "typography": self.typography.as_dict(),
             "include_tags": list(self.include_tags),
             "exclude_tags": list(self.exclude_tags),
+            "include_reading_notes": self.include_reading_notes,
         }
 
     @classmethod
@@ -438,6 +443,7 @@ class ExportConfig:
             typography=opts.typography,
             include_tags=opts.include_tags,
             exclude_tags=opts.exclude_tags,
+            include_reading_notes=opts.include_reading_notes,
         )
 
     def to_options(self) -> ExportOptions:
