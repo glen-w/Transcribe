@@ -196,7 +196,9 @@ def test_plan_from_folders_empty_parent_errors(tmp_path: Path) -> None:
 
 def test_inbox_and_cli_wire_folders_surfaces() -> None:
     inbox = Path("src/transcribe/ui/import_inbox.py").read_text(encoding="utf-8")
-    main = Path("src/transcribe/__main__.py").read_text(encoding="utf-8")
+    parser = Path("src/transcribe/cli/parser.py").read_text(encoding="utf-8")
+    bulk = Path("src/transcribe/cli/bulk.py").read_text(encoding="utf-8")
+    main = parser + "\n" + bulk
     assert "plan_from_folders" in main
     assert '"folders"' in main or "'folders'" in main
     assert "--on-existing" in main

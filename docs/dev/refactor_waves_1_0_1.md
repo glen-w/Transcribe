@@ -23,6 +23,13 @@ Non-goals for the whole programme: rename `tx_*` session keys, merge OCR and Ana
 
 Split `__main__.py` into `transcribe.cli` (parser + one module per command family). `python -m transcribe` and the `transcribe` console script still dispatch through `__main__.main`. No flag or exit-code change.
 
+| Item | Acceptance |
+|------|------------|
+| Parser | `transcribe.cli.parser.build_parser` owns argparse |
+| Commands | notebook / export / bulk / rag / backup live under `transcribe.cli` |
+| Entry | `transcribe.__main__.main` still imported by tests; `PATHS` still patchable there |
+| Flags | Identical subcommands and exit codes |
+
 ---
 
 ## Wave 3 — Shared batch notebook picker

@@ -139,10 +139,10 @@ def test_batch_analysis_from_import_run(tmp_path: Path) -> None:
 
 
 def test_cli_wires_bulk_analyse_surfaces() -> None:
-    main_src = Path("src/transcribe/__main__.py").read_text(encoding="utf-8")
-    assert '"bulk-analyse"' in main_src
+    cli_src = Path("src/transcribe/cli/parser.py").read_text(encoding="utf-8")
+    assert '"bulk-analyse"' in cli_src
     for sub in ("pending", "import-run", "notebooks", "status", "resume"):
-        assert sub in main_src
+        assert sub in cli_src
 
 
 def test_cli_bulk_analyse_pending_offline(tmp_path: Path, monkeypatch) -> None:

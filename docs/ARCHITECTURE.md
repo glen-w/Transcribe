@@ -7,7 +7,7 @@ Transcribe keeps a small ownership model on purpose.
 ```text
 Streamlit UI (8510) ──┐
                       ├──► services (project, ingest, job, export, archive, doctor)
-CLI ──────────────────┘              │
+CLI (`transcribe.cli`) ─┘              │
                                      ▼
                     workspace (data/)
                     ├── corpus/          # corpus-index + import-runs (bulk import)

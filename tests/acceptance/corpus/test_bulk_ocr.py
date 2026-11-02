@@ -175,13 +175,15 @@ def test_batch_multipass_cancel_skips_remaining_notebooks(tmp_path: Path) -> Non
 
 
 def test_cli_wires_bulk_run_surfaces() -> None:
-    main = Path("src/transcribe/__main__.py").read_text(encoding="utf-8")
-    assert '"bulk-run"' in main
-    assert "pending" in main
-    assert "import-run" in main
-    assert "ocr_run_id" in main
-    assert 'action="append"' in main
-    assert "--no-auto-composite" in main
+    parser = Path("src/transcribe/cli/parser.py").read_text(encoding="utf-8")
+    bulk = Path("src/transcribe/cli/bulk.py").read_text(encoding="utf-8")
+    assert '"bulk-run"' in parser
+    assert "pending" in parser
+    assert "import-run" in parser
+    assert "ocr_run_id" in parser
+    assert 'action="append"' in parser
+    assert "--no-auto-composite" in parser
+    assert "ocr_run_id" in bulk
 
 
 def test_cli_bulk_run_pending_offline(tmp_path: Path, monkeypatch) -> None:

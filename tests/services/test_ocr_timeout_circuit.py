@@ -180,7 +180,7 @@ def test_cli_run_exit_code_completed_without_circuit() -> None:
 
 
 def test_cli_run_uses_circuit_exit_code_multipass_does_not() -> None:
-    main = Path("src/transcribe/__main__.py").read_text(encoding="utf-8")
+    main = Path("src/transcribe/cli/notebook.py").read_text(encoding="utf-8")
     assert "return cli_run_exit_code(progress)" in main
     run_idx = main.index('if args.cmd == "run":')
     multi_idx = main.index('if args.cmd == "multipass":')

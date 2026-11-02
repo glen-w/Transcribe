@@ -51,7 +51,7 @@ Offline multi-component detector tests belong under `tests/services/` (or `tests
 
 | Area | Module |
 |------|--------|
-| CLI | `transcribe.__main__` |
+| CLI | `transcribe.__main__` (dispatch) + `transcribe.cli` (parser and commands) |
 | UI | `transcribe.ui.app` |
 | Project RMW | `transcribe.services.project` |
 | Ingest | `transcribe.ingest` |
