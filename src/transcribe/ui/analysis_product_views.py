@@ -14,7 +14,6 @@ from typing import Any
 import streamlit as st
 
 from transcribe.analysis.health import AnalysisHealth, ModuleHealth
-from transcribe.analysis.units import page_id_from_unit_id
 from transcribe.config.models import OVERVIEW_CARD_IDS
 from transcribe.markdown_plain import escape_markdown_plain
 from transcribe.services.analysis_compare import COMPARABLE_SPECS, extract_foundations_display
@@ -28,11 +27,17 @@ from transcribe.ui.analysis_display_helpers import (
     aggregate_entity_sentiment,
     contextual_label_counts,
     emotion_label_totals,
+    entity_sentiment_chart_rows,
+    entity_sentiment_table_rows,
     epistemic_category_bars,
     epistemic_page_series_rows,
+    evidence_by_unit_id,
+    foundations_headline,
     group_action_items,
+    highlight_quote_chart_rows,
     moments_score_rows,
     motif_rows,
+    page_id_for_moment,
     ranked_dict,
     sentiment_bucket_counts,
     topic_shift_series_rows,
@@ -174,7 +179,7 @@ def render_entity_sentiment_section(payload: dict[str, Any]) -> None:
         "Named entities joined to the page’s sentiment (this notebook only — "
         "not compared across the corpus)."
     )
-    chart_rows = [r for r in rows if r["mentions"] >= 1][:16]
+    chart_rows = entity_sentiment_chart_rows(rows)
     st.bar_chart(
         {
             "entity": [r["entity"][:28] for r in chart_rows],
@@ -184,16 +189,7 @@ def render_entity_sentiment_section(payload: dict[str, Any]) -> None:
         y="mean sentiment",
     )
     st.dataframe(
-        [
-            {
-                "entity": r["entity"],
-                "type": r["label"],
-                "mentions": r["mentions"],
-                "mean": r["mean_sentiment"],
-                "polarity": r["polarity"],
-            }
-            for r in rows
-        ],
+        entity_sentiment_table_rows(rows),
         width="stretch",
         hide_index=True,
     )
@@ -254,10 +250,7 @@ def render_overview_product(
         if payload is None:
             continue
         bits = extract_foundations_display(payload, mid)
-        if bits:
-            st.markdown(f"**{title}** · " + " · ".join(f"{lab}={val}" for lab, val in bits[:8]))
-        else:
-            st.markdown(f"**{title}** · ready")
+        st.markdown(foundations_headline(title, bits))
         _maybe_compare(
             mid,
             payload,
@@ -751,19 +744,7 @@ def _page_id_for_moment(
     evidence_by_unit: dict[str, dict[str, Any]],
 ) -> str | None:
     """Resolve a notebook page id for a moments row (payload or evidence)."""
-    raw = row.get("page_id")
-    if isinstance(raw, str) and raw:
-        return raw
-    unit_id = row.get("unit_id")
-    if isinstance(unit_id, str) and unit_id:
-        cite = evidence_by_unit.get(unit_id) or {}
-        ref = cite.get("source_ref") if isinstance(cite, dict) else None
-        if isinstance(ref, dict):
-            pid = ref.get("page_id")
-            if isinstance(pid, str) and pid:
-                return pid
-        return page_id_from_unit_id(unit_id)
-    return None
+    return page_id_for_moment(row, evidence_by_unit=evidence_by_unit)
 
 
 def render_moments_product(
@@ -799,10 +780,7 @@ def render_moments_product(
         y="score",
     )
     env = mh.envelope or {}
-    evidence_by_unit: dict[str, dict[str, Any]] = {}
-    for cite in env.get("evidence") or []:
-        if isinstance(cite, dict) and cite.get("unit_id"):
-            evidence_by_unit[str(cite["unit_id"])] = cite
+    evidence_by_unit = evidence_by_unit_id(env if isinstance(env, dict) else None)
     for row in rows:
         quote = escape_markdown_plain((row.get("quote") or "")[:240])
         st.markdown(f"- _{row['score']:.3g}_ · {quote}")
@@ -860,12 +838,12 @@ def render_summaries_product(
         if mid == "highlights":
             quotes = payload.get("quotes") or []
             if quotes:
-                scored = [q for q in quotes if isinstance(q, dict) and q.get("score") is not None]
+                scored = highlight_quote_chart_rows(quotes)
                 if scored:
                     st.bar_chart(
                         {
-                            "quote": [(q.get("text") or "")[:36] for q in scored[:12]],
-                            "score": [float(q["score"]) for q in scored[:12]],
+                            "quote": [q["quote"] for q in scored],
+                            "score": [q["score"] for q in scored],
                         },
                         x="quote",
                         y="score",

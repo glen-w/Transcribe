@@ -38,6 +38,8 @@ CLI (`transcribe.cli`) ─┘              │
 | OCR HTTP | `VisionOCRProvider` (Ollama implementation) |
 | Chart palettes (`ui.chart_colors`) | `transcribe.config.chart_colors` — UI renders only |
 | Batch notebook source radio | `ui.batch_source_picker` — OCR (`tx_*`) and Analyse (`ax_*`); coordinators stay separate |
+| Reading / Review chrome | `page_viewer` and `review_workbench` orchestrate resolve → chrome → body; lanes stay purpose-specific |
+| Analyse product rows | Streamlit-free shaping in `ui.analysis_display_helpers`; widgets render only |
 | UI widgets | `transcribe.ui` only — must not invent OCR/persistence rules |
 | Organisation tag catalog (slugs, labels, colours) | [contracts/tag-catalog.md](contracts/tag-catalog.md) |
 | Workspace search/timeline | `ArchiveService` over rebuildable SQLite |

@@ -355,6 +355,88 @@ def moments_score_rows(payload: dict[str, Any], *, limit: int = 12) -> list[dict
     return rows
 
 
+def page_id_for_moment(
+    row: dict[str, Any],
+    *,
+    evidence_by_unit: dict[str, dict[str, Any]],
+) -> str | None:
+    """Resolve a notebook page id for a moments row (payload or evidence)."""
+    raw = row.get("page_id")
+    if isinstance(raw, str) and raw:
+        return raw
+    unit_id = row.get("unit_id")
+    if isinstance(unit_id, str) and unit_id:
+        cite = evidence_by_unit.get(unit_id) or {}
+        ref = cite.get("source_ref") if isinstance(cite, dict) else None
+        if isinstance(ref, dict):
+            pid = ref.get("page_id")
+            if isinstance(pid, str) and pid:
+                return pid
+        return page_id_from_unit_id(unit_id)
+    return None
+
+
+def evidence_by_unit_id(envelope: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    """Index analysis-envelope citations by ``unit_id``."""
+    out: dict[str, dict[str, Any]] = {}
+    if not isinstance(envelope, dict):
+        return out
+    for cite in envelope.get("evidence") or []:
+        if isinstance(cite, dict) and cite.get("unit_id"):
+            out[str(cite["unit_id"])] = cite
+    return out
+
+
+def entity_sentiment_chart_rows(
+    rows: list[dict[str, Any]],
+    *,
+    limit: int = 16,
+) -> list[dict[str, Any]]:
+    """Mentions with at least one occurrence, truncated for the bar chart."""
+    return [r for r in rows if int(r.get("mentions") or 0) >= 1][:limit]
+
+
+def entity_sentiment_table_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Dataframe-ready entity tone rows."""
+    return [
+        {
+            "entity": r["entity"],
+            "type": r["label"],
+            "mentions": r["mentions"],
+            "mean": r["mean_sentiment"],
+            "polarity": r["polarity"],
+        }
+        for r in rows
+    ]
+
+
+def foundations_headline(title: str, bits: list[tuple[str, Any]]) -> str:
+    """Markdown headline for an Overview foundation card."""
+    if bits:
+        return f"**{title}** · " + " · ".join(f"{lab}={val}" for lab, val in bits[:8])
+    return f"**{title}** · ready"
+
+
+def highlight_quote_chart_rows(
+    quotes: list[Any],
+    *,
+    limit: int = 12,
+) -> list[dict[str, Any]]:
+    """Scored highlight quotes for a bar chart."""
+    out: list[dict[str, Any]] = []
+    for q in quotes:
+        if not isinstance(q, dict) or q.get("score") is None:
+            continue
+        try:
+            score = float(q["score"])
+        except (TypeError, ValueError):
+            continue
+        out.append({"quote": str(q.get("text") or "")[:36], "score": score})
+        if len(out) >= limit:
+            break
+    return out
+
+
 ACTION_TYPE_LABELS = {
     "action_item": "Action items",
     "decision": "Decisions",

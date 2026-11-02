@@ -49,6 +49,13 @@ Extract the pending / import-run / pick radio from `run_transcribe.py` and `run_
 
 Extract `render_page_viewer` into nav-resolve / chrome / body. Split Review so `render_review_page` is orchestration over existing tab helpers. Pull remaining row-shaping out of `analysis_product_views.py` into Streamlit-free helpers. Behaviour unchanged.
 
+| Item | Acceptance |
+|------|------------|
+| Page viewer | `render_page_viewer` orchestrates `_resolve_viewer_session` / `_render_viewer_chrome` / `_render_viewer_body` |
+| Review | `render_review_page` orchestrates resolve / chrome / lane body; tab helpers stay |
+| View rows | `page_id_for_moment`, entity-tone rows, highlight-quote rows, foundations headline live in Streamlit-free `analysis_display_helpers` |
+| Behaviour | Session keys, Jump-to-page, Review lanes, and product copy unchanged |
+
 ---
 
 ## Wave 5 — ProjectService collaborators + load vs reconcile

@@ -7,9 +7,15 @@ from transcribe.ui.analysis_display_helpers import (
     analyse_picker_status_phrase,
     contextual_label_counts,
     emotion_label_totals,
+    entity_sentiment_chart_rows,
+    entity_sentiment_table_rows,
+    evidence_by_unit_id,
     format_analyse_picker_label,
+    foundations_headline,
     group_action_items,
+    highlight_quote_chart_rows,
     motif_rows,
+    page_id_for_moment,
     topic_weight_rows,
     unit_series,
     wordcloud_rows,
@@ -123,3 +129,46 @@ def test_analyse_picker_labels_name_published_status():
     assert analyse_picker_status_phrase("failed") == "existing failed analysis"
     assert analyse_picker_status_phrase("stale") == "existing out-of-date analysis"
     assert analyse_picker_status_phrase("") == "no analysis"
+
+
+def test_page_id_for_moment_and_evidence_index():
+    assert page_id_for_moment({"page_id": "p1"}, evidence_by_unit={}) == "p1"
+    env = {
+        "evidence": [
+            {"unit_id": "u1", "source_ref": {"kind": "page", "page_id": "p2"}},
+            "skip",
+        ]
+    }
+    indexed = evidence_by_unit_id(env)
+    assert page_id_for_moment({"unit_id": "u1"}, evidence_by_unit=indexed) == "p2"
+    assert evidence_by_unit_id(None) == {}
+
+
+def test_entity_sentiment_and_highlight_row_shaping():
+    rows = [
+        {
+            "entity": "Ada",
+            "label": "PERSON",
+            "mentions": 2,
+            "mean_sentiment": 0.4,
+            "polarity": "positive",
+        },
+        {
+            "entity": "skip",
+            "label": "ORG",
+            "mentions": 0,
+            "mean_sentiment": 0.0,
+            "polarity": "neutral",
+        },
+    ]
+    chart = entity_sentiment_chart_rows(rows)
+    assert [r["entity"] for r in chart] == ["Ada"]
+    table = entity_sentiment_table_rows(rows)
+    assert table[0]["type"] == "PERSON"
+    assert table[0]["mean"] == 0.4
+    quotes = highlight_quote_chart_rows(
+        [{"text": "hello world", "score": 1.5}, {"text": "nope"}, "x"]
+    )
+    assert quotes == [{"quote": "hello world", "score": 1.5}]
+    assert foundations_headline("Counts", [("tokens", 12)]) == "**Counts** · tokens=12"
+    assert foundations_headline("Counts", []) == "**Counts** · ready"

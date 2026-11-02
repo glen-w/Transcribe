@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -542,24 +543,42 @@ def _resolve_view_entries(
     )
 
 
-def render_page_viewer(
-    *,
-    paths: ProjectPaths | None = None,
-    projects: ProjectService | None = None,
-    project: Project | None = None,
-    page_id: str,
-    page_ids: list[str] | None = None,
-    highlight_query: str = "",
-    back_label: str = "Back",
-    show_back: bool = True,
-    view_entries: list[dict[str, Any]] | None = None,
-    presentation: str = "edit",
-) -> Project | None:
-    """Render scan + OCR + metadata for one page.
 
-    When ``view_entries`` spans multiple notebooks, Prev/Next switches project roots.
-    ``presentation="read"`` hides mutating controls (Reading mode).
-    """
+@dataclass
+class _ViewerSession:
+    """Resolved page-viewer state shared by chrome and body."""
+
+    read_only: bool
+    search_context: bool
+    nav_scope: str
+    highlight_query: str
+    back_label: str
+    show_back: bool
+    entries: list[dict[str, str]]
+    page_id: str
+    idx: int
+    paths: ProjectPaths
+    projects: ProjectService
+    project: Project
+    page: Any
+    img_path: Path
+    result: Any
+
+
+def _resolve_viewer_session(
+    *,
+    paths: ProjectPaths | None,
+    projects: ProjectService | None,
+    project: Project | None,
+    page_id: str,
+    page_ids: list[str] | None,
+    highlight_query: str,
+    back_label: str,
+    show_back: bool,
+    view_entries: list[dict[str, Any]] | None,
+    presentation: str,
+) -> tuple[_ViewerSession | None, Project | None]:
+    """Nav-resolve: entries, active page, and loaded project/result."""
     read_only = presentation == "read"
     search_context = _is_search_reading_context(read_only=read_only)
     nav_scope = (
@@ -600,7 +619,7 @@ def render_page_viewer(
     )
     if not entries:
         st.info("No pages in this context.")
-        return project
+        return None, project
 
     if search_context:
         baseline = (
@@ -629,7 +648,7 @@ def render_page_viewer(
             if st.button("Clear tag filter", key="pv_clear_tag_filter_empty", icon=ic.RESET):
                 st.session_state["viewer_tag_filter"] = []
                 st.rerun()
-            return project
+            return None, project
 
     st.session_state["view_entries"] = entries
     page_ids_flat = [e["page_id"] for e in entries]
@@ -656,7 +675,7 @@ def render_page_viewer(
     page = next((p for p in project.pages if p.page_id == page_id), None)
     if page is None:
         st.error(f"Page {page_id[:8]}… not found in {project.title}")
-        return project
+        return None, project
 
     # Refresh unapproved suggestions (edit presentation only). Cover pages also
     # re-try while undated so they can inherit the first dated page after later
@@ -677,6 +696,43 @@ def render_page_viewer(
     render = project.renders[page.active_render_id]
     img_path = paths.resolve_contained(render.image_relpath)
     result = projects.load_page_result(page.page_id)
+
+    return (
+        _ViewerSession(
+            read_only=read_only,
+            search_context=search_context,
+            nav_scope=nav_scope,
+            highlight_query=highlight_query,
+            back_label=back_label,
+            show_back=show_back,
+            entries=entries,
+            page_id=page_id,
+            idx=idx,
+            paths=paths,
+            projects=projects,
+            project=project,
+            page=page,
+            img_path=img_path,
+            result=result,
+        ),
+        project,
+    )
+
+
+def _render_viewer_chrome(session: _ViewerSession) -> bool:
+    """Top bar, tags, detections; True when the viewer should stop (thumbs)."""
+    read_only = session.read_only
+    search_context = session.search_context
+    nav_scope = session.nav_scope
+    back_label = session.back_label
+    show_back = session.show_back
+    entries = session.entries
+    page_id = session.page_id
+    idx = session.idx
+    paths = session.paths
+    projects = session.projects
+    project = session.project
+    page = session.page
 
     if search_context:
         nav_scope = _render_search_nav_scope_control(notebook_root=paths.root)
@@ -875,8 +931,22 @@ def render_page_viewer(
                 key_prefix="pv_thumbs",
             )
             remember_reading_page(paths.root, page_id)
-            return project
+            return True
 
+    return False
+
+
+def _render_viewer_body(session: _ViewerSession) -> None:
+    """Scan, transcription, and page metadata."""
+    read_only = session.read_only
+    highlight_query = session.highlight_query
+    entries = session.entries
+    paths = session.paths
+    projects = session.projects
+    project = session.project
+    page = session.page
+    img_path = session.img_path
+    result = session.result
     if read_only:
         # Reading: text-forward; scan is a smaller reference beside transcription.
         left, right = st.columns([2, 3])
@@ -1120,8 +1190,11 @@ def render_page_viewer(
                     st.caption(f"Suspicious date order: {preview}")
             else:
                 st.session_state.pop(f"pv_confirm_date_regressions_{page.page_id}", None)
+            from transcribe.services.tags import TagService
             from transcribe.ui.tag_pills import render_tag_assignment_editor
 
+            tag_svc = TagService()
+            catalog = tag_svc.load_catalog()
             selected_tags, new_tag_raw = render_tag_assignment_editor(
                 current=page.tags,
                 catalog=catalog,
@@ -1211,10 +1284,47 @@ def render_page_viewer(
                     st.session_state[pending_delete] = True
                     st.rerun()
 
-    if read_only:
-        remember_reading_page(paths.root, page.page_id)
 
-    return project
+
+def render_page_viewer(
+    *,
+    paths: ProjectPaths | None = None,
+    projects: ProjectService | None = None,
+    project: Project | None = None,
+    page_id: str,
+    page_ids: list[str] | None = None,
+    highlight_query: str = "",
+    back_label: str = "Back",
+    show_back: bool = True,
+    view_entries: list[dict[str, Any]] | None = None,
+    presentation: str = "edit",
+) -> Project | None:
+    """Render scan + OCR + metadata for one page.
+
+    When ``view_entries`` spans multiple notebooks, Prev/Next switches project roots.
+    ``presentation="read"`` hides mutating controls (Reading mode).
+    """
+    session, project = _resolve_viewer_session(
+        paths=paths,
+        projects=projects,
+        project=project,
+        page_id=page_id,
+        page_ids=page_ids,
+        highlight_query=highlight_query,
+        back_label=back_label,
+        show_back=show_back,
+        view_entries=view_entries,
+        presentation=presentation,
+    )
+    if session is None:
+        return project
+    if _render_viewer_chrome(session):
+        return session.project
+    _render_viewer_body(session)
+    if session.read_only:
+        remember_reading_page(session.paths.root, session.page.page_id)
+    return session.project
+
 
 
 def open_page_context(

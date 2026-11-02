@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
@@ -297,17 +298,33 @@ def _provenance_line(
     return f"{head} · {'unsaved changes' if dirty else 'saved'}"
 
 
-def render_review_page(
+
+@dataclass
+class _ReviewSession:
+    """Resolved Review page state shared by chrome and lanes."""
+
+    entries: list
+    page_id: str
+    idx: int
+    total: int
+    project: Project
+    page: object
+    img_path: Path
+    result: PageResult
+    chip: str
+    date_label: str
+
+
+def _resolve_review_session(
     *,
     paths: ProjectPaths,
     projects: ProjectService,
     project: Project,
     page_id: str,
     page_ids: list[str],
-    view_entries: list[dict[str, str]] | None = None,
-) -> None:
-    """Render the OCR comparison workbench for one page in the Review queue."""
-    _inject_review_hotkeys()
+    view_entries: list[dict[str, str]] | None,
+) -> _ReviewSession | None:
+    """Load/repair the active Review page."""
     entries = view_entries or [
         {"page_id": pid, "project_root": str(paths.root)} for pid in page_ids
     ]
@@ -337,7 +354,7 @@ def render_review_page(
     page = next((p for p in project.pages if p.page_id == page_id), None)
     if page is None:
         st.error("Page not found in this notebook.")
-        return
+        return None
     render = project.renders[page.active_render_id]
     img_path = paths.resolve_contained(render.image_relpath)
     result = projects.load_page_result(page_id) or PageResult(page_id=page_id)
@@ -351,7 +368,30 @@ def render_review_page(
     elif review_status == "needs_attention":
         chip = "⚠ needs attention"
 
-    _render_multipass_progress_if_running(projects)
+    return _ReviewSession(
+        entries=entries,
+        page_id=page_id,
+        idx=idx,
+        total=total,
+        project=project,
+        page=page,
+        img_path=img_path,
+        result=result,
+        chip=chip,
+        date_label=date_label,
+    )
+
+
+def _render_review_chrome(session: _ReviewSession, projects: ProjectService) -> bool:
+    """Page bar and optional thumbnail grid; True when Review should stop."""
+    entries = session.entries
+    page_id = session.page_id
+    idx = session.idx
+    total = session.total
+    project = session.project
+    page = session.page
+    chip = session.chip
+    date_label = session.date_label
 
     # Compact page bar: icon prev/next, title·date, N/M jump, thumbs, status, date.
     nav = st.columns(
@@ -451,8 +491,25 @@ def render_review_page(
             current_page_id=page_id,
             key_prefix="rw_thumbs",
         )
-        return
+        return True
 
+    return False
+
+
+def _render_review_body(
+    session: _ReviewSession,
+    *,
+    paths: ProjectPaths,
+    projects: ProjectService,
+) -> None:
+    """Scan column plus the selected Review lane."""
+    entries = session.entries
+    page_id = session.page_id
+    idx = session.idx
+    project = session.project
+    page = session.page
+    img_path = session.img_path
+    result = session.result
     canonical = st.session_state[f"rw_buf_{page_id}"]
     dirty = _is_dirty(page_id)
     origin = st.session_state.get(f"rw_origin_{page_id}")
@@ -584,6 +641,33 @@ def render_review_page(
             _render_cleanup_tab(projects, project, page)
         else:
             _render_other_tab(paths, projects, project, page)
+
+def render_review_page(
+    *,
+    paths: ProjectPaths,
+    projects: ProjectService,
+    project: Project,
+    page_id: str,
+    page_ids: list[str],
+    view_entries: list[dict[str, str]] | None = None,
+) -> None:
+    """Render the OCR comparison workbench for one page in the Review queue."""
+    _inject_review_hotkeys()
+    session = _resolve_review_session(
+        paths=paths,
+        projects=projects,
+        project=project,
+        page_id=page_id,
+        page_ids=page_ids,
+        view_entries=view_entries,
+    )
+    if session is None:
+        return
+    _render_multipass_progress_if_running(projects)
+    if _render_review_chrome(session, projects):
+        return
+    _render_review_body(session, paths=paths, projects=projects)
+
 
 
 def _render_multipass_progress_if_running(projects: ProjectService) -> None:
