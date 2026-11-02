@@ -39,19 +39,19 @@
 
 ## Status at a glance
 
-**Package:** **0.8.8**. U2 + I0–I6 are landed. Next public cut: **0.9.0** (tag when release governance is run), then **1.0** notebook freeze.
+**Package:** **1.0.1**. Notebook freeze tagged **1.0.0**; this cut is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). Remaining work is deepen-in-place and unscheduled architecture candidates.
 
 ```text
-0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 (now) → 0.9.0 → 1.0
-         I0–I1    I2–I3   patch   product  patch   I5+docs    U2+I6     freeze
-                                  cut      cut              cut
+0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1
+         I0–I1    I2–I3   patch   product  patch   I5+docs  U2+I6   freeze  decoupling
+                                  cut      cut
 ```
 
 | Horizon | Status | What it means |
 |---------|--------|---------------|
-| **Now** | [~] | Run release governance and tag **0.9.0**; finish Track C freeze checks toward **1.0** |
-| **0.9.0** | [ ] | Tag — U2 acceptance and I0–I6 exit gate are green; cut when governance checklist is run |
-| **1.0** | [ ] | Declare the notebook workbench complete for the [scope lean](#scope-lean--24-sep-2026) |
+| **Now** | [x] | Package **1.0.1**; remaining items are deepen-in-place / unscheduled architecture candidates |
+| **0.9.0** | [x] | Changelog cut — U2 + I0–I6 |
+| **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch |
 | **Parked** | [−] | Autobiography programme — [on file](#after-10--notebook-anchored-autobiography-workbench----on-file), future separate product |
 
 | Programme | Status | Authority |

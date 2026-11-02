@@ -10,7 +10,7 @@ Lane names here match the root `Makefile` and `.github/workflows/ci.yml`. Defaul
 | `make test-fast` / `pytest -q` | Default offline suite (`pyproject.toml` `addopts`) |
 | `make test-contracts` | `tests/contracts/` (offline storage/shape) |
 | `make test-acceptance` | `tests/acceptance/` (hardening + corpus + OCR lifecycle) |
-| `make test-coverage` | Default suite + coverage (`.coveragerc` `fail_under`; I3) |
+| `make test-coverage` | Default suite + coverage (`.coveragerc` `fail_under = 80`; UI omitted) |
 | `make lint` | Ruff critical selects on `src/transcribe` (same as CI `lint`) |
 | `make docker-smoke` | Compose loopback bind assert |
 | `make docs` | Sphinx HTML from `docs/` Markdown (`pip install -e '.[docs]'`) |

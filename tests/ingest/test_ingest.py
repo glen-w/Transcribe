@@ -150,3 +150,33 @@ def test_is_cover_filename():
     assert is_cover_filename("/tmp/scan/cover.png")
     assert not is_cover_filename("mycover.png")
     assert not is_cover_filename("cover.pdf")
+
+
+def test_sequential_image_imports_preserve_order(tmp_path: Path):
+    paths = open_project_paths(tmp_path / "proj")
+    clock, ids = FakeClock(), SequentialIds()
+    projects = ProjectService(paths, clock=clock, ids=ids)
+    projects.create("ordered")
+    ingest = IngestService(paths, clock=clock, ids=ids)
+    ingest.import_bytes("a.png", _png_bytes(color=(1, 2, 3)))
+    ingest.import_bytes("b.png", _png_bytes(color=(4, 5, 6)))
+    project = ingest.import_bytes("c.png", _png_bytes(color=(7, 8, 9)))
+    assert [p.page_index for p in project.pages] == [0, 0, 0]
+    names = []
+    for page in project.pages:
+        source = next(s for s in project.sources if s.source_id == page.source_id)
+        names.append(source.original_filename)
+    assert names == ["a.png", "b.png", "c.png"]
+    assert len(project.pages) == 3
+
+
+def test_pdf_pages_keep_source_page_index_order(tmp_path: Path):
+    paths = open_project_paths(tmp_path / "proj")
+    clock, ids = FakeClock(), SequentialIds()
+    projects = ProjectService(paths, clock=clock, ids=ids)
+    projects.create("pdf-order")
+    ingest = IngestService(paths, clock=clock, ids=ids)
+    project = ingest.import_bytes("scan.pdf", _pdf_bytes(3), render_dpi=72)
+    assert [p.page_index for p in project.pages] == [0, 1, 2]
+    assert project.sources[0].page_count == 3
+    assert project.sources[0].original_filename == "scan.pdf"

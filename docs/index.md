@@ -61,6 +61,7 @@ ARCHITECTURE
 developer_quickstart
 usability_wave_plan
 infrastructure_wave_0_9_plan
+dev/refactor_waves_1_0_1
 INTEGRATION_SEAM
 ```
 

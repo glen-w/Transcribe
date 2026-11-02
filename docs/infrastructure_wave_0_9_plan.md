@@ -4,7 +4,7 @@
 
 **Thesis:** Product capability is ahead of operational infrastructure. Transcribe already has strong offline tests, acceptance gates, Markdown docs authority, Docker packaging, and local `# pre-release` / `# deep-test` agent SOPs — but lacks the **repo machinery** TranscriptX uses to keep every PR honest and every tag evidenced. This wave closes that gap without scheduling new analysis modules or stealing the usability wave’s **U2** product focus.
 
-**Version note:** Package is **1.0.0**. The **0.9** label was the programme name (TranscriptX-style pre-1.0 stabilisation). Intermediate cuts: **0.7.0** = I0+I1; **0.8.0** = I2+I3 (landed); **0.8.5** = product patch; **0.8.6** = post-U3 product cut + **I4** Sphinx/CI docs; **0.8.7** = names/lexical detectors, Review/Library polish, circuit CLI honesty; **0.8.8** = **I5** Pages + install/docs reframe; **0.9.0** = U2 + I0–I6; **1.0.0** = notebook freeze ([scope lean](ROADMAP.md#scope-lean--24-sep-2026)). A stranger-testing round is not an I7 track and not a release gate. Autobiography is not the next track.
+**Version note:** Package is **1.0.1**. The **0.9** label was the programme name (TranscriptX-style pre-1.0 stabilisation). Intermediate cuts: **0.7.0** = I0+I1; **0.8.0** = I2+I3 (landed); **0.8.5** = product patch; **0.8.6** = post-U3 product cut + **I4** Sphinx/CI docs; **0.8.7** = names/lexical detectors, Review/Library polish, circuit CLI honesty; **0.8.8** = **I5** Pages + install/docs reframe; **0.9.0** = U2 + I0–I6; **1.0.0** = notebook freeze ([scope lean](ROADMAP.md#scope-lean--24-sep-2026)). A stranger-testing round is not an I7 track and not a release gate. Autobiography is not the next track.
 
 ```text
 Developer lanes     →     PR CI honesty     →     Release evidence
@@ -59,7 +59,7 @@ Snapshot against [glen-w/TranscriptX](https://github.com/glen-w/TranscriptX) mai
 | **Makefile lanes** | Rich `test-*`, `docs`, `docs-gen`, `docker-smoke`, `pages-site` | `Makefile` + `tests/README.md` (**I0**, 0.7.0); `make docs` / `docs-clean` via `build_docs.sh` (**I4**); `make pages-site` (**I5**) | **I0** |
 | **Test docs** | `tests/README.md` lane budgets + marker policy | Landed **I0** | **I0** |
 | **Markers** | smoke / contract / integration(_core|_extended) / heavy / gui_* / release_only / quarantined / requires_* | smoke / unit / integration / slow / requires_* / quarantined | **I0**, **I3** |
-| **Coverage** | `.coveragerc` `fail_under = 70`; `make test-coverage` | Landed **I3** (`fail_under = 75`; UI omitted) | **I3** |
+| **Coverage** | `.coveragerc` `fail_under = 70`; `make test-coverage` | Landed **I3** (`fail_under = 75`; UI omitted); **1.0.1** raised the floor to **80** | **I3** |
 | **Pre-commit** | `config/.pre-commit-config.yaml` (hooks + black/ruff/mypy) | Root `.pre-commit-config.yaml` (**I3**; ruff critical + file hygiene; black/mypy still optional) | **I3** |
 | **Release kit** | `scripts/release/*` + `scripts/secrets_check.sh` | Landed **I2** | **I2** |
 | **Release governance** | `docs/dev/release_governance.md` + severity/ops docs | Landed **I2** (tag checklist; `# pre-release` stays local confidence) | **I2** |

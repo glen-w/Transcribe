@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-02
+
 ### Added
 
 - **Ask RAG** (opt-in): View → Ask mode Grounded / RAG / Both, Paperful-shaped LanceDB index + Ollama embeddings, workspace `analysis.rag.*` under Settings → Analysis. Default Ask stays grounded. Extra `transcribe[rag]`; Compose image installs it. CLI `transcribe rag ingest` ( `--library` / `--dry-run` / `--force`) warms indexes overnight without an Ask LLM call.
@@ -14,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Granite vision recipe (`repeat_penalty=1.2`) and `repair_truncated_repetition_successes` so historical truncated+looping “successes” demote to `token_repeat` and do not skip forever — [ocr_model_recipes.md](docs/runtime/ocr_model_recipes.md).
 - Truncated OCR: fail prompt-echo / early loops; **trim** late fence/loop tails (≥70% into the text) and keep the diary prefix. glm/granite recipes add `stop=["```\\n```"]` plus `repeat_penalty=1.2` (a lone fence stop emptied glm pages that open with ` ```markdown `).
 - Workspace-configurable OCR model recipes (`data/config/ocr-model-recipes.json` + **Settings → Models**): disable/override builtins, add custom lanes, `freeze_prompt` so glm/granite stay options-only, tighter granite/deepseek matching, `recipe_id` on plan/provenance — [ocr_model_recipes.md](docs/runtime/ocr_model_recipes.md).
+
+### Changed
+
+- Package **1.0.1**. Layering refactor in PR-sized waves: chart palettes live in config (no Streamlit import), CLI split into `transcribe.cli`, shared OCR/Analyse batch notebook picker (`tx_*` / `ax_*` keys kept), Reading/Review renderers as resolve → chrome → body, `ProjectService` dates/review-repair/declutter collaborators. `load()` stays the public API; `reconcile_interrupted()` is the explicit reopen path.
+- Coverage floor raised to 80 (UI still omitted).
 
 ## [1.0.0] - 2026-10-23
 

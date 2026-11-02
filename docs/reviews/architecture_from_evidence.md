@@ -4,6 +4,8 @@
 **Scope:** CLI, Streamlit UI, services, persistence, tests — reconstructed from call paths, not from `ARCHITECTURE.md` as authority  
 **Status:** Review landed. High-value low-risk follow-ups (CLI circuit exit, progress chrome, detection reconcile vs analysis lock) are implemented in the same change set. Remaining decoupling and P3 polish are recorded as unscheduled candidates on [ROADMAP.md — Architecture follow-ups](../ROADMAP.md#later--architecture-follow-ups-from-evidence-review--candidates).
 
+**1.0.1 (2026-11-02):** [refactor waves](../dev/refactor_waves_1_0_1.md) landed L4 schema registry, `transcribe.cli`, chart palettes in config, shared batch picker, Review/Reading resolve→chrome→body, and `ProjectService` collaborators. L2 `load()` default remains `reconcile=True`.
+
 Documentation was treated as a claim to check. This review does not redefine on-disk schemas.
 
 ## A. System model
@@ -74,7 +76,7 @@ Flags: **E** evidenced; **I** inferred; **A** ambiguous; **C** contradictory acr
 1. **Job success after circuit skip (FR2/FR10/FR22, C).** `JobCoordinator` sets `status="completed"` when the timeout/`model_load` circuit opens. Tests pin that. UI warns via `circuit_open`. CLI `run` historically exited 0 on `completed` — automation treated a half-notebook as success. *(CLI exit fixed in this change set; on-disk `completed` + `circuit_open` unchanged.)*
 2. **Cancel vs fail (FR22, C).** Coordinators use `cancelled`; UI snapshots historically mapped that to panel `failed`. *(Chrome mapping fixed in this change set.)*
 3. **Detect is both a workflow and an Analyse step (FR5/FR6, A).** Different cancel, locks, and progress.
-4. **Schema registry split (FR21, I).** `persistence.schema.SUPPORTED` omits settings, profiles, job-record, interface-menus.
+4. **Schema registry split (FR21, I).** *(Addressed in 1.0.1: `SUPPORTED` lists settings, profile, job-record, interface-menus, geocode-cache. Settings/profile still load via `ConfigError`.)*
 5. **`ProjectService.load` is not a pure read (FR18, I).** Default `reconcile=True` demotes running OCR/analysis/detection attempts.
 6. **Names detector depends on analysis NER (FR6, E).** `DetectionRunner._load_or_run_ner` may `run_module("ner")`.
 7. **No deep links, no auth, no schema upgrade** — consistent with local v1; “durable corpus” has no `schema_version` 2 path.
@@ -86,7 +88,7 @@ Flags: **E** evidenced; **I** inferred; **A** ambiguous; **C** contradictory acr
 | DP1 | Domain documents, `effective_text()`, fingerprints | `domain/models.py`, `domain/fingerprint.py`, `domain/validation.py` |
 | DP2 | Path layout / containment | `paths.py:ProjectPaths`, `runtime_paths.py`, `corpus/paths.py` |
 | DP3 | Atomic JSON, flock, format gate | `persistence/atomic.py`, `locks.py`, `schema.py` |
-| DP4 | `ProjectService` | `services/project.py` (SoT + dates + review + declutter + reconcile) |
+| DP4 | `ProjectService` | `services/project.py` plus `project_dates` / `project_review_repair` / `project_declutter` collaborators |
 | DP5 | Ingest + declutter | `ingest/`, `declutter/`, `ProjectService.reapply_visual_declutter` |
 | DP6 | OCR job coordinator | `services/job.py:JobCoordinator` |
 | DP7 | Ollama HTTP + discovery cache | `providers/ollama.py`, `analysis/llm_runtime.py` |
@@ -104,7 +106,7 @@ Flags: **E** evidenced; **I** inferred; **A** ambiguous; **C** contradictory acr
 | DP19 | Streamlit shell / session / `cache_resource` | `ui/app.py`, `shell.py`, `navigation.py` |
 | DP20 | Review / page overlay | `ui/review_workbench.py`, `review_queue.py`, `page_viewer.py` |
 | DP21 | Action menus | `ui/action_menus/` |
-| DP22 | CLI | `__main__.py` |
+| DP22 | CLI | `transcribe.cli` (`__main__.main` still the console entry) |
 | DP23 | Doctor | CLI + `ui/diagnostics.py` |
 | DP24 | Places geocode | `services/places.py`, `ui/places_map.py` |
 | DP25 | Page metrics / thumbs | `page_metrics/`, `services/thumbnails.py` |
@@ -154,7 +156,7 @@ Non-obvious coupling: `effective_text()` feeds analysis/detection/export; OCR fi
 
 Dangerous “local” edits: `effective_text` / attempt activation; `ProjectService.load`; OCR fingerprint composition; `JobProgress.status` vocabulary; forgotten archive generation bump; preset `detector_ids`; `st.cache_resource` coordinator constructors.
 
-Pressure: `ProjectService` (~1300 lines) mixes SoT I/O, ingest recovery, OCR graph, review, dates, declutter, and analysis/detection reconcile. Review workbench and `run_transcribe.py` embed orchestration. Call cycle: `load` → analysis/detection storage; `DetectionRunner` → `ProjectService` + `AnalysisRunner`.
+Pressure: `ProjectService` still owns SoT I/O, ingest recovery, OCR graph, and analysis/detection reconcile; dates / review-repair / declutter are collaborators as of 1.0.1. Review and page-viewer orchestrate resolve → chrome → body. Call cycle: `load` → analysis/detection storage; `DetectionRunner` → `ProjectService` + `AnalysisRunner`.
 
 Do **not** replace file-shaped SoT with a database, add an event bus, or split CLI/UI service implementations because those patterns exist elsewhere.
 
@@ -236,7 +238,7 @@ False confidence: UI tests that `assert 'progress.status == "completed"' in RUN`
 | L1 | Circuit is not CLI success; keep on-disk `completed`; UI phase `partial` | **Done** (CLI `run` + chrome). Multipass overall-complete unchanged. |
 | L2 | Split `load` from `reconcile`; detection lock | **Partial:** reconcile still default-on-load; detection now also no-ops when **analysis** lock held. Full load-default change deferred. |
 | L3 | Names detector consumes published NER only | Proposed |
-| L4 | One schema registry for every written `format` | Proposed |
+| L4 | One schema registry for every written `format` | **Done (1.0.1)** |
 | L5 | Pure snapshot mappers tested without Streamlit page imports | **Done:** `ui/progress_snapshots.py` |
 
 Do not: replace JSON-on-disk, add an event bus, add v1 auth, rewrite navigation.

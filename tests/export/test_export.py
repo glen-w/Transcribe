@@ -68,6 +68,38 @@ def test_export_all_formats_share_revision(tmp_path: Path):
     assert notebook["content_revision"] == rev
 
 
+def test_export_json_includes_provenance_and_effective_text_fields(tmp_path: Path):
+    paths, projects = _notebook_with_edit(tmp_path, "Prov")
+    export = ExportService(paths, projects)
+    written = export.export_all(
+        dest_dir=tmp_path / "prov",
+        options=ExportOptions(formats=frozenset({"json", "markdown", "text"})),
+    )
+    notebook = read_json(written["notebook"])
+    assert notebook["format"] == "transcribe.notebook"
+    assert notebook["schema_version"] == 1
+    assert notebook["content_revision"]
+    page = notebook["pages"][0]
+    assert page["edited"] is True
+    assert page["edited_text"] == "edited Prov"
+    assert page["text"] == "edited Prov"
+    assert page["raw_text"]
+    assert page["raw_text"] != page["text"]
+    assert page["active_attempt_id"]
+    assert page["input_fingerprint"]
+    assert isinstance(page["provenance"], dict)
+    assert page["provenance"]["model_name"] == "fake-vision"
+    assert "model_digest" in page["provenance"]
+    assert "prompt_id" in page["provenance"]
+    assert isinstance(page.get("provider_metadata"), dict)
+    md = written["markdown"].read_text(encoding="utf-8")
+    txt = written["text"].read_text(encoding="utf-8")
+    assert "edited Prov" in md
+    assert "edited Prov" in txt
+    assert notebook["content_revision"] in md
+    assert notebook["content_revision"] in txt
+
+
 def test_typography_does_not_change_content_revision(tmp_path: Path):
     paths, projects = _notebook_with_edit(tmp_path)
     export = ExportService(paths, projects)

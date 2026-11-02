@@ -74,4 +74,4 @@ Date / review-repair / declutter become collaborators that `ProjectService` dele
 
 ## Wrap-up
 
-Docs sync, offline coverage expansion (UI still omitted from `.coveragerc`), incremental package version, local `# pre-release`.
+Docs sync, offline coverage expansion (UI still omitted from `.coveragerc`; floor **80**), leftover ingest/export/provider/job isolation tests, package **1.0.1**, local `# pre-release`.
