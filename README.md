@@ -58,8 +58,8 @@ Copy `.env.example` to `.env` and set **`HOST_PROJECTS_DIR`** to an absolute pat
 host with an OCR-friendly vision model.
 
 ```bash
-git clone https://github.com/glen-w/transcribe.git
-cd transcribe
+git clone https://github.com/glen-w/Transcribe.git
+cd Transcribe
 cp .env.example .env          # set HOST_PROJECTS_DIR
 docker compose up --build transcribe-web
 # → http://127.0.0.1:8510/

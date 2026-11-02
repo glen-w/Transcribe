@@ -51,7 +51,7 @@ LOCATIONS_FILENAME = "locations.json"
 _NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 # Nominatim requires an identifying User-Agent (TX uses geopy user_agent="transcriptx").
 _USER_AGENT = (
-    "TranscribeNotebookOCR/0.2 (local-first; places map; " "https://github.com/glen-w/transcribe)"
+    "TranscribeNotebookOCR/0.2 (local-first; places map; " "https://github.com/glen-w/Transcribe)"
 )
 _MIN_REQUEST_INTERVAL_S = 1.05
 _DEFAULT_TIMEOUT_S = 10.0  # match TX geopy timeout

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- GitHub repository display name is **Transcribe** (`glen-w/Transcribe`), matching the product name already used in the UI and docs. Python package, CLI (`transcribe` / `./transcribe.sh`), and Docker (`transcribe-web`) stay lowercase.
+- Roadmap honesty: **Now** is [1.1 deepen-in-place](docs/dev/deepen_waves_1_1.md); 0.9.0 / 1.0 / Track C are signed off as landed. Stale active-backlog ranks (0.9.0 cut, Track C) no longer look open.
+
 ## [1.0.1] - 2026-11-02
 
 ### Added

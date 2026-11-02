@@ -22,8 +22,8 @@ Clone the repo. Copy `.env.example` to `.env`. Set **`HOST_PROJECTS_DIR`** to an
 notebooks.
 
 ```bash
-git clone https://github.com/glen-w/transcribe.git
-cd transcribe
+git clone https://github.com/glen-w/Transcribe.git
+cd Transcribe
 cp .env.example .env
 # edit .env: HOST_PROJECTS_DIR=/Users/you/Documents/transcribe-projects
 docker compose up --build transcribe-web

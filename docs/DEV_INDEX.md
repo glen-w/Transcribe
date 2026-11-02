@@ -17,7 +17,8 @@ Active developer and maintainer docs. Historical material is listed only via [AR
 
 | Doc | Purpose |
 |-----|---------|
-| [ROADMAP.md](ROADMAP.md) | Product roadmap: notebook contract through 1.0. Autobiography write-up is on file for a future separate product (scope lean 24 Sep 2026), not 1.1–2.0 |
+| [ROADMAP.md](ROADMAP.md) | Product roadmap: notebook contract through 1.0; **Now** is 1.1 deepen-in-place. Autobiography write-up is on file for a future separate product (scope lean 24 Sep 2026), not this repo’s 1.1 |
+| [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place waves (Inbox, declutter v4, reorder, hand-model bring-back, leftover architecture) |
 | [usability_wave_plan.md](usability_wave_plan.md) | Usability-wave tracks U0–U4 (done; Inbox polish may continue) |
 | [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) | 0.9 infrastructure wave: **I0–I6** landed |
 | [runtime/install_verification_matrix.md](runtime/install_verification_matrix.md) | Tag evidence cells (Docker / native / Ollama) |
@@ -50,6 +51,7 @@ Product and module reviews (critique and follow-ups — not contracts): [reviews
 | [dev/ocr_review_workbench_plan.md](dev/ocr_review_workbench_plan.md) | Post-U3 OCR Review workbench (scan / tabbed lanes / evidence / merged draft / transcription) |
 | [dev/streamlit_efficiency_audit.md](dev/streamlit_efficiency_audit.md) | Streamlit every-rerun / Review / View cost audit and PR1 fluidity fixes |
 | [dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md) | Staged decoupling waves (layering, CLI, batch picker, Review/View split, ProjectService) |
+| [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place wave acceptance tables |
 | [runtime/ocr_model_recipes.md](runtime/ocr_model_recipes.md) | Per-model OCR recipes (builtins + workspace overlay) |
 | [contracts/ocr-model-recipes.md](contracts/ocr-model-recipes.md) | Recipe overlay schema, merge, fingerprint |
 

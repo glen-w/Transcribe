@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please skim [docs/ROADMAP.md](https://github.com/glen-w/transcribe/blob/main/docs/ROADMAP.md)
+        Please skim [docs/ROADMAP.md](https://github.com/glen-w/Transcribe/blob/main/docs/ROADMAP.md)
         before filing. After 1.0 autobiography features are gated and should not be requested as 0.9 work.
   - type: textarea
     id: problem

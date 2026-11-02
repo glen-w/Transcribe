@@ -46,7 +46,7 @@ Supported entrypoints: [public_surfaces.md](public_surfaces.md).
 - Core notebook analysis modules and Analyse (optional local text Ollama for LLM modules)
 - Deepen-in-place: usability wave — trust, Analyse product UX, first-run operability (**U2** done), daily workbench (**U3** done); OCR fail-fast, Analyse corpus-compare, Moments/chart jump → Reading, and Analyse/View split are shipped deepen-in-place ([ROADMAP.md](ROADMAP.md) · [usability_wave_plan.md](usability_wave_plan.md))
 
-**Path to 1.0:** freeze tagged **1.0.0** (U2 + I0–I6, plus severity / ops / manual acceptance / analysis audit). Current package **1.0.1** (layering/decoupling). A stranger-testing round is not a release gate. Detail: [ROADMAP.md](ROADMAP.md) Path to 0.9.0 / 1.0.
+**Path to 1.0:** freeze tagged **1.0.0** (U2 + I0–I6, plus severity / ops / manual acceptance / analysis audit). Current package **1.0.1** (layering/decoupling). **Now:** [1.1 deepen-in-place](dev/deepen_waves_1_1.md). A stranger-testing round is not a release gate. Historical: [ROADMAP.md](ROADMAP.md) Path to 0.9.0 / 1.0.
 
 **Out of scope for current core**
 

@@ -1,9 +1,10 @@
 # Transcribe roadmap
 
 **Product definition:** [PRODUCT.md](PRODUCT.md)  
-**Active product focus:** [Path to 0.9.0 / 1.0](#path-to-090--10) — U2 + I0–I6 landed; remaining cut is the **0.9.0** tag + Track C freeze  
+**Active product focus:** [1.1 deepen-in-place](dev/deepen_waves_1_1.md) — ranked backlog + leftover architecture bits after **1.0.1**  
 **Wave plans (done tracks):** [usability_wave_plan.md](usability_wave_plan.md) · [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md)  
-**Critical path:** [Path to 0.9.0 / 1.0](#path-to-090--10)  
+**Critical path:** [Active backlog](#active-backlog--ranked) · [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)  
+**Historical 0.9 / 1.0 path:** [Path to 0.9.0 / 1.0](#path-to-090--10) — tagged; Track C signed off  
 **Scope boundary:** [Scope lean — 24 Sep 2026](#scope-lean--24-sep-2026)  
 **On file, not this product:** [After 1.0 — autobiography](#after-10--notebook-anchored-autobiography-workbench----on-file)  
 **Analysis porting map:** [dev/analysis_module_porting.md](dev/analysis_module_porting.md)  
@@ -21,7 +22,7 @@
 | If you need… | Go to |
 |--------------|--------|
 | What this product is (and is not) | [Scope lean](#scope-lean--24-sep-2026) · [PRODUCT.md](PRODUCT.md) |
-| What to build next | [Active backlog](#active-backlog--ranked) · [Path to 0.9.0 / 1.0](#path-to-090--10) |
+| What to build next | [Active backlog](#active-backlog--ranked) · [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) |
 | Track detail for usability | [usability_wave_plan.md](usability_wave_plan.md) (authority for U0–U4) |
 | Track detail for maintainer infra | [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (authority for I0–I6) |
 | What already shipped | [Status at a glance](#status-at-a-glance) · [Shipped programmes](#shipped-programmes) |
@@ -39,19 +40,19 @@
 
 ## Status at a glance
 
-**Package:** **1.0.1**. Notebook freeze tagged **1.0.0**; this cut is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). Remaining work is deepen-in-place and unscheduled architecture candidates.
+**Package:** **1.0.1**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **Now** is the [1.1 deepen-in-place](dev/deepen_waves_1_1.md) programme.
 
 ```text
-0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1
-         I0–I1    I2–I3   patch   product  patch   I5+docs  U2+I6   freeze  decoupling
+0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1 → 1.1.0
+         I0–I1    I2–I3   patch   product  patch   I5+docs  U2+I6   freeze  decoupling  deepen
                                   cut      cut
 ```
 
 | Horizon | Status | What it means |
 |---------|--------|---------------|
-| **Now** | [x] | Package **1.0.1**; remaining items are deepen-in-place / unscheduled architecture candidates |
+| **Now** | [~] | **1.1 deepen-in-place** ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)): Inbox, declutter v4, page reorder, hand-model bring-back, leftover architecture |
 | **0.9.0** | [x] | Changelog cut — U2 + I0–I6 |
-| **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch |
+| **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch; Track C signed off |
 | **Parked** | [−] | Autobiography programme — [on file](#after-10--notebook-anchored-autobiography-workbench----on-file), future separate product |
 
 | Programme | Status | Authority |
@@ -118,24 +119,26 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 
 ## Active backlog — ranked
 
-U2 and I6 no longer block the cut. Rank 1 is the next maintainer action; candidates must not delay the tag.
+**1.1 deepen-in-place** ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)). Rank 1 is the next maintainer action. Do not schedule autobiography from this list.
 
-| Rank | Item | Status | Blocks 0.9.0? | Detail |
-|------|------|--------|---------------|--------|
-| 1 | **0.9.0 package cut** | [ ] | Yes | Run [release_governance.md](dev/release_governance.md); bump version / CHANGELOG |
-| 2 | **Track C freeze checks** | [ ] docs | Soft | Notebook core freeze, rebuildability, longevity minimum, known-limitations honesty |
-| 3 | **Hand-model loop (external)** | [~] | No | Export exists; iterate models outside app; verify with multipass |
-| 4 | **U4 Inbox polish** | [?] | No | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
-| 5 | **Visual declutter expansion** | [?] | No | Binding gutter → edge shadows (Pillow-only, outside page area) |
-| 6 | **Page reorder / date repair** | [?] | No | Drag/drop grid + suspicious-date cluster action |
+| Rank | Item | Status | Wave | Detail |
+|------|------|--------|------|--------|
+| 1 | **Cover Open + dirty leave** | [ ] | W1 | Visible Library cover Open; Review Discard & leave (not second Prev/Next) |
+| 2 | **Auto-tag suppression** | [ ] | W2 | Re-run does not re-apply slugs the user removed |
+| 3 | **Detect cancel** | [ ] | W3 | Stop after current window; kernel `cancel_check` already exists |
+| 4 | **U4 Inbox polish** | [?] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
+| 5 | **Visual declutter expansion** | [?] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
+| 6 | **Page reorder / date repair** | [?] | W6–W7 | `pages` array permute + date-cluster action; drag/drop island optional |
+| 7 | **Hand-model bring-back (external)** | [~] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |
+| 8 | **L2 `load()` default** | [?] | W9 | `reconcile=False` by default; explicit reopen path |
 
-**Landed (no longer backlog):** U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export.
+**Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling.
 
 ---
 
 ## Path to 0.9.0 / 1.0
 
-**Status:** [~] in progress — authoritative sequencing from package **0.8.8** toward a frozen **1.0** notebook workbench ([scope lean](#scope-lean--24-sep-2026)). Companion tracks: [usability_wave_plan.md](usability_wave_plan.md) (U2), [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (I0–I6). A stranger-testing round is not a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)).
+**Status:** [x] done — **0.9.0** (2026-10-23) and **1.0.0** notebook freeze tagged; **1.0.1** decoupling patch. Historical sequencing from package **0.8.8**. Companion tracks: [usability_wave_plan.md](usability_wave_plan.md) (U2), [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (I0–I6). A stranger-testing round is not a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)). Live work is the [1.1 deepen-in-place](dev/deepen_waves_1_1.md) backlog above.
 
 **Thesis:** Cut an operable **0.9.0**, then declare **1.0** as the notebook contract. Harden the existing notebook/OCR/analysis/corpus stack. Do **not** ship photos-as-context, WhatsApp, a People store, Slices, reconstruction, or time-of-day storage in this repo.
 
@@ -205,19 +208,19 @@ No runtime context schema and no `data/context/` tree in this repo. The checklis
 
 | # | Checklist item | Intent | 1.0 gate? |
 |-----|----------------|--------|-----------|
-| 1 | **Notebook core freeze** | `transcribe.project` v1, `page-result` v1, `AnalysisDocument` v1 remain loadable; After 1.0 is **additive-only**; do not generalize `SourceDocument` | Yes |
-| 2 | **Human metadata vocabulary** | ClaimStatus documented as a map onto existing `date_approved` / detection `review_status` / `edited_text` ([TERMS.md](TERMS.md)). Runtime ClaimStatus schema waits for a future product | Docs only |
-| 3 | **Rebuildability proven** | Archive FTS delete-and-rebuild; backup excludes `data/cache/`; corpus + hardening acceptance suites green on CI (I1/I6) | Yes |
-| 4 | **Extensibility noted** | Future lock order **corpus → context → notebook**; context trees must be optional (absence = valid 1.0 workspace). See [ARCHITECTURE.md](ARCHITECTURE.md) | Docs only (parked programme) |
-| 5 | **Longevity minimum for testers** | Pre-upgrade backup + restore verify documented in first-run / [backup_and_restore.md](backup_and_restore.md); refuse/recover copy for schema bumps. Full “archive readable without Transcribe” stays candidate | Thin yes |
-| 6 | **Known-limitations honesty** | First-run bites, remote Ollama, unapproved dates on timeline, Analyse optional extras — visible to unfamiliar users | Yes |
-| 7 | **Explicit non-goals** | No WhatsApp/Telegram/photo-context corpus; no Person store; no Slices; no ReconstructionBundle; no page time-of-day field; no `AnalysisDocument` v1 bump | Yes |
+| 1 | **Notebook core freeze** | `transcribe.project` v1, `page-result` v1, `AnalysisDocument` v1 remain loadable; After 1.0 is **additive-only**; do not generalize `SourceDocument` | Yes — signed off on **1.0.0** |
+| 2 | **Human metadata vocabulary** | ClaimStatus documented as a map onto existing `date_approved` / detection `review_status` / `edited_text` ([TERMS.md](TERMS.md)). Runtime ClaimStatus schema waits for a future product | Docs only — met |
+| 3 | **Rebuildability proven** | Archive FTS delete-and-rebuild; backup excludes `data/cache/`; corpus + hardening acceptance suites green on CI (I1/I6) | Yes — signed off on **1.0.0** |
+| 4 | **Extensibility noted** | Future lock order **corpus → context → notebook**; context trees must be optional (absence = valid 1.0 workspace). See [ARCHITECTURE.md](ARCHITECTURE.md) | Docs only (parked programme) — met |
+| 5 | **Longevity minimum for testers** | Pre-upgrade backup + restore verify documented in first-run / [backup_and_restore.md](backup_and_restore.md); refuse/recover copy for schema bumps. Full “archive readable without Transcribe” stays candidate | Thin yes — signed off on **1.0.0** |
+| 6 | **Known-limitations honesty** | First-run bites, remote Ollama, unapproved dates on timeline, Analyse optional extras — visible to unfamiliar users | Yes — signed off on **1.0.0** |
+| 7 | **Explicit non-goals** | No WhatsApp/Telegram/photo-context corpus; no Person store; no Slices; no ReconstructionBundle; no page time-of-day field; no `AnalysisDocument` v1 bump | Yes — signed off on **1.0.0** |
 
 Optional U4 Inbox polish may continue but is **not** on the 0.9.0 critical path.
 
 ### 0.9.0 cut
 
-When **U2 acceptance** and the **I0–I6 exit gate** are both true: bump `pyproject.toml` / `__version__` / CHANGELOG to **0.9.0**. Intermediate cuts landed: **0.7.0** = I0+I1; **0.8.0** = I2+I3; **0.8.5** = product patch; **0.8.6** = post-U3 product cut + **I4** Sphinx/CI docs; **0.8.7** = names/lexical detectors, Review/Library polish, circuit CLI honesty; **0.8.8** = **I5** Pages landing + Docker-preferred install docs. **I6** sustaining lanes and **U2** sample/first-run docs are landed — ready for the **0.9.0** package cut when release governance is run.
+**[x] tagged 2026-10-23.** Intermediate cuts: **0.7.0** = I0+I1; **0.8.0** = I2+I3; **0.8.5** = product patch; **0.8.6** = post-U3 product cut + **I4** Sphinx/CI docs; **0.8.7** = names/lexical detectors, Review/Library polish, circuit CLI honesty; **0.8.8** = **I5** Pages landing + Docker-preferred install docs. **I6** + **U2** enabled the cut.
 
 ### 1.0 freeze — definition of done
 
@@ -228,7 +231,7 @@ When **U2 acceptance** and the **I0–I6 exit gate** are both true: bump `pyproj
 | Product promise | Import → OCR → Review → Analyse (optional) → Export → Backup works via documented Docker path |
 | U2 acceptance | Sample + first-run docs closed |
 | Infra | I0–I6 exit gate green; **0.9.0** tagged |
-| Foundation | Track C rows marked Yes signed off in release notes / governance |
+| Foundation | Track C rows marked Yes — **signed off** on the **1.0.0** tag (this file, Track C table) |
 | Contracts | Core schemas remain loadable; no context corpus on disk |
 | Honesty | [known_limitations.md](known_limitations.md) covers first-run bites; miss list = Failed OCR; VL OCR ≠ text LLM |
 | Scope | PRODUCT / ROADMAP still page-first; autobiography still on file, not scheduled |
@@ -237,7 +240,11 @@ Autobiography does **not** start afterwards inside this repo. The write-up stays
 
 ---
 
-## Now — Usability wave — [~] active
+## Now — 1.1 deepen-in-place — [~] active
+
+Authority: [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md). Usability **U0–U4** and infra **I0–I6** are done (U4 Inbox polish may continue as W4). Do **not** schedule deferred-reinterpretation ports or autobiography while this focus is open.
+
+## Usability wave — [x] done (Inbox polish may continue)
 
 Priority after shipping the core module set. **Do not** schedule deferred-reinterpretation ports while this focus is open. Full track plan: [usability_wave_plan.md](usability_wave_plan.md). Detection Prompt Hub / Detect UI is a **shipped parallel track** ([detection_wave2_plan.md](archive/plans/detection_wave2_plan.md); not this wave’s definition of done — avoid calling Detection the product “Wave 2” in usability docs).
 
@@ -338,7 +345,7 @@ Capability already on `main`. Kept here so “Next” is not polluted with done 
 
 ### Shipped — OCR lifecycle package — [x]
 
-Ambitious OCR features on the durable attempt model: multipass multi-model runs, compare/prefer/promote, composite candidates, preference stats, fine-tune export. Contracts: [ocr-multipass](contracts/ocr-multipass.md), [ocr-preference](contracts/ocr-preference.md), [finetune-export](contracts/finetune-export.md), extended [page-result](contracts/page-result.md). Outline for external training: [finetune_export.md](finetune_export.md). Shipped via [PR #15](https://github.com/glen-w/transcribe/pull/15).
+Ambitious OCR features on the durable attempt model: multipass multi-model runs, compare/prefer/promote, composite candidates, preference stats, fine-tune export. Contracts: [ocr-multipass](contracts/ocr-multipass.md), [ocr-preference](contracts/ocr-preference.md), [finetune-export](contracts/finetune-export.md), extended [page-result](contracts/page-result.md). Outline for external training: [finetune_export.md](finetune_export.md). Shipped via [PR #15](https://github.com/glen-w/Transcribe/pull/15).
 
 | Wave | Status | Outcome |
 |------|--------|---------|
@@ -1062,4 +1069,5 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 | 24 Sep 2026 | **Scope lean:** product stops at notebook workbench; autobiography on file for a future separate product | “After 1.0 Transcribe becomes autobiography” as this repo’s ladder |
 | 2026-09+ | Stranger-testing is **not** a release gate | Stranger-testing as I7 / path-to-1.0 step |
 | Expansion wave (#47) | U2.2/U2.4, ignore-pages Reader, detection fine-tune export, I6 landed | Treating those as open 0.9.0 blockers |
+| 2026-11-02 | **1.1 deepen-in-place** is the active product focus after 1.0.1; Track C signed off as already met on 1.0.0; 0.9.0/1.0 path is historical | Stale active-backlog ranks 1–2 (0.9.0 cut / Track C as open) |
 

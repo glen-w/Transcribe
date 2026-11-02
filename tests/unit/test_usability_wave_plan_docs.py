@@ -13,7 +13,7 @@ def test_usability_wave_plan_exists_with_tracks():
     plan = DOCS / "usability_wave_plan.md"
     assert plan.is_file(), "docs/usability_wave_plan.md missing"
     text = plan.read_text(encoding="utf-8")
-    assert "[~] active" in text
+    assert "[x] done" in text
     for track in ("U0", "U1", "U2", "U3", "U4"):
         assert track in text, f"plan missing track {track}"
     assert "not the centerpiece" in text
@@ -69,7 +69,9 @@ def test_hardening_checklist_splits_phase6_items():
 
 def test_roadmap_now_is_usability_wave():
     text = (DOCS / "ROADMAP.md").read_text(encoding="utf-8")
-    assert "## Now — Usability wave" in text
+    assert "## Now — 1.1 deepen-in-place" in text
+    assert "## Usability wave — [x] done" in text
+    assert "deepen_waves_1_1.md" in text
     assert "**U0**" in text and "**U1**" in text
     assert "U2 First-run" in text or "**U2" in text
     assert "U4" in text

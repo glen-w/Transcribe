@@ -9,7 +9,7 @@ from transcribe.services.export_options import BODY_FONT_CHOICES
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="transcribe", description="Local notebook OCR")
+    parser = argparse.ArgumentParser(prog="transcribe", description="Transcribe — local notebook OCR")
     sub = parser.add_subparsers(dest="cmd", required=True)
     p_init = sub.add_parser("init", help="Create a new project directory")
     p_init.add_argument("project", type=Path)
