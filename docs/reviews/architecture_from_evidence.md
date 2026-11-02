@@ -166,7 +166,7 @@ Routing is session-only (`ui_mode` + `root`). No `st.query_params`.
 
 - Import partial success uses `st.success` with “(N failed)”.
 - Cover Open is an opacity-0 button.
-- Review dirty leave: second Prev/Next discards (`rw_force_leave`).
+- Review dirty leave: Stay / Discard & leave (`rw_pending_leave`).
 - Detect runs synchronously in the request; no cancel.
 - Settings **Reset whole workspace settings** has no confirm (copies `settings.reset.{stamp}.json` first).
 - Re-apply visual declutter has no confirm; margin loss is documented.

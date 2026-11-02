@@ -775,6 +775,8 @@ def test_archive_view_wire_uses_configured_actions() -> None:
     assert "navigate_open" in source
     assert "_render_clickable_cover" in source
     assert "with st.container()" in source
+    assert "tx_open_cover_" in source
+    assert 'key.replace("tx_cover_", "tx_open_cover_", 1)' in source
     shell = Path("src/transcribe/ui/shell.py").read_text(encoding="utf-8")
     assert "st-key-tr_al_" in shell
     assert "st-key-tx_cover_" in shell

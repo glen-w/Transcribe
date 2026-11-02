@@ -427,9 +427,10 @@ def inject_global_styles(*, force: bool = False) -> None:
         font-size: 0.8rem;
         line-height: 1;
     }
-    /* Cover click = Open (transparent button overlays the thumbnail only).
-       Require direct-child cover key so ancestor page blocks / sibling
-       captions+actions are not part of the hit target or hover outline. */
+    /* Cover click-on-image = Open (transparent overlay on the thumbnail only).
+       Visible labelled Open lives under the thumb (tx_open_cover_*, not this
+       prefix). Require direct-child cover key so ancestor page blocks /
+       sibling captions+actions are not part of the hit target or hover outline. */
     div[data-testid="stVerticalBlock"]:has(> [class*="st-key-tx_cover_"]) {
         position: relative;
     }

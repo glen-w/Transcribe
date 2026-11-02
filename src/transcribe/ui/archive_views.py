@@ -126,6 +126,10 @@ def _cover_open_key(instance_prefix: str, project_id: str) -> str:
     digest = hashlib.sha1(f"{instance_prefix}|{project_id}|cover_open".encode()).hexdigest()[:10]
     return f"tx_cover_{instance_prefix}_{project_id}_{digest}"
 
+def _open_cover(ctx: ActionContext) -> None:
+    if navigate_open(ctx, rerun=False):
+        st.rerun()
+
 
 def _render_clickable_cover(
     thumb: Path,
@@ -134,25 +138,38 @@ def _render_clickable_cover(
     key: str,
     width: int | str = "stretch",
 ) -> None:
-    """Cover thumbnail: click runs the same navigation as the Open action.
+    """Cover thumbnail: click-on-image overlay plus a visible Open control.
 
     Image + overlay button share a dedicated container so the absolute cover
-    hit-target cannot stretch over captions or the action strip below.
+    hit-target cannot stretch over captions or the action strip below. The
+    overlay stays visually transparent (shell CSS). The labelled Open button
+    sits under the thumb so the control is visible without a pointer hover.
     """
+    can_open = bool(ctx.project_exists and ctx.has_pages and ctx.page_ids)
+    help_text = widget_help(help_for(ActionId.OPEN) if can_open else "No pages to open.")
     with st.container():
         st.image(str(thumb), width=width)
-        can_open = bool(ctx.project_exists and ctx.has_pages and ctx.page_ids)
         if st.button(
             "Open",
             key=key,
             type="tertiary",
             width="stretch",
             disabled=not can_open,
-            help=widget_help(help_for(ActionId.OPEN) if can_open else "No pages to open."),
+            help=help_text,
             icon=ic.FOLDER_OPEN,
         ):
-            if navigate_open(ctx, rerun=False):
-                st.rerun()
+            _open_cover(ctx)
+    label_key = key.replace("tx_cover_", "tx_open_cover_", 1)
+    if st.button(
+        "Open",
+        key=label_key,
+        type="tertiary",
+        width="stretch",
+        disabled=not can_open,
+        help=help_text,
+        icon=ic.FOLDER_OPEN,
+    ):
+        _open_cover(ctx)
 
 
 def _filters_from_widgets(

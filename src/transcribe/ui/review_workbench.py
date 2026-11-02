@@ -407,16 +407,9 @@ def _render_review_chrome(session: _ReviewSession, projects: ProjectService) -> 
         icon=ic.CHEVRON_LEFT,
     ):
         if _is_dirty(page_id):
-            st.warning(
-                "Unsaved changes on this page — Save first, or click Previous page again to discard."
-            )
-            if st.session_state.get("rw_force_leave") == page_id:
-                st.session_state.pop("rw_force_leave", None)
-                _navigate_to_entry(entries[idx - 1])
-                st.session_state.pop(f"rw_buf_{page_id}", None)
-                st.rerun()
-            st.session_state["rw_force_leave"] = page_id
+            st.session_state["rw_pending_leave"] = {"page_id": page_id, "target_idx": idx - 1}
         else:
+            st.session_state.pop("rw_pending_leave", None)
             _navigate_to_entry(entries[idx - 1])
             st.rerun()
     nav[1].markdown(f"**{project.title}** · {date_label}")
@@ -428,16 +421,9 @@ def _render_review_chrome(session: _ReviewSession, projects: ProjectService) -> 
         icon=ic.CHEVRON_RIGHT,
     ):
         if _is_dirty(page_id):
-            st.warning(
-                "Unsaved changes on this page — Save first, or click Next page again to discard."
-            )
-            if st.session_state.get("rw_force_leave") == page_id:
-                st.session_state.pop("rw_force_leave", None)
-                _navigate_to_entry(entries[idx + 1])
-                st.session_state.pop(f"rw_buf_{page_id}", None)
-                st.rerun()
-            st.session_state["rw_force_leave"] = page_id
+            st.session_state["rw_pending_leave"] = {"page_id": page_id, "target_idx": idx + 1}
         else:
+            st.session_state.pop("rw_pending_leave", None)
             _navigate_to_entry(entries[idx + 1])
             st.rerun()
     with nav[3]:
@@ -482,6 +468,21 @@ def _render_review_chrome(session: _ReviewSession, projects: ProjectService) -> 
                 st.error(str(exc))
     else:
         nav[6].write("")
+
+    pending = st.session_state.get("rw_pending_leave")
+    if isinstance(pending, dict) and pending.get("page_id") == page_id:
+        target_idx = pending.get("target_idx")
+        st.warning("Unsaved changes on this page. Save first, or discard to leave.")
+        stay, discard = st.columns(2)
+        if stay.button("Stay", key="rw_stay_leave"):
+            st.session_state.pop("rw_pending_leave", None)
+            st.rerun()
+        if discard.button("Discard & leave", key="rw_discard_leave", type="primary"):
+            st.session_state.pop("rw_pending_leave", None)
+            st.session_state.pop(f"rw_buf_{page_id}", None)
+            if isinstance(target_idx, int) and 0 <= target_idx < total:
+                _navigate_to_entry(entries[target_idx])
+            st.rerun()
 
     from transcribe.ui.thumbnails_view import render_thumbnails_view, thumbs_mode_active
 
@@ -868,6 +869,7 @@ def _advance_after_reviewed(entries: list[dict[str, str]], idx: int) -> None:
     if idx + 1 < len(entries):
         _navigate_to_entry(entries[idx + 1])
     st.session_state.pop("rw_force_leave", None)
+    st.session_state.pop("rw_pending_leave", None)
 
 
 def _render_evidence_strip(

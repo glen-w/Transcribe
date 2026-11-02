@@ -19,9 +19,9 @@ Non-goals for the whole programme: GPU/training loop, new analysis modules, `com
 
 ---
 
-## Wave 1 — Cover Open + dirty leave
+## Wave 1 — Cover Open + dirty leave — [x]
 
-Library cover Open is a visible control. Review dirty-leave is an explicit Discard & leave (not a second Prev/Next).
+Library cover Open is a visible control under the thumb (`tx_open_cover_*`). Review dirty-leave is Stay / Discard & leave (`rw_pending_leave`).
 
 ## Wave 2 — Auto-tag suppression
 

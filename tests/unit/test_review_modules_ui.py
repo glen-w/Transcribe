@@ -135,3 +135,11 @@ def test_review_module_removal_allows_detectors_only_remainder() -> None:
     apply_pending_review_module_removal(ss)
     assert ss["run_analysis_preset"] == "Custom"
     assert ss["run_analysis_custom_modules"] == []
+
+
+def test_review_dirty_leave_is_explicit_discard() -> None:
+    source = Path("src/transcribe/ui/review_workbench.py").read_text(encoding="utf-8")
+    assert "Discard & leave" in source
+    assert "rw_pending_leave" in source
+    assert "click Previous page again" not in source
+    assert "click Next page again" not in source
