@@ -23,6 +23,18 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
         print(f"Created project at {paths.root}")
         return 0
 
+    if args.cmd == "pages":
+        paths = open_project_paths(args.project)
+        projects = ProjectService(paths, clock=clock, ids=ids)
+        if args.pages_cmd == "reorder":
+            project = projects.reorder_pages(args.page_ids)
+        elif args.pages_cmd == "move-to-date-cluster":
+            project = projects.move_page_to_date_cluster(args.page_id)
+        else:
+            return None
+        print(" ".join(page.page_id for page in project.pages))
+        return 0
+
     if args.cmd == "models":
         url = normalize_base_url(args.base_url or default_ollama_base_url())
         if not is_local_machine_host(url):

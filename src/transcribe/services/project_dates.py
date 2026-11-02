@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from transcribe.domain.dates import (
@@ -15,10 +16,55 @@ from transcribe.domain.dates import (
 )
 from transcribe.domain.models import PageIndex, Project
 from transcribe.domain.validation import validate_project
+from transcribe.errors import ProjectError
 from transcribe.persistence.atomic import read_json, write_json_atomic
 from transcribe.persistence.locks import mutation_lock
 from transcribe.persistence.schema import require_format
 from transcribe.ports import to_iso
+
+
+def splice_page_after_date_cluster(pages: Sequence[PageIndex], page_id: str) -> list[PageIndex]:
+    """Return a new ``pages`` order with ``page_id`` placed by date cluster.
+
+    Confirmed (``date_approved``) pages sharing date ``D`` form a contiguous
+    cluster; the moved page is inserted after that cluster's last page. When no
+    such cluster exists, insert after the last page whose approved date is not
+    clearly after ``D`` (chronological). Does not mutate on-disk ``page_index``.
+    """
+    idx = next((i for i, page in enumerate(pages) if page.page_id == page_id), None)
+    if idx is None:
+        raise ProjectError(f"unknown page_id: {page_id}")
+    page = pages[idx]
+    if page.date is None:
+        raise ProjectError("cannot move an undated page to a date cluster")
+    target = page.date
+    remaining = [p for p in pages if p.page_id != page_id]
+
+    def _is_confirmed_cluster_member(other: PageIndex) -> bool:
+        return bool(other.date_approved and other.date is not None and other.date == target)
+
+    cluster_end: int | None = None
+    i = 0
+    while i < len(remaining):
+        if _is_confirmed_cluster_member(remaining[i]):
+            j = i
+            while j + 1 < len(remaining) and _is_confirmed_cluster_member(remaining[j + 1]):
+                j += 1
+            cluster_end = j
+            break
+        i += 1
+
+    if cluster_end is not None:
+        insert_at = cluster_end + 1
+    else:
+        insert_at = 0
+        for i, other in enumerate(remaining):
+            if other.date is None or not other.date_approved:
+                continue
+            if not target.clearly_before(other.date):
+                insert_at = i + 1
+
+    return remaining[:insert_at] + [page] + remaining[insert_at:]
 
 
 class ProjectDateOps:

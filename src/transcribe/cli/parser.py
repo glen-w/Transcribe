@@ -170,6 +170,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_export.add_argument("--title", default=None, help="Override anthology title")
 
+    p_pages = sub.add_parser("pages", help="Reorder notebook pages (pages array only)")
+    pages_sub = p_pages.add_subparsers(dest="pages_cmd", required=True)
+    p_pages_reorder = pages_sub.add_parser(
+        "reorder",
+        help="Set notebook order from a permutation of page ids",
+    )
+    p_pages_reorder.add_argument("project", type=Path)
+    p_pages_reorder.add_argument(
+        "page_ids",
+        nargs="+",
+        help="Every page_id exactly once; does not rename render directories",
+    )
+    p_pages_move = pages_sub.add_parser(
+        "move-to-date-cluster",
+        help="Insert a page after the confirmed cluster for its date",
+    )
+    p_pages_move.add_argument("project", type=Path)
+    p_pages_move.add_argument("page_id")
+
     p_status = sub.add_parser("status", help="Show project page statuses")
     p_status.add_argument("project", type=Path)
 

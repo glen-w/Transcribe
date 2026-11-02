@@ -32,11 +32,11 @@ from transcribe.errors import JobConflictError, ProjectError
 from transcribe.corpus.paths import CorpusPaths
 from transcribe.paths import ProjectPaths
 from transcribe.persistence.atomic import read_json, write_json_atomic
-from transcribe.persistence.locks import job_lock_held, mutation_lock
+from transcribe.persistence.locks import analysis_lock_held, job_lock_held, mutation_lock
 from transcribe.persistence.schema import require_format
 from transcribe.ports import Clock, IdGenerator, to_iso
 from transcribe.runtime_paths import default_ollama_base_url
-from transcribe.services.project_dates import ProjectDateOps
+from transcribe.services.project_dates import ProjectDateOps, splice_page_after_date_cluster
 from transcribe.services.project_declutter import DeclutterReapplyStats, ProjectDeclutter
 from transcribe.services.project_review_repair import ProjectReviewRepair
 
@@ -434,6 +434,80 @@ class ProjectService:
                     source_file.unlink(missing_ok=True)
                 except OSError:
                     pass
+            return current
+
+    def _refuse_reorder_if_busy(self) -> None:
+        if job_lock_held(self.paths.job_lock):
+            raise JobConflictError("cannot reorder pages while an OCR job is running")
+        if analysis_lock_held(self.paths.analysis_lock):
+            raise JobConflictError("cannot reorder pages while an analysis job is running")
+
+    def reorder_pages(self, page_ids: Sequence[str]) -> Project:
+        """Permute notebook order (the ``pages`` array) without touching ``page_index``.
+
+        ``page_ids`` must be a permutation of every current page id. Refuses
+        duplicate/missing ids, an empty list, and OCR/analysis locks. On-disk
+        render directories stay at ``pages/<source_id>/<page_index>/``.
+        """
+        self._refuse_reorder_if_busy()
+        ordered = list(page_ids)
+        if not ordered:
+            raise ProjectError("empty page permutation")
+        if len(ordered) != len(set(ordered)):
+            raise ProjectError("duplicate page_id in permutation")
+
+        with mutation_lock(self.paths.mutation_lock):
+            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
+            current = Project.from_dict(payload)
+            existing = [page.page_id for page in current.pages]
+            if len(ordered) != len(existing) or set(ordered) != set(existing):
+                raise ProjectError("permutation must list every page_id exactly once")
+            if ordered == existing:
+                return current
+            index_by_id = {page.page_id: page.page_index for page in current.pages}
+            by_id = {page.page_id: page for page in current.pages}
+            current.pages = [by_id[page_id] for page_id in ordered]
+            for page in current.pages:
+                if page.page_index != index_by_id[page.page_id]:
+                    raise ProjectError("reorder must not change page_index")
+            self._dates._reinfer_unapproved_page_dates(
+                current.pages,
+                cover_page_id=current.cover_page_id,
+                start_idx=0,
+                cover_look_ahead=False,
+            )
+            current.updated_at = to_iso(self.clock.now())
+            validate_project(current)
+            write_json_atomic(self.paths.manifest, current.as_dict())
+            return current
+
+    def move_page_to_date_cluster(self, page_id: str) -> Project:
+        """Insert ``page_id`` after the confirmed cluster for its date.
+
+        Undated pages are refused. No on-disk ``page_index`` rename.
+        """
+        self._refuse_reorder_if_busy()
+        with mutation_lock(self.paths.mutation_lock):
+            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
+            current = Project.from_dict(payload)
+            self._require_page(current, page_id)
+            new_order = splice_page_after_date_cluster(current.pages, page_id)
+            if [page.page_id for page in new_order] == [page.page_id for page in current.pages]:
+                return current
+            index_by_id = {page.page_id: page.page_index for page in current.pages}
+            current.pages = new_order
+            for page in current.pages:
+                if page.page_index != index_by_id[page.page_id]:
+                    raise ProjectError("reorder must not change page_index")
+            self._dates._reinfer_unapproved_page_dates(
+                current.pages,
+                cover_page_id=current.cover_page_id,
+                start_idx=0,
+                cover_look_ahead=False,
+            )
+            current.updated_at = to_iso(self.clock.now())
+            validate_project(current)
+            write_json_atomic(self.paths.manifest, current.as_dict())
             return current
 
     def approve_page_date(

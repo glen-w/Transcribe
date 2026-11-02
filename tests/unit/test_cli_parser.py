@@ -42,6 +42,9 @@ def test_build_parser_registers_core_commands() -> None:
         "restore",
         "corpus-doctor",
         "detect",
+        "pages",
+        "reorder",
+        "move-to-date-cluster",
     ):
         assert name in dests, name
 

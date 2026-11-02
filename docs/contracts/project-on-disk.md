@@ -76,6 +76,10 @@ Writers load → modify → validate → atomically replace `project.json` under
 
 `ProjectService.delete_page` removes one page (manifest entry, result JSON, thumb, and page directory artifacts). Later pages in the same source are reindexed so `page_index` stays contiguous; a source with no remaining pages is removed. Clearing `cover_page_id` when the cover is deleted is required. Refuses when the notebook would become empty (delete the notebook instead) or while an OCR job lock is held. UI: page viewer → Delete page.
 
+### Page reorder
+
+`ProjectService.reorder_pages` permutes the `pages` array only. It does **not** rename `pages/<source_id>/<page_index>/` or change `page_index`. `move_page_to_date_cluster` inserts a dated page after a contiguous confirmed (`date_approved`) cluster of the same date, or chronologically when no cluster exists. Both refuse OCR and analysis locks. CLI: `transcribe pages reorder` / `transcribe pages move-to-date-cluster`. Unapproved inherited dates are re-inferred after a move.
+
 ## `content_revision` (notebook content identity)
 
 `content_revision` is the hex SHA-256 of a canonical JSON object describing **exportable notebook content** (all pages in project order). It is distinct from analysis `content_fingerprint` ([analysis-document.md](analysis-document.md)), which may omit blank/excluded pages and use analysis split profiles.

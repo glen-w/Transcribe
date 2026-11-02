@@ -39,7 +39,7 @@ Product buckets imported / failed / duplicated / needs-review over existing Impo
 
 `remove_binding_gutter` then `remove_edge_shadows`. Pillow crop insets only. `DECLUTTER_VERSION` 4.
 
-## Wave 6 — Page reorder kernel
+## Wave 6 — Page reorder kernel — [x]
 
 `ProjectService.reorder_pages` permutes the `pages` array. `move_page_to_date_cluster` inserts after a confirmed date cluster. CLI. No on-disk `page_index` reindex.
 

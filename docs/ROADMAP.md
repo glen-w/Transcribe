@@ -128,7 +128,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 | 3 | **Detect cancel** | [x] | W3 | Stop after current window; kernel `cancel_check` already exists |
 | 4 | **U4 Inbox polish** | [x] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
 | 5 | **Visual declutter expansion** | [x] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
-| 6 | **Page reorder / date repair** | [?] | W6–W7 | `pages` array permute + date-cluster action; drag/drop island optional |
+| 6 | **Page reorder / date repair** | [~] | W6–W7 | Kernel shipped (`reorder_pages` / CLI); UI move controls remain |
 | 7 | **Hand-model bring-back (external)** | [~] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |
 | 8 | **L2 `load()` default** | [?] | W9 | `reconcile=False` by default; explicit reopen path |
 
