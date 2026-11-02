@@ -68,6 +68,7 @@ Other contracts (including analysis-run-storage, detection-run-storage, and page
 - Page diary dates may be auto-suggested (`date_source: extracted|inherited`) or human-approved. Invariants: `date=null` ⇒ `date_approved=true` and `date_source=null`; approved dates have `date_source=null`; unapproved dates require a source. Legacy manifests without these keys load as approved.
 - Optional additive `review_status` on each page: `unreviewed` (default when absent) \| `needs_attention` \| `reviewed` \| `skipped`. This is human OCR-review state, distinct from date approval. `reviewed` is valid only while the page-result fingerprints still match the current effective text and OCR evidence ([page-result.md](page-result.md)). Writers omit the key when `unreviewed`.
 - Optional additive `ignored` on each page (default `false`; writers omit the key when false). Ignored pages stay in the notebook and in JSON export. Reading hides them by default; exported reading formats omit them when `export.exclude_ignored_pages` is on (the same workspace default). Distinct from `analysis_excluded`.
+- Optional additive `suppressed_auto_tags` (`string[]` of slugs; writers omit when empty). Auto-tag / `union_page_tags` skip these slugs on that page until an explicit Apply clears the tombstone. Distinct from `tags` (current assignments).
 
 Writers load → modify → validate → atomically replace `project.json` under the mutation lock. Callers must not wholesale-write a stale in-memory `Project` that was loaded before an unrelated settings/metadata change.
 

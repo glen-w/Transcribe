@@ -189,3 +189,50 @@ def test_rewrite_skips_notebook_with_job_lock(tmp_path: Path, monkeypatch):
         assert svc.load_catalog().get_by_slug("renamed") is not None
     finally:
         held.release()
+
+
+
+def test_union_skips_suppressed_auto_tags_until_cleared(tmp_path: Path):
+    runtime = _runtime(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("nb")
+    projects = _notebook(runtime, "nb1", clock, ids)
+    pages = projects.load().pages
+    page_id = pages[0].page_id
+    svc = TagService(runtime, clock=clock, ids=SequentialIds("tag"))
+    n = svc.union_page_tags(projects, [page_id], "poetry")
+    assert n == 1
+    n = svc.drop_page_tags(projects, [page_id], "poetry", suppress=True)
+    assert n == 1
+    after = projects.load(reconcile=False)
+    assert "poetry" not in after.pages[0].tags
+    assert "poetry" in after.pages[0].suppressed_auto_tags
+    assert "suppressed_auto_tags" in after.pages[0].as_dict()
+    n = svc.union_page_tags(projects, [page_id], "poetry")
+    assert n == 0
+    still = projects.load(reconcile=False)
+    assert "poetry" not in still.pages[0].tags
+    n = svc.union_page_tags(projects, [page_id], "poetry", clear_suppression=True)
+    assert n == 1
+    restored = projects.load(reconcile=False)
+    assert "poetry" in restored.pages[0].tags
+    assert restored.pages[0].suppressed_auto_tags == []
+    assert "suppressed_auto_tags" not in restored.pages[0].as_dict()
+
+
+def test_assign_page_suppresses_removed_slugs(tmp_path: Path):
+    runtime = _runtime(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("nb")
+    projects = _notebook(runtime, "nb1", clock, ids)
+    page_id = projects.load().pages[0].page_id
+    svc = TagService(runtime, clock=clock, ids=SequentialIds("tag"))
+    svc.assign_page(projects, page_id, ["poetry", "travel"])
+    svc.assign_page(projects, page_id, ["travel"])
+    after = projects.load(reconcile=False)
+    assert after.pages[0].tags == ["travel"]
+    assert after.pages[0].suppressed_auto_tags == ["poetry"]
+    n = svc.union_page_tags(projects, [page_id], "poetry")
+    assert n == 0
+    svc.assign_page(projects, page_id, ["travel", "poetry"])
+    restored = projects.load(reconcile=False)
+    assert "poetry" in restored.pages[0].tags
+    assert "poetry" not in restored.pages[0].suppressed_auto_tags

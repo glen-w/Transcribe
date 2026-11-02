@@ -182,7 +182,10 @@ def render_page_detection_tag_row(
             ):
                 try:
                     det_svc.apply_finding_tag(
-                        finding, [page_id], approve_finding=len(span_ids) == 1
+                        finding,
+                        [page_id],
+                        approve_finding=len(span_ids) == 1,
+                        clear_suppression=True,
                     )
                     bump_archive_generation(build_runtime_paths())
                     st.rerun()

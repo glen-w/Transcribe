@@ -143,8 +143,13 @@ class DetectionService:
         page_ids: list[str],
         *,
         approve_finding: bool = False,
+        clear_suppression: bool = False,
     ) -> int:
-        """Union the finding tag onto ``page_ids``. Returns how many pages changed."""
+        """Union the finding tag onto ``page_ids``. Returns how many pages changed.
+
+        Auto-tag leaves ``PageIndex.suppressed_auto_tags`` in place. Pass
+        ``clear_suppression=True`` for an explicit Apply control.
+        """
         if finding.review_status == "rejected":
             return 0
         eligible = self._eligible_tag_page_ids(finding, page_ids)
@@ -166,6 +171,7 @@ class DetectionService:
             missing,
             slug,
             label=label,
+            clear_suppression=clear_suppression,
         )
         if approve_finding:
             self._persist_review(finding, "approved")

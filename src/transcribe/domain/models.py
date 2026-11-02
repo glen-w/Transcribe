@@ -428,6 +428,7 @@ class PageIndex:
     analysis_excluded: bool = False
     ignored: bool = False
     review_status: str = "unreviewed"
+    suppressed_auto_tags: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         date, approved, source = canonicalize_page_date_state(
@@ -448,6 +449,9 @@ class PageIndex:
         }
         if self.ignored:
             payload["ignored"] = True
+        suppressed = normalize_tags(self.suppressed_auto_tags)
+        if suppressed:
+            payload["suppressed_auto_tags"] = suppressed
         status = self.review_status or "unreviewed"
         if status != "unreviewed":
             payload["review_status"] = status
@@ -473,6 +477,7 @@ class PageIndex:
             analysis_excluded=bool(data.get("analysis_excluded", False)),
             ignored=bool(data.get("ignored", False)),
             review_status=status,
+            suppressed_auto_tags=normalize_tags(data.get("suppressed_auto_tags")),
         )
 
     def set_date_state(

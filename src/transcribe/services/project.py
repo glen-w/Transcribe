@@ -279,7 +279,17 @@ class ProjectService:
                     continue
                 found = True
                 if tags is not _UNSET:
-                    page.tags = normalize_tags(tags)  # type: ignore[arg-type]
+                    new_tags = normalize_tags(tags)  # type: ignore[arg-type]
+                    old_set = set(page.tags)
+                    new_set = set(new_tags)
+                    removed = [slug for slug in page.tags if slug not in new_set]
+                    added = new_set - old_set
+                    page.tags = new_tags
+                    suppressed = [slug for slug in page.suppressed_auto_tags if slug not in added]
+                    for slug in removed:
+                        if slug not in suppressed:
+                            suppressed.append(slug)
+                    page.suppressed_auto_tags = normalize_tags(suppressed)
                 if ignored is not _UNSET:
                     page.ignored = bool(ignored)
                 break

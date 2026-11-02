@@ -23,7 +23,7 @@ Non-goals for the whole programme: GPU/training loop, new analysis modules, `com
 
 Library cover Open is a visible control under the thumb (`tx_open_cover_*`). Review dirty-leave is Stay / Discard & leave (`rw_pending_leave`).
 
-## Wave 2 — Auto-tag suppression
+## Wave 2 — Auto-tag suppression — [x]
 
 Additive `suppressed_auto_tags` on `PageIndex`. Re-running auto-tag does not re-apply slugs the user removed. `transcribe.detection-auto-tag` v1 stays detector defaults.
 

@@ -86,6 +86,6 @@ Filter: **AND** over required slugs (viewer click-to-constrain and Library page-
 
 ## Detection auto-tag (Transcribe host)
 
-Opt-in, **not** part of detector `cache_config` / cache identity. After a successful publish (or from already-published findings), union tags onto every page in each finding span. Default slug is `normalize_slug(finding_type)`. The **names** detector unions each detected person name (`detector_data.tag_slug` / `name`) instead of `names`. Skip `rejected` findings. Re-running with auto-tag on re-adds a slug the user removed; turn the checkbox off to stop.
+Opt-in, **not** part of detector `cache_config` / cache identity. After a successful publish (or from already-published findings), union tags onto every page in each finding span. Default slug is `normalize_slug(finding_type)`. The **names** detector unions each detected person name (`detector_data.tag_slug` / `name`) instead of `names`. Skip `rejected` findings. Re-running with auto-tag on does **not** re-apply a slug listed on that page's `suppressed_auto_tags` (written when the user removes the slug in Review tags or Detect drop-tag). An explicit Apply control may clear the tombstone. Per-detector defaults still live in `detection-auto-tag.json`; turn the checkbox off to stop tagging entirely.
 
 Transcribe prefs file `{TRANSCRIBE_DATA_DIR}/config/detection-auto-tag.json` (`format: transcribe.detection-auto-tag`, schema 1) stores per-detector defaults. It is not fingerprint-relevant.

@@ -120,8 +120,13 @@ class TagService:
         *,
         label: str | None = None,
         color: str | None = None,
+        clear_suppression: bool = False,
     ) -> int:
-        """Add ``slug`` to each page (additive). Returns how many pages changed."""
+        """Add ``slug`` to each page (additive). Returns how many pages changed.
+
+        Pages that list ``slug`` in ``suppressed_auto_tags`` are skipped unless
+        ``clear_suppression`` is true (manual Apply).
+        """
         slugs = normalize_slugs([slug])
         if not slugs:
             return 0
@@ -136,6 +141,12 @@ class TagService:
             current = Project.from_dict(payload)
             for page in current.pages:
                 if page.page_id not in wanted:
+                    continue
+                if clear_suppression and token in page.suppressed_auto_tags:
+                    page.suppressed_auto_tags = [
+                        slug for slug in page.suppressed_auto_tags if slug != token
+                    ]
+                if token in page.suppressed_auto_tags:
                     continue
                 if token in page.tags:
                     continue
@@ -154,8 +165,14 @@ class TagService:
         projects: ProjectService,
         page_ids: Sequence[str],
         slug: str,
+        *,
+        suppress: bool = False,
     ) -> int:
-        """Remove ``slug`` from each page. Returns how many pages changed."""
+        """Remove ``slug`` from each page. Returns how many pages changed.
+
+        When ``suppress`` is true, also record the slug on
+        ``PageIndex.suppressed_auto_tags`` so auto-tag will not re-apply it.
+        """
         slugs = normalize_slugs([slug])
         if not slugs:
             return 0
@@ -168,10 +185,17 @@ class TagService:
             for page in current.pages:
                 if page.page_id not in wanted:
                     continue
-                if token not in page.tags:
-                    continue
-                page.tags = [tag for tag in page.tags if tag != token]
-                changed += 1
+                did = False
+                if token in page.tags:
+                    page.tags = [tag for tag in page.tags if tag != token]
+                    did = True
+                if suppress and token not in page.suppressed_auto_tags:
+                    page.suppressed_auto_tags = normalize_slugs(
+                        [*page.suppressed_auto_tags, token]
+                    )
+                    did = True
+                if did:
+                    changed += 1
             if changed:
                 current.updated_at = to_iso(self.clock.now())
                 validate_project(current)
