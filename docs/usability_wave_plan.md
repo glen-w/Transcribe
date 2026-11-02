@@ -424,7 +424,7 @@ U4 Inbox polish may remain open after the usability wave is declared done for U0
 - [x] Corpus acceptance gate green
 - [x] Inbox / import recovery UI + CLI as supported surfaces
 - [x] Public docs claim bulk/inbox only after gate
-- [ ] Richer Inbox outcomes taxonomy / optional inbox-dir scan (polish)
+- [x] Richer Inbox outcomes taxonomy / optional inbox-dir scan (polish)
 
 ---
 

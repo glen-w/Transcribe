@@ -31,7 +31,7 @@ Additive `suppressed_auto_tags` on `PageIndex`. Re-running auto-tag does not re-
 
 Standalone Detect can Stop after the current window (`DetectionRunCoordinator` + `cancel_check`). No new job-status enum.
 
-## Wave 4 — U4 Inbox polish
+## Wave 4 — U4 Inbox polish — [x]
 
 Product buckets imported / failed / duplicated / needs-review over existing ImportRun fields. Prefill/scan `TRANSCRIBE_INBOX_DIR`. Corpus-integrity gate stays green.
 

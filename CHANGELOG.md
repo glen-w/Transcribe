@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library cover Open is a labelled control under the thumbnail. Review unsaved navigation uses Stay / Discard & leave instead of a second Prev/Next click.
 - Auto-tag no longer re-applies slugs the user removed (`PageIndex.suppressed_auto_tags`). Explicit Apply can clear the tombstone.
 - Standalone Detect can Stop after the current window (background coordinator, same cancel path Analyse already used).
+- Import Batch shows imported / failed / duplicated / needs-review outcomes and can scan `TRANSCRIBE_INBOX_DIR`.
 
 ## [1.0.1] - 2026-11-02
 

@@ -15,6 +15,7 @@ from transcribe.corpus.adapters import (
     scan_folder_notebooks,
 )
 from transcribe.corpus.folder_overwrite import prepare_folder_overwrite
+from transcribe.corpus.import_outcomes import format_outcome_summary, summarize_import_run
 from transcribe.corpus.import_run import (
     ImportRun,
     ImportRunStore,
@@ -101,6 +102,14 @@ def _render_single_folder(
     ids: UuidGenerator,
 ) -> None:
     st.markdown("#### Import folder")
+    inbox = str(runtime.inbox_dir)
+    if "import_inbox_folder" not in st.session_state:
+        st.session_state["import_inbox_folder"] = inbox
+    scan_cols = st.columns([3, 1])
+    with scan_cols[1]:
+        if st.button("Scan inbox", key="import_inbox_scan_single", help=f"Use {inbox}"):
+            st.session_state["import_inbox_folder"] = inbox
+            st.rerun()
     folder_text = st.text_input(
         "Folder path",
         key="import_inbox_folder",
@@ -168,6 +177,14 @@ def _render_parent_folders(
         "Each immediate child folder with JPEG/PNG/PDF files becomes a notebook "
         "named after that folder. Nested folders and loose files in the parent are ignored."
     )
+    inbox = str(runtime.inbox_dir)
+    if "import_inbox_parent" not in st.session_state:
+        st.session_state["import_inbox_parent"] = inbox
+    scan_cols = st.columns([3, 1])
+    with scan_cols[1]:
+        if st.button("Scan inbox", key="import_inbox_scan_parent", help=f"Use {inbox}"):
+            st.session_state["import_inbox_parent"] = inbox
+            st.rerun()
     parent_text = st.text_input(
         "Parent folder path",
         key="import_inbox_parent",
@@ -357,18 +374,19 @@ def render_import_inbox(runtime: RuntimePaths) -> None:
                 queue_transcribe_imported(flashed)
 
     for run in runs[:20]:
-        committed = sum(1 for i in run.items if i.state == "committed")
-        skipped = sum(1 for i in run.items if i.state == "skipped")
-        failed = sum(1 for i in run.items if i.state == "failed")
         pending = sum(1 for i in run.items if i.state == "pending")
+        buckets = summarize_import_run(run)
         with st.expander(
-            f"`{run.import_run_id}` · {run.status} · "
-            f"{committed} ok / {skipped} skipped / {failed} failed / {pending} pending",
+            f"`{run.import_run_id}` · {run.status} · {format_outcome_summary(buckets)}",
             expanded=run.import_run_id == flash,
         ):
             st.caption(
                 f"plan `{run.plan_id}` · policy `{run.import_policy_id}` · "
                 f"updated {run.updated_at}"
+            )
+            st.caption(
+                f"imported {buckets['imported']} · failed {buckets['failed']} · "
+                f"duplicated {buckets['duplicated']} · needs-review {buckets['needs_review']}"
             )
             for item in run.items:
                 bits = [item.state]

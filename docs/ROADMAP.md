@@ -126,7 +126,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 | 1 | **Cover Open + dirty leave** | [x] | W1 | Visible Library cover Open; Review Discard & leave (not second Prev/Next) |
 | 2 | **Auto-tag suppression** | [x] | W2 | Re-run does not re-apply slugs the user removed |
 | 3 | **Detect cancel** | [x] | W3 | Stop after current window; kernel `cancel_check` already exists |
-| 4 | **U4 Inbox polish** | [?] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
+| 4 | **U4 Inbox polish** | [x] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
 | 5 | **Visual declutter expansion** | [?] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
 | 6 | **Page reorder / date repair** | [?] | W6–W7 | `pages` array permute + date-cluster action; drag/drop island optional |
 | 7 | **Hand-model bring-back (external)** | [~] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |

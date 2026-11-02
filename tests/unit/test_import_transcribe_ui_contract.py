@@ -110,3 +110,11 @@ def test_ocr_batch_run_format_registered() -> None:
     assert "mode" in contract
     assert "vision_model_names" in contract
     assert "Multipass / compare-models over a batch" not in contract
+
+
+def test_inbox_shows_outcome_buckets_and_inbox_dir_scan() -> None:
+    assert "summarize_import_run" in INBOX
+    assert "needs-review" in INBOX or "needs_review" in INBOX
+    assert "Scan inbox" in INBOX
+    assert "runtime.inbox_dir" in INBOX
+    assert "import_inbox_scan_single" in INBOX
