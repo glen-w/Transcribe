@@ -143,11 +143,43 @@ class EdgeShadowParams:
     max_band_cap_px: int = 40
 
 
+@dataclass(frozen=True)
+class LidSliverParams:
+    """Very thin uniform lid/background sliver below the normal min band.
+
+    Existing walks reject bands thinner than ``_min_band_px`` (8-16px) so a
+    4-15px scanner-lid sliver survives. This op accepts only a full-edge,
+    near-uniform strip whose mean differs clearly from the interior probe.
+    Crop insets only; never touches interior pixels.
+    """
+
+    min_dimension_px: int = 64
+    min_sliver_px: int = 4
+    max_sliver_px: int = 15
+    # Lid slivers are solid dark/coloured scanner-lid bands. Near-paper means
+    # (>= this) belong to overscan/shadow ops or are page-edge gradients.
+    band_mean_max: float = 200.0
+    max_strip_variance: float = 300.0
+    ref_mean_tol: float = 10.0
+    interior_probe_px: int = 16
+    interior_probe_offset_px: int = 2
+    min_mean_delta: float = 25.0
+    paper_inset_px: int = 1
+    min_remaining_fraction_num: int = 70
+    min_remaining_fraction_den: int = 100
+    min_remaining_edge_px: int = 32
+    aspect_min_num: int = 1
+    aspect_min_den: int = 5
+    aspect_max_num: int = 5
+    aspect_max_den: int = 1
+
+
 SCAN_BORDER_PARAMS = ScanBorderParams()
 UNIFORM_OVERSCAN_PARAMS = UniformOverscanParams()
 CORNER_WEDGE_PARAMS = CornerWedgeParams()
 BINDING_GUTTER_PARAMS = BindingGutterParams()
 EDGE_SHADOW_PARAMS = EdgeShadowParams()
+LID_SLIVER_PARAMS = LidSliverParams()
 
 # Multi-pass budget: L-shaped grey+white overscan needs a second crop after the
 # first edge type is removed so full-strip stats become uniform again. Extra
@@ -720,6 +752,93 @@ def detect_edge_shadow_insets(
     )
 
 
+def _walk_lid_sliver_band(
+    *,
+    dim: int,
+    params: LidSliverParams,
+    sample: Callable[[int], tuple[float, float]],
+) -> int:
+    k = 0
+    ref_mean: float | None = None
+    while k < params.max_sliver_px:
+        mean, var = sample(k)
+        if var > params.max_strip_variance:
+            break
+        if ref_mean is not None and abs(mean - ref_mean) > params.ref_mean_tol:
+            break
+        if ref_mean is None:
+            ref_mean = mean
+        k += 1
+    return k
+
+
+def detect_lid_sliver_insets(
+    gray: Image.Image, params: LidSliverParams = LID_SLIVER_PARAMS
+) -> tuple[tuple[int, int, int, int] | None, str]:
+    """Return insets for thin (4-15px) uniform edge slivers or None."""
+    if gray.mode != "L":
+        raise ValueError(f"expected mode L, got {gray.mode!r}")
+    width, height = gray.size
+    if width < params.min_dimension_px or height < params.min_dimension_px:
+        return None, "noop: image below minimum dimension"
+
+    def inset_for(edge: Edge) -> int:
+        dim = width if edge in ("left", "right") else height
+        if edge == "left":
+            sample = lambda k: _strip_stats_vertical(gray, k)  # noqa: E731
+            band = lambda k: _region_mean_vertical(gray, 0, k)  # noqa: E731
+            probe = lambda k, off, n: _region_mean_vertical(gray, k + off, k + off + n)  # noqa: E731
+        elif edge == "right":
+            sample = lambda k: _strip_stats_vertical(gray, width - 1 - k)  # noqa: E731
+            band = lambda k: _region_mean_vertical(gray, width - k, width)  # noqa: E731
+            probe = lambda k, off, n: _region_mean_vertical(  # noqa: E731
+                gray, width - k - off - n, width - k - off
+            )
+        elif edge == "top":
+            sample = lambda k: _strip_stats_horizontal(gray, k)  # noqa: E731
+            band = lambda k: _region_mean_horizontal(gray, 0, k)  # noqa: E731
+            probe = lambda k, off, n: _region_mean_horizontal(gray, k + off, k + off + n)  # noqa: E731
+        else:
+            sample = lambda k: _strip_stats_horizontal(gray, height - 1 - k)  # noqa: E731
+            band = lambda k: _region_mean_horizontal(gray, height - k, height)  # noqa: E731
+            probe = lambda k, off, n: _region_mean_horizontal(  # noqa: E731
+                gray, height - k - off - n, height - k - off
+            )
+        k = _walk_lid_sliver_band(dim=dim, params=params, sample=sample)
+        if k < params.min_sliver_px or k > params.max_sliver_px:
+            return 0
+        remaining = dim - k
+        offset, probe_n = _interior_probe_span(
+            remaining,
+            interior_probe_px=params.interior_probe_px,
+            interior_probe_offset_px=params.interior_probe_offset_px,
+        )
+        if probe_n <= 0:
+            return 0
+        band_mean = band(k)
+        if band_mean > params.band_mean_max:
+            return 0
+        if abs(probe(k, offset, probe_n) - band_mean) < params.min_mean_delta:
+            return 0
+        return min(k + params.paper_inset_px, dim - params.min_remaining_edge_px)
+
+    return _validate_insets(
+        width,
+        height,
+        inset_for("left"),
+        inset_for("top"),
+        inset_for("right"),
+        inset_for("bottom"),
+        min_remaining_edge_px=params.min_remaining_edge_px,
+        min_remaining_fraction_num=params.min_remaining_fraction_num,
+        min_remaining_fraction_den=params.min_remaining_fraction_den,
+        aspect_min_num=params.aspect_min_num,
+        aspect_min_den=params.aspect_min_den,
+        aspect_max_num=params.aspect_max_num,
+        aspect_max_den=params.aspect_max_den,
+    )
+
+
 def _merge_insets(
     a: tuple[int, int, int, int] | None,
     b: tuple[int, int, int, int] | None,
@@ -985,6 +1104,7 @@ def detect_declutter_border_insets(
     wedge_params: CornerWedgeParams = CORNER_WEDGE_PARAMS,
     gutter_params: BindingGutterParams = BINDING_GUTTER_PARAMS,
     shadow_params: EdgeShadowParams = EDGE_SHADOW_PARAMS,
+    lid_params: LidSliverParams = LID_SLIVER_PARAMS,
 ) -> tuple[tuple[int, int, int, int] | None, str]:
     """Detect scanner beds, binding gutters, and residual edge shadows (multi-pass).
 
@@ -1025,6 +1145,8 @@ def detect_declutter_border_insets(
         merged = _merge_insets(merged, gutter_insets)
         shadow_insets, shadow_reason = detect_edge_shadow_insets(working, shadow_params)
         merged = _merge_insets(merged, shadow_insets)
+        lid_insets, lid_reason = detect_lid_sliver_insets(working, lid_params)
+        merged = _merge_insets(merged, lid_insets)
         if merged == (0, 0, 0, 0):
             for reason in (
                 grey_reason,
@@ -1032,6 +1154,7 @@ def detect_declutter_border_insets(
                 wedge_reason,
                 gutter_reason,
                 shadow_reason,
+                lid_reason,
             ):
                 if reason != "noop: no border detected":
                     last_reason = reason

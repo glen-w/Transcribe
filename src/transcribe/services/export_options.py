@@ -230,14 +230,31 @@ BodyFont = str
 
 
 def normalize_body_font(value: str | None) -> str:
-    key = str(value or DEFAULT_BODY_FONT).lower().strip()
+    raw = str(value or DEFAULT_BODY_FONT).strip()
+    key = raw.lower()
     if key in BODY_FONT_CATALOG:
         return key
+    if key.startswith("custom:"):
+        # User-supplied family name: keep only safe CSS identifier characters.
+        name = raw[len("custom:") :].strip().strip('"').strip("'")
+        name = "".join(ch for ch in name if ch.isalnum() or ch in " _-").strip()
+        if name:
+            return f"custom:{name[:60]}"
     return DEFAULT_BODY_FONT
 
 
 def body_font_spec(key: str) -> BodyFontSpec:
-    return BODY_FONT_CATALOG[normalize_body_font(key)]
+    normalized = normalize_body_font(key)
+    if normalized.startswith("custom:"):
+        name = normalized[len("custom:") :]
+        return BodyFontSpec(
+            key=normalized,
+            label=f"{name} (custom)",
+            css_stack=f'"{name}", Georgia, "Times New Roman", serif',
+            pdf_base="serif",
+            google_family=None,
+        )
+    return BODY_FONT_CATALOG[normalized]
 
 
 def body_font_label(key: str) -> str:
@@ -324,6 +341,10 @@ class ExportOptions:
     title_page: bool = True
     cover_image: bool = True
     typography: ExportTypography = field(default_factory=ExportTypography)
+    # 1.2: page tag filters for reading formats (AND include, any exclude).
+    # JSON (transcribe.notebook) always keeps the full notebook.
+    include_tags: tuple[str, ...] = ()
+    exclude_tags: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -335,6 +356,8 @@ class ExportOptions:
             "title_page": self.title_page,
             "cover_image": self.cover_image,
             "typography": self.typography.as_dict(),
+            "include_tags": list(self.include_tags),
+            "exclude_tags": list(self.exclude_tags),
         }
 
     @classmethod
@@ -353,6 +376,8 @@ class ExportOptions:
         breaks = str(data.get("page_breaks") or "per_page").lower()
         if breaks not in ("per_page", "continuous"):
             breaks = "per_page"
+        from transcribe.domain.dates import normalize_tags
+
         return cls(
             formats=formats,
             page_breaks=breaks,  # type: ignore[arg-type]
@@ -362,6 +387,8 @@ class ExportOptions:
             title_page=bool(data.get("title_page", True)),
             cover_image=bool(data.get("cover_image", True)),
             typography=ExportTypography.from_dict(data.get("typography")),
+            include_tags=tuple(normalize_tags(data.get("include_tags"))),
+            exclude_tags=tuple(normalize_tags(data.get("exclude_tags"))),
         )
 
     def wants(self, fmt: ExportFormat) -> bool:
@@ -380,6 +407,8 @@ class ExportConfig:
     title_page: bool = True
     cover_image: bool = True
     typography: ExportTypography = field(default_factory=ExportTypography)
+    include_tags: tuple[str, ...] = ()
+    exclude_tags: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -391,6 +420,8 @@ class ExportConfig:
             "title_page": self.title_page,
             "cover_image": self.cover_image,
             "typography": self.typography.as_dict(),
+            "include_tags": list(self.include_tags),
+            "exclude_tags": list(self.exclude_tags),
         }
 
     @classmethod
@@ -405,6 +436,8 @@ class ExportConfig:
             title_page=opts.title_page,
             cover_image=opts.cover_image,
             typography=opts.typography,
+            include_tags=opts.include_tags,
+            exclude_tags=opts.exclude_tags,
         )
 
     def to_options(self) -> ExportOptions:

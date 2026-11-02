@@ -30,6 +30,7 @@ from transcribe.errors import JobConflictError, ProviderError
 from transcribe.ingest import IngestService
 from transcribe.paths import ProjectPaths
 from transcribe.persistence.atomic import write_json_atomic
+from transcribe.persistence.disk import ensure_disk_budget
 from transcribe.persistence.locks import JobLock, job_lock_held
 from transcribe.ports import Clock, IdGenerator, to_iso
 from transcribe.preprocess import PREPROCESS_VERSION, apply_preprocess
@@ -229,6 +230,17 @@ class JobCoordinator:
         project = self.projects.load(reconcile=False)
         resolve_cleanup_plan_config(project.settings, client=self.cleanup_client)
 
+    def _ensure_disk_budget_or_raise(self, page_ids: list[str] | None = None) -> None:
+        """Fail before scheduling when free disk cannot absorb page writes.
+
+        Estimate is deliberately coarse (16 KiB of result/thumbnail churn per
+        targeted page) on top of the shared 256 MiB headroom. This runs before
+        any page write so a full disk never leaves a half-written notebook.
+        """
+        project = self.projects.load(reconcile=False)
+        targets = page_ids if page_ids is not None else [p.page_id for p in project.pages]
+        ensure_disk_budget(self.paths.results_dir, additional=len(targets) * 16 * 1024)
+
     def start(
         self,
         *,
@@ -237,6 +249,7 @@ class JobCoordinator:
         model_name: str | None = None,
     ) -> str:
         self._validate_cleanup_settings_or_raise()
+        self._ensure_disk_budget_or_raise(page_ids)
         with self._lock:
             if self._job is not None and self._job.thread and self._job.thread.is_alive():
                 raise JobConflictError("a transcription job is already running in this process")
@@ -277,6 +290,7 @@ class JobCoordinator:
     ) -> JobProgress:
         """CLI-friendly synchronous run (still uses job lock)."""
         self._validate_cleanup_settings_or_raise()
+        self._ensure_disk_budget_or_raise(page_ids)
         if not self._job_file_lock.try_acquire():
             raise JobConflictError("another process holds the OCR job lock for this project")
         job_id = self.ids.new_id()
@@ -310,6 +324,7 @@ class JobCoordinator:
         on_progress: Callable[[JobProgress], None] | None = None,
     ) -> JobProgress:
         """Run an already-frozen JobPlan (multipass vision phases)."""
+        self._ensure_disk_budget_or_raise(list(plan.page_ids))
         acquired = False
         if hold_lock:
             if not self._job_file_lock.try_acquire():
@@ -1101,6 +1116,7 @@ def build_coordinator(
     base_url = default_ollama_base_url()
     if paths.manifest.exists():
         try:
+            # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
             project = projects.load(reconcile=True)
             base_url = project.settings.base_url
         except Exception:

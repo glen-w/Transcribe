@@ -400,6 +400,7 @@ class BatchAnalysisCoordinator:
             try:
                 root = self._root_for_item(item)
                 projects = ProjectService(open_project_paths(root), clock=self.clock, ids=self.ids)
+                # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
                 project = projects.load(reconcile=True)
                 if pages_with_text_count(projects, project) == 0:
                     item.state = "skipped"

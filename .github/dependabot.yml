@@ -1,0 +1,19 @@
+# Supply-chain hygiene: keep CI actions and Python deps current in small,
+# reviewable PRs. pip-audit + SBOM run in nightly (see workflows/nightly.yml).
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3

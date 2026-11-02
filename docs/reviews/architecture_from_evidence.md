@@ -6,6 +6,8 @@
 
 **1.0.1 (2026-11-02):** [refactor waves](../dev/refactor_waves_1_0_1.md) landed L4 schema registry, `transcribe.cli`, chart palettes in config, shared batch picker, Review/Reading resolve→chrome→body, and `ProjectService` collaborators. L2 `load()` default remains `reconcile=True`.
 
+**1.2.0:** L2 landed — `load()` now defaults to `reconcile=False`; notebook-open and run-freeze paths pass `reconcile=True` deliberately. See [expansion & hardening wave](../dev/expansion_hardening_wave_1_2.md) Wave 0.
+
 Documentation was treated as a claim to check. This review does not redefine on-disk schemas.
 
 ## A. System model

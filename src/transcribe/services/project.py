@@ -173,7 +173,7 @@ class ProjectService:
             )
         return project
 
-    def _load_unlocked(self, *, reconcile: bool = True) -> Project:
+    def _load_unlocked(self, *, reconcile: bool = False) -> Project:
         if not self.paths.manifest.exists():
             raise ProjectError(f"no project.json at {self.paths.root}")
         payload = require_format(read_json(self.paths.manifest), "transcribe.project")
@@ -183,15 +183,17 @@ class ProjectService:
             self._reconcile_interrupted_locked()
         return project
 
-    def load(self, *, reconcile: bool = True) -> Project:
+    def load(self, *, reconcile: bool = False) -> Project:
         """Load the on-disk notebook. Public read API; reconcile is explicit.
 
-        ``reconcile=True`` (default) is a **write** used on notebook open: recover
-        incomplete ingest, then mark orphaned running OCR attempts interrupted
-        when the job lock is free, then reconcile analysis/detection storage.
-        Mid-run UI, jobs, and nested analysis/detection loads must pass
-        ``reconcile=False``. That still recovers incomplete ingest before
-        trusting the manifest.
+        ``reconcile=False`` (default, 1.2 L2) is a pure read aside from
+        crash-interrupted ingest recovery: it never marks running attempts
+        interrupted. ``reconcile=True`` is a **write** used only on explicit
+        notebook (re)open: recover incomplete ingest, then mark orphaned
+        running OCR attempts interrupted when the job lock is free, then
+        reconcile analysis/detection storage. Notebook-open callers use
+        :meth:`reconcile_interrupted` or pass ``reconcile=True`` deliberately;
+        mid-run UI, jobs, and nested analysis/detection loads use the default.
 
         Does not change ``effective_text()`` semantics, fingerprints, or lock
         order (mutation lock, then job-lock check inside OCR reconcile).

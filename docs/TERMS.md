@@ -29,7 +29,7 @@ This document is an **index of terms only**. It aggregates terminology from auth
 - **Doctor** — Integrity check CLI / Diagnostics. See [public_surfaces.md](public_surfaces.md) · [corpus-integrity.md](contracts/corpus-integrity.md).
 - **Prompt Hub** — Settings catalogue for OCR, cleanup, and detection prompts. See [contracts/prompt-definition.md](contracts/prompt-definition.md).
 - **Detector / DetectionFinding** — Prompt-backed scan and derived span finding. See [detection-definition.md](contracts/detection-definition.md) · [detection-finding.md](contracts/detection-finding.md).
-- **Visual declutter** — Import-time (and Settings re-apply) scanner-border / binding-gutter / edge-shadow crop; not OCR preprocess. See [contracts/source-asset.md](contracts/source-asset.md).
+- **Visual declutter** — Import-time (and Settings re-apply) scanner-border / binding-gutter / edge-shadow / lid-sliver crop (v5); not OCR preprocess. See [contracts/source-asset.md](contracts/source-asset.md).
 - **Notebook order / page order** — The order of the `pages` array in `project.json`; `page_index` is only an on-disk locator and never changes on reorder. See [contracts/project-on-disk.md](contracts/project-on-disk.md#page-reorder) · [runtime/ocr.md](runtime/ocr.md#page-order).
 - **Date cluster** — Contiguous run of pages sharing one confirmed date; **Move to date cluster** splices a page after it. See [contracts/project-on-disk.md](contracts/project-on-disk.md#page-reorder).
 - **Import outcome buckets** — `imported` / `failed` / `duplicated` / `needs-review` summary over ImportRun items. See [contracts/import-run.md](contracts/import-run.md) · [user_guide.md](user_guide.md#bulk-import-and-batch-jobs).
@@ -41,6 +41,10 @@ This document is an **index of terms only**. It aggregates terminology from auth
 - **Install extras** (`[ui]` / `[dev]` / `[export]`) — Packaging profiles, not Analyse presets. See [runtime/installation.md](runtime/installation.md).
 - **Named settings profile** — Activation-pointer overlay under `data/config/profiles/<target>/`. See [workspace-settings.md](contracts/workspace-settings.md) · [runtime/settings.md](runtime/settings.md).
 - **Analyse UI preset** (Quick / Balanced / Thorough / Custom) — Module-set policies for Analyse. See [workspace-settings.md](contracts/workspace-settings.md) · [runtime/analysis.md](runtime/analysis.md).
+- **Collection** — A named, ordered shelf spanning notebooks (workspace organisation, not a tag). See [contracts/notebook-collections.md](contracts/notebook-collections.md).
+- **Archived notebook** — A notebook hidden from default Library/Search/pickers by lifecycle state; never deleted and always in backup. See [contracts/notebook-collections.md](contracts/notebook-collections.md).
+- **Saved search** — A named stored set of search filters (filters only, never results). See [contracts/saved-searches.md](contracts/saved-searches.md).
+- **Quality rating** — A local collect-only quality signal (OCR sample / cleanup / analysis). See [contracts/quality-ratings.md](contracts/quality-ratings.md).
 - **Slice / ContextCollection / Person store / Reconstruction** — Planned post-1.0 autobiography concepts; **not shipped**. Sequencing only: [ROADMAP.md](ROADMAP.md) After 1.0. No contract yet. Not the Mood → Moments analysis module.
 - **ClaimStatus** — Vocabulary map (Evidence / Extraction / Confirmation / Interpretation layers) onto existing `date_approved`, detection `review_status`, and `edited_text`. Documented for the 1.0 foundation checklist; runtime schema waits for After 1.0 contracts. See [ROADMAP.md](ROADMAP.md) Path to 0.9.0 Track C · After 1.0 ClaimStatus table.
 - **0.9.0** — Package cut (U2 + I0–I6) before **1.0**. A stranger-testing round is not a release gate. Intermediate infra cuts: **0.7.0** (I0–I1), **0.8.0** (I2–I3). See [ROADMAP.md](ROADMAP.md) Path to 0.9.0.

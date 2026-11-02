@@ -100,6 +100,34 @@ def test_gate_crash_reopen_interrupts_without_clobber(tmp_path: Path):
 
 
 @pytest.mark.smoke
+def test_gate_default_load_is_read_explicit_reconcile_interrupts(tmp_path: Path):
+    """L2 (1.2): load() default must not interrupt; explicit reopen does."""
+    projects, runner, _clock, _ids, _paths = _project_with_pages(
+        tmp_path,
+        ["Default load is a read with sufficient content for stats module."],
+        prefix="l2",
+    )
+    published = runner.run_module("stats")
+    assert published["outcome"] == "success"
+    storage = AnalysisStorage(projects.paths)
+    orphan = dict(published)
+    orphan["attempt_id"] = "orphan-l2"
+    orphan["attempt_state"] = "running"
+    orphan["published"] = False
+    storage.write_attempt("stats", orphan)
+
+    projects.load()  # default: pure read
+    still = storage.read_attempt("stats", "orphan-l2")
+    assert still is not None
+    assert still["attempt_state"] == "running"
+
+    projects.load(reconcile=True)  # deliberate reopen
+    after = storage.read_attempt("stats", "orphan-l2")
+    assert after is not None
+    assert after["attempt_state"] == "interrupted"
+
+
+@pytest.mark.smoke
 def test_gate_stale_detection_after_edit(tmp_path: Path):
     """Exit bullet 2 — health becomes stale after notebook edit."""
     projects, runner, _clock, _ids, paths = _project_with_pages(

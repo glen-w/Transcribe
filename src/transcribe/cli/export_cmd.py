@@ -57,9 +57,40 @@ def _cmd_export(args: argparse.Namespace, *, clock, ids) -> int:
     from transcribe.services.export_options import ExportOptions, ExportTypography
 
     roots: list[Path] = []
+    if getattr(args, "collection", None):
+        from transcribe.services.archive import ArchiveFilters, ArchiveService
+        from transcribe.services.collections import NotebookCollectionsStore
+
+        runtime = runtime_paths()
+        store = NotebookCollectionsStore(runtime)
+        collection = store.load().collection(args.collection)
+        if collection is None:
+            print(f"error: no collection {args.collection!r}", file=sys.stderr)
+            return 2
+        by_id = {
+            nb.project_id: nb.root
+            for nb in ArchiveService(runtime).list_notebooks(
+                order="oldest",
+                filters=ArchiveFilters(include_archived=True),
+            )
+        }
+        roots.extend(by_id[pid] for pid in collection.project_ids if pid in by_id)
+        if not roots:
+            print("error: collection has no notebooks on disk", file=sys.stderr)
+            return 2
     if args.notebooks:
         roots.extend(args.notebooks)
-    if args.project is not None:
+    # With --collection / --notebooks supplying the notebooks, a single
+    # positional that is not a notebook directory is the destination.
+    dest_override: Path | None = None
+    if (
+        roots
+        and args.project is not None
+        and args.dest is None
+        and not (Path(args.project) / "project.json").exists()
+    ):
+        dest_override = Path(args.project)
+    elif args.project is not None:
         if args.project not in roots:
             roots.insert(0, args.project)
     if not roots:
@@ -80,8 +111,11 @@ def _cmd_export(args: argparse.Namespace, *, clock, ids) -> int:
         formats = frozenset(str(f).lower() for f in args.formats)  # type: ignore[arg-type]
 
     typo = base.typography
+    font_key = args.body_font or typo.body_font
+    if getattr(args, "custom_font", None):
+        font_key = f"custom:{args.custom_font}"
     typo = ExportTypography(
-        body_font=args.body_font or typo.body_font,  # type: ignore[arg-type]
+        body_font=font_key,  # type: ignore[arg-type]
         body_size_pt=float(args.body_size if args.body_size is not None else typo.body_size_pt),
         line_height=float(args.line_height if args.line_height is not None else typo.line_height),
         paragraph_spacing_em=typo.paragraph_spacing_em,
@@ -93,8 +127,12 @@ def _cmd_export(args: argparse.Namespace, *, clock, ids) -> int:
         page_breaks=args.page_breaks or base.page_breaks,  # type: ignore[arg-type]
         include_dates=base.include_dates,
         include_blank_pages=base.include_blank_pages,
+        exclude_ignored_pages=base.exclude_ignored_pages,
         title_page=base.title_page,
+        cover_image=base.cover_image,
         typography=typo,
+        include_tags=tuple(args.include_tags or ()),
+        exclude_tags=tuple(args.exclude_tags or ()),
     )
 
     snapshots = []
@@ -109,7 +147,9 @@ def _cmd_export(args: argparse.Namespace, *, clock, ids) -> int:
         snapshots.append(ExportService.capture_snapshot_at(nb_paths, nb_projects))
 
     assert primary_paths is not None and primary_projects is not None
-    if args.dest is not None:
+    if dest_override is not None:
+        dest = dest_override
+    elif args.dest is not None:
         dest = args.dest
     elif os.getenv("TRANSCRIBE_EXPORT_DIR"):
         dest = runtime_paths().export_dir / primary_paths.root.name

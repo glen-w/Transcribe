@@ -558,6 +558,9 @@ def _render_review_body(
         from transcribe.ui.layout import emit_layout_marker
 
         emit_layout_marker("tx-review-scan")
+        from transcribe.ui.page_lightbox import inject_page_lightbox
+
+        inject_page_lightbox()
         rot = int(st.session_state.get(f"rw_rot_{page_id}") or 0)
         image = _open_review_scan(img_path, rot)
         zoom = st.session_state.get(f"rw_zoom_{page_id}") or "fit_page"
@@ -846,6 +849,22 @@ def _save_buffer(projects: ProjectService, page_id: str, *, mark_reviewed: bool)
     edited: str | None = text
     if result is not None and result.edited_text is None and text == effective:
         edited = None
+    # Quality loop (collect-only, local): a first human correction of an OCR
+    # reading is a sampled OCR-quality signal. Never break the save on it.
+    if result is not None and result.edited_text is None:
+        try:
+            from transcribe.services.quality import QualityRatingStore
+
+            attempt = result.active_attempt()
+            ocr_text = (attempt.raw_text if attempt and attempt.raw_text else effective) or ""
+            QualityRatingStore(build_runtime_paths()).record_ocr_sample(
+                project_id=projects.load(reconcile=False).id,
+                page_id=page_id,
+                ocr_text=ocr_text,
+                reviewed_text=edited,
+            )
+        except Exception:  # noqa: BLE001
+            pass
     try:
         saved = projects.save_user_edit(
             page_id,

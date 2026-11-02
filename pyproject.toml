@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transcribe"
-version = "1.0.1"
+version = "1.2.0"
 description = "Transcribe: local-first handwritten notebook OCR using Ollama vision models"
 readme = "README.md"
 license = { text = "MIT" }
@@ -58,6 +58,7 @@ markers = [
   "unit: isolated unit tests (optional tagging; not required)",
   "integration: live local Ollama (or other live dependency) — never for offline doubles",
   "slow: intentionally slow tests",
+  "scale: synthetic scale/performance budgets (nightly only)",
   "requires_ollama: live Ollama HTTP required",
   "requires_docker: Docker daemon required",
   "requires_network: outbound network required",

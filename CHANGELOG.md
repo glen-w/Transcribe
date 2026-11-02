@@ -5,9 +5,31 @@ All notable changes to Transcribe will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-11-02
+
+Expansion & hardening wave ([docs/dev/expansion_hardening_wave_1_2.md](docs/dev/expansion_hardening_wave_1_2.md)): balanced-max hardening (H1–H4) and expansion (E1–E5) on shipped surfaces, folding in the 1.1 deepen waves below. No separate 1.1.0 tag was cut.
 
 ### Added
+
+- **Search first-class:** published-NER People/Places filters in Library and Search (`ArchiveFilters.people`/`places`, archive `entities_json`), and **saved searches** (`transcribe.saved-searches`; Search expander, `transcribe saved-search`, `transcribe search --saved`).
+- **Notebook collections & archived state** (`transcribe.notebook-collections`): Library Collections manager, archive/unarchive (hidden by default, never deleted, always in backup), collection + archived filters, Export anthology by collection (`--collection`).
+- **Export by tag:** reading-format include (AND) / exclude (any) page-tag filters in Export panel and CLI (`--include-tag` / `--exclude-tag`); notebook JSON keeps every page. Custom body fonts (`custom:<Family>`, `register_custom_font`, `--custom-font`).
+- **Quality & evaluation loop** (`transcribe.quality-ratings`, all local): sampled OCR ratings auto-recorded on first Review correction (with character error rate), cleanup/analysis ratings via `transcribe quality`, Diagnostics quality summary, deterministic page sampling.
+- **Import → OCR smoke kit** implemented (`tests/acceptance/ocr_lifecycle/test_import_ocr_smoke_kit.py`, stub vision, no GPU): human corrections survive re-OCR; whitespace output is an `empty_output` miss.
+- **Diagnostics job timeline:** validated OCR/Analyse/Detect run records per notebook (record id = correlation id; malformed records shown as invalid, never trusted).
+- **Scale lane:** synthetic 25-notebook / 500-page Archive budgets (`make test-scale`, nightly `scale` marker).
+- **Longevity:** `transcribe verify-export <dir>` proves an export is readable standalone (manifest, checksums, revision stamps, EPUB/PDF sanity); `transcribe workspace-doctor` sweeps corpus + every notebook.
+- **Declutter v5:** `remove_lid_slivers` crops thin (4–15 px) uniform dark/coloured edge slivers below the normal min band (`DECLUTTER_VERSION` 5).
+- **Page-scan lightbox:** click a large scan in Reading/Review for a black fullscreen overlay (Esc/click closes); `st.image` hover fullscreen remains the fallback.
+- Supply chain: Dependabot (actions/pip/docker) and a nightly `pip-audit` + CycloneDX SBOM job.
+
+### Changed
+
+- **`ProjectService.load()` defaults to `reconcile=False`** (L2): loading is a read; interrupting orphaned runs is the explicit notebook-open path (`reconcile=True` / `reconcile_interrupted()`), used deliberately by the shell, Analysis freeze, and batch starts.
+- Hardening: OCR jobs fail before scheduling when free disk is below the shared headroom (`DiskFullError`); the native UI refuses an unacknowledged non-loopback bind (`TRANSCRIBE_ALLOW_LAN=1` opts in); Diagnostics output is redacted for credentials and workspace roots.
+- The narrow-gutter declutter case that used to no-op below the min band now crops as a v5 lid sliver.
+
+### Added (1.1 deepen waves, previously Unreleased)
 
 - **Workflow tour** ([docs/workflows.md](docs/workflows.md)): 20 screenshots and two short GIFs (a review pass; repairing an out-of-order page) of the real UI on an invented sample notebook, linked from the README, user guide, first-notebook guide, and the landing page. Regenerate with `make docs-media` (`scripts/docs/capture_docs_media.py`; Playwright, no real pages, no OCR). `tests/unit/test_docs_media.py` guards image links, orphans, and size budgets.
 - Tracked-binary allowlist accepts `[[globs]]` entries (`docs/images/*`, `website/images/*`).
@@ -22,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - GitHub repository display name is **Transcribe** (`glen-w/Transcribe`), matching the product name already used in the UI and docs. Python package, CLI (`transcribe` / `./transcribe.sh`), and Docker (`transcribe-web`) stay lowercase.
-- Roadmap honesty: **Now** is [1.1 deepen-in-place](docs/dev/deepen_waves_1_1.md); 0.9.0 / 1.0 / Track C are signed off as landed. Stale active-backlog ranks (0.9.0 cut, Track C) no longer look open.
+- Roadmap honesty: **Now** is [1.2 expansion & hardening](docs/dev/expansion_hardening_wave_1_2.md) (1.1 deepen W1–W9 folded in); 0.9.0 / 1.0 / Track C are signed off as landed.
 - Library cover Open is a labelled control under the thumbnail. Review unsaved navigation uses Stay / Discard & leave instead of a second Prev/Next click.
 - Auto-tag no longer re-applies slugs the user removed (`PageIndex.suppressed_auto_tags`). Explicit Apply can clear the tombstone.
 - Standalone Detect can Stop after the current window (background coordinator, same cancel path Analyse already used).

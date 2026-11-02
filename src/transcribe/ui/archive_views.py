@@ -183,6 +183,10 @@ def _filters_from_widgets(
     include_undated: bool,
     range_start: ApproximateDate | None = None,
     range_end: ApproximateDate | None = None,
+    people: tuple[str, ...] = (),
+    places: tuple[str, ...] = (),
+    include_archived: bool = False,
+    collection_id: str = "",
 ) -> ArchiveFilters:
     return ArchiveFilters(
         period=period if period in ("all", "year", "range") else "all",  # type: ignore[arg-type]
@@ -194,6 +198,10 @@ def _filters_from_widgets(
         project_tags=tuple(selected_project_tags),
         tags=tuple(selected_tags),
         include_undated=include_undated,
+        people=people,
+        places=places,
+        include_archived=include_archived,
+        collection_id=collection_id,
     )
 
 
@@ -600,8 +608,35 @@ def _render_library_filters(archive: ArchiveService) -> ArchiveFilters | None:
 
     query = st.text_input("Search / filter term", value="", key="archive_query")
     include_undated = st.checkbox("Include undated pages in counts", value=True)
+    include_archived = st.checkbox(
+        "Include archived notebooks", value=False, key="archive_include_archived"
+    )
     tag_filter = st.text_input("Tag filter (comma-separated, AND)", "")
     selected_tags = [t.strip() for t in tag_filter.split(",") if t.strip()]
+    people_raw = st.text_input(
+        "People (published NER, comma-separated)", "", key="archive_people"
+    )
+    places_raw = st.text_input(
+        "Places (published NER, comma-separated)", "", key="archive_places"
+    )
+    people = tuple(x.strip() for x in people_raw.split(",") if x.strip())
+    places = tuple(x.strip() for x in places_raw.split(",") if x.strip())
+    collection_id = ""
+    try:
+        from transcribe.services.collections import NotebookCollectionsStore
+
+        collections = NotebookCollectionsStore().load().collections
+    except Exception:  # noqa: BLE001
+        collections = ()
+    if collections:
+        labels = {"": "All collections"}
+        labels.update({c.collection_id: c.name for c in collections})
+        collection_id = st.selectbox(
+            "Collection",
+            list(labels),
+            format_func=lambda cid: labels.get(cid, cid),
+            key="archive_collection",
+        )
 
     # Type inventory with period/query/tags applied (types unconstrained) for selected/total.
     base_for_types = _filters_from_widgets(
@@ -614,6 +649,10 @@ def _render_library_filters(archive: ArchiveService) -> ArchiveFilters | None:
         include_undated=include_undated,
         range_start=range_start,
         range_end=range_end,
+        people=people,
+        places=places,
+        include_archived=include_archived,
+        collection_id=collection_id,
     )
     inventory = archive.type_inventory(base_for_types)
     media_keys = [t.key for t in inventory if t.kind == "media_type"]
@@ -659,6 +698,10 @@ def _render_library_filters(archive: ArchiveService) -> ArchiveFilters | None:
         include_undated=include_undated,
         range_start=range_start,
         range_end=range_end,
+        people=people,
+        places=places,
+        include_archived=include_archived,
+        collection_id=collection_id,
     )
 
 
@@ -713,6 +756,8 @@ def _notebook_card(
         b = nb.date_end.format_display() if nb.date_end else "?"
         date_label = f"{a} → {b}"
     st.caption(escape_markdown_plain(nb.title))
+    if nb.archived:
+        st.caption("Archived")
     if nb.tags:
         from transcribe.services.tags import TagService
 
@@ -729,8 +774,92 @@ def _notebook_card(
         st.caption("Actions unavailable.")
 
 
+def _render_collections_manager(runtime: RuntimePaths, archive: ArchiveService) -> None:
+    """Collections + archived state (workspace organisation, not tags)."""
+    from transcribe.services.archive import ArchiveFilters as _AF
+    from transcribe.services.collections import NotebookCollectionsStore
+
+    try:
+        store = NotebookCollectionsStore(runtime)
+        state = store.load()
+    except Exception as exc:  # noqa: BLE001
+        st.caption(f"Collections unavailable: {exc}")
+        return
+    notebooks = archive.list_notebooks(
+        order="newest", filters=_AF(include_archived=True)
+    )
+    title_by_id = {nb.project_id: nb.title or nb.project_id[:8] for nb in notebooks}
+    with st.expander("Collections & archived notebooks", expanded=False):
+        st.caption(
+            "Collections are curated shelves spanning notebooks. "
+            "Archived notebooks are hidden from default lists; nothing is deleted."
+        )
+        new_name = st.text_input("New collection name", key="col_new_name")
+        if st.button("Create collection", key="col_create"):
+            if new_name.strip():
+                try:
+                    store.create(new_name.strip())
+                    st.rerun()
+                except ValueError as exc:
+                    st.warning(str(exc))
+            else:
+                st.warning("Give the collection a name.")
+        if not state.collections:
+            st.caption("No collections yet.")
+        for collection in state.collections:
+            st.markdown(f"**{escape_markdown_plain(collection.name)}**")
+            if collection.description:
+                st.caption(escape_markdown_plain(collection.description))
+            members = st.multiselect(
+                "Notebooks",
+                list(title_by_id),
+                default=[pid for pid in collection.project_ids if pid in title_by_id],
+                format_func=lambda pid: title_by_id.get(pid, pid),
+                key=f"col_members_{collection.collection_id}",
+            )
+            c1, c2, c3 = st.columns(3)
+            if c1.button("Save members", key=f"col_save_{collection.collection_id}"):
+                store.set_members(collection.collection_id, tuple(members))
+                archive.note_mutation()
+                st.rerun()
+            rename = c2.text_input(
+                "Rename",
+                value=collection.name,
+                key=f"col_rename_{collection.collection_id}",
+                label_visibility="collapsed",
+            )
+            if c2.button("Rename", key=f"col_rename_btn_{collection.collection_id}"):
+                try:
+                    store.rename(collection.collection_id, rename)
+                    st.rerun()
+                except ValueError as exc:
+                    st.warning(str(exc))
+            if c3.button("Delete collection", key=f"col_delete_{collection.collection_id}"):
+                store.delete(collection.collection_id)
+                archive.note_mutation()
+                st.rerun()
+        if title_by_id:
+            target = st.selectbox(
+                "Notebook",
+                list(title_by_id),
+                format_func=lambda pid: title_by_id.get(pid, pid),
+                key="col_archive_target",
+            )
+            c1, c2 = st.columns(2)
+            archived_now = state.is_archived(target)
+            if c1.button(
+                "Unarchive" if archived_now else "Archive",
+                key="col_archive_toggle",
+            ):
+                store.set_archived(target, archived=not archived_now)
+                archive.note_mutation()
+                st.rerun()
+            c2.caption("Archived" if archived_now else "Active")
+
+
 def render_library(runtime: RuntimePaths, archive: ArchiveService) -> None:
     archive.ensure_index()
+    _render_collections_manager(runtime, archive)
     view = _library_view()
     if not archive.list_notebooks(order="newest"):
         st.info(
@@ -791,7 +920,6 @@ def render_notebooks(runtime: RuntimePaths, archive: ArchiveService) -> None:
 def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
     from transcribe.domain.dates import parse_date_input
 
-    del runtime
     archive.ensure_index()
     notebooks = archive.list_notebooks(order="newest")
     if not notebooks:
@@ -801,8 +929,70 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
         )
         return
 
+    # Saved searches (filter JSON only). Applying one overrides the widgets
+    # below for this run; Save stores the last executed search filters.
+    applied_filters = None
+    try:
+        from transcribe.services.saved_searches import SavedSearchStore
+
+        saved_store = SavedSearchStore(runtime)
+        saved_options = saved_store.list()
+    except Exception:  # noqa: BLE001
+        saved_store = None
+        saved_options = []
+    if saved_store is not None:
+        with st.expander("Saved searches", expanded=False):
+            if saved_options:
+                saved_labels = {s.search_id: s.name for s in saved_options}
+                picked = st.selectbox(
+                    "Saved search",
+                    list(saved_labels),
+                    format_func=lambda sid: saved_labels.get(sid, sid),
+                    key="search_saved_pick",
+                )
+                c_apply, c_delete = st.columns(2)
+                if c_apply.button("Apply saved search", key="search_saved_apply"):
+                    chosen = saved_store.get(picked)
+                    if chosen is not None:
+                        st.session_state["search_applied_id"] = chosen.search_id
+                        st.session_state["search_applied_query"] = chosen.query
+                        st.session_state["search_applied_order"] = chosen.order
+                        st.session_state["search_applied_filters"] = chosen.filters
+                        st.rerun()
+                if c_delete.button("Delete saved search", key="search_saved_delete"):
+                    saved_store.delete(picked)
+                    st.rerun()
+            else:
+                st.caption("No saved searches yet. Run a search, then save it below.")
+            save_name = st.text_input("Save current search as", key="search_saved_name")
+            if st.button("Save current search", key="search_saved_save"):
+                last = st.session_state.get("search_last_filters")
+                if save_name.strip() and last is not None:
+                    saved_store.upsert(
+                        save_name.strip(),
+                        query=str(st.session_state.get("search_last_query") or ""),
+                        order=str(st.session_state.get("search_last_order") or "oldest"),
+                        filters=last,
+                    )
+                    st.rerun()
+                elif not save_name.strip():
+                    st.warning("Give the saved search a name.")
+                else:
+                    st.warning("Run a search first, then save it.")
+    applied_id = st.session_state.pop("search_applied_id", None)
+    if applied_id:
+        applied_filters = st.session_state.get("search_applied_filters")
+        st.caption(f"Applied saved search: {applied_id[:8]}…")
+        applied_query = str(st.session_state.get("search_applied_query") or "")
+        applied_order = str(st.session_state.get("search_applied_order") or "oldest")
+    else:
+        applied_query = None
+        applied_order = None
+
     query = st.text_input("Search text", value=st.session_state.get("search_query", ""))
     st.session_state["search_query"] = query
+    if applied_query is not None:
+        query = applied_query
 
     years = archive.available_years()
     period_options = ["All", "Year", "Range"] if years else ["All", "Range"]
@@ -852,6 +1042,17 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
     tag_filter = st.text_input("Tags (comma-separated, AND)", key="search_tags")
     tags = tuple(t.strip().lower() for t in tag_filter.split(",") if t.strip())
     include_undated = st.checkbox("Include undated", value=True, key="search_undated")
+    include_archived = st.checkbox(
+        "Include archived notebooks", value=False, key="search_include_archived"
+    )
+    people_raw = st.text_input(
+        "People (published NER, comma-separated)", key="search_people"
+    )
+    places_raw = st.text_input(
+        "Places (published NER, comma-separated)", key="search_places"
+    )
+    people = tuple(x.strip() for x in people_raw.split(",") if x.strip())
+    places = tuple(x.strip() for x in places_raw.split(",") if x.strip())
 
     inventory = archive.type_inventory()
     media_keys = [t.key for t in inventory if t.kind == "media_type"]
@@ -860,7 +1061,8 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
     page_size = 50
     filter_sig = (
         f"{query}|{order}|{tags}|{selected_media}|{include_undated}|"
-        f"{period_key}|{year}|{range_start}|{range_end}"
+        f"{period_key}|{year}|{range_start}|{range_end}|"
+        f"{people}|{places}|{include_archived}|{applied_id}"
     )
     if st.session_state.get("search_filter_sig") != filter_sig:
         st.session_state["search_filter_sig"] = filter_sig
@@ -876,7 +1078,17 @@ def render_search(runtime: RuntimePaths, archive: ArchiveService) -> None:
         tags=tags,
         media_types=(tuple(selected_media) if set(selected_media) != set(media_keys) else ()),
         include_undated=include_undated,
+        include_archived=include_archived,
+        people=people,
+        places=places,
     )
+    if applied_filters is not None:
+        filters = applied_filters
+    if applied_order in ("oldest", "newest"):
+        order = applied_order
+    st.session_state["search_last_filters"] = filters
+    st.session_state["search_last_query"] = query
+    st.session_state["search_last_order"] = order
     result = archive.search(
         query, order=order, filters=filters, limit=page_size, offset=offset  # type: ignore[arg-type]
     )

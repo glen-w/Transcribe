@@ -83,6 +83,12 @@ class ArchiveFilters:
     project_tags: tuple[str, ...] = ()
     notebook_ids: tuple[str, ...] = ()
     include_undated: bool = True
+    # 1.2: published-NER mention filters (surface forms, case-insensitive).
+    people: tuple[str, ...] = ()
+    places: tuple[str, ...] = ()
+    # 1.2: archived notebooks are hidden unless explicitly included.
+    include_archived: bool = False
+    collection_id: str = ""
 
 
 @dataclass
@@ -129,6 +135,8 @@ class NotebookSummary:
     pages_per_day: float | None
     activity: list[ActivityBin] = field(default_factory=list)
     media_types: list[str] = field(default_factory=list)
+    archived: bool = False
+    collection_ids: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -258,7 +266,36 @@ def _filters_active_for_notebooks(filters: ArchiveFilters) -> bool:
         or filters.tags
         or filters.media_types
         or filters.project_tags
+        or filters.people
+        or filters.places
     )
+
+
+def _fold_entity(value: str) -> str:
+    return " ".join(str(value).strip().split()).casefold()
+
+
+def _row_entities(row: sqlite3.Row) -> list[dict]:
+    try:
+        rows = json.loads(row["entities_json"] or "[]")
+    except (ValueError, KeyError, IndexError):
+        return []
+    return rows if isinstance(rows, list) else []
+
+
+def _entities_match(row: sqlite3.Row, wanted: tuple[str, ...], labels: frozenset) -> bool:
+    if not wanted:
+        return True
+    found = {
+        _fold_entity(str(r.get("surface") or ""))
+        for r in _row_entities(row)
+        if r.get("label") in labels
+    }
+    return all(_fold_entity(w) in found for w in wanted)
+
+
+_PLACE_LABELS = frozenset({"GPE", "LOC", "FAC"})
+_PERSON_LABELS = frozenset({"PERSON"})
 
 
 def _fts_match_query(raw: str) -> str | None:
@@ -318,7 +355,9 @@ class ArchiveService:
               date_start_json TEXT,
               date_end_json TEXT,
               page_count INTEGER NOT NULL,
-              signature TEXT NOT NULL
+              signature TEXT NOT NULL,
+              archived INTEGER NOT NULL DEFAULT 0,
+              collections_json TEXT NOT NULL DEFAULT '[]'
             );
             CREATE TABLE IF NOT EXISTS pages (
               page_id TEXT PRIMARY KEY,
@@ -330,12 +369,25 @@ class ArchiveService:
               sort_key TEXT,
               tags_json TEXT NOT NULL,
               project_tags_json TEXT NOT NULL DEFAULT '[]',
+              entities_json TEXT NOT NULL DEFAULT '[]',
               text TEXT NOT NULL,
               FOREIGN KEY(project_id) REFERENCES notebooks(project_id) ON DELETE CASCADE
             );
             CREATE INDEX IF NOT EXISTS idx_pages_project ON pages(project_id);
             CREATE INDEX IF NOT EXISTS idx_pages_sort ON pages(sort_key);
             """)
+        cols_nb = {r[1] for r in conn.execute("PRAGMA table_info(notebooks)")}
+        if "archived" not in cols_nb:
+            conn.execute("ALTER TABLE notebooks ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
+        if "collections_json" not in cols_nb:
+            conn.execute(
+                "ALTER TABLE notebooks ADD COLUMN collections_json TEXT NOT NULL DEFAULT '[]'"
+            )
+        cols_pg = {r[1] for r in conn.execute("PRAGMA table_info(pages)")}
+        if "entities_json" not in cols_pg:
+            conn.execute(
+                "ALTER TABLE pages ADD COLUMN entities_json TEXT NOT NULL DEFAULT '[]'"
+            )
         row = conn.execute("SELECT value FROM meta WHERE key = 'cache_schema_version'").fetchone()
         if row is not None:
             cache_version = int(row["value"])
@@ -371,6 +423,12 @@ class ArchiveService:
         if results.exists():
             mtimes = sorted(f"{p.name}:{p.stat().st_mtime_ns}" for p in results.glob("*.json"))
             parts.extend(mtimes)
+        ner = root / "analysis" / "ner" / "published.json"
+        if ner.exists():
+            parts.append(f"ner:{ner.stat().st_mtime_ns}")
+        org = self.runtime.data_dir / "config" / "notebook-collections.json"
+        if org.exists():
+            parts.append(f"org:{org.stat().st_mtime_ns}")
         return "|".join(parts)
 
     def _ttl_fresh(self, *, generation: int, now: float) -> bool:
@@ -489,12 +547,14 @@ class ArchiveService:
         conn.execute("DELETE FROM pages WHERE project_id = ?", (project.id,))
         conn.execute("DELETE FROM notebooks WHERE project_id = ?", (project.id,))
         start, end = _notebook_bounds(project)
+        archived, collection_ids = self._org_for_project(project.id)
         conn.execute(
             """
             INSERT INTO notebooks(
               project_id, title, root, updated_at, tags_json, cover_page_id,
-              date_start_json, date_end_json, page_count, signature
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              date_start_json, date_end_json, page_count, signature,
+              archived, collections_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 project.id,
@@ -507,8 +567,11 @@ class ArchiveService:
                 json.dumps(end.as_dict()) if end else None,
                 len(project.pages),
                 signature,
+                1 if archived else 0,
+                json.dumps(collection_ids),
             ),
         )
+        entities_by_page = self._published_ner_entities(root)
         for ord_i, page in enumerate(project.pages):
             result = projects.load_page_result(page.page_id)
             text = (result.effective_text() if result else None) or ""
@@ -526,8 +589,9 @@ class ArchiveService:
                 """
                 INSERT INTO pages(
                   page_id, project_id, page_ord, source_id, media_type,
-                  date_json, sort_key, tags_json, project_tags_json, text
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  date_json, sort_key, tags_json, project_tags_json, text,
+                  entities_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     page.page_id,
@@ -540,6 +604,7 @@ class ArchiveService:
                     json.dumps(combined_tags),
                     json.dumps(project.tags),
                     text,
+                    json.dumps(entities_by_page.get(page.page_id, [])),
                 ),
             )
             conn.execute(
@@ -556,6 +621,52 @@ class ArchiveService:
                 ),
             )
 
+    def _org_for_project(self, project_id: str) -> tuple[bool, list[str]]:
+        """(archived, collection_ids) from the workspace organisation store."""
+        try:
+            from transcribe.services.collections import NotebookCollectionsStore
+
+            state = NotebookCollectionsStore(self.runtime).load()
+        except Exception:  # noqa: BLE001 - cache must rebuild even if org file is bad
+            return False, []
+        return state.is_archived(project_id), [
+            c.collection_id for c in state.collections_for(project_id)
+        ]
+
+    @staticmethod
+    def _published_ner_entities(root: Path) -> dict[str, list[dict[str, str]]]:
+        """Published-NER entities grouped by page (unit) id; {} when absent/stale-shaped."""
+        try:
+            from transcribe.analysis.storage import AnalysisStorage
+            from transcribe.paths import ProjectPaths
+
+            published = AnalysisStorage(ProjectPaths(root=root)).read_published("ner")
+        except Exception:  # noqa: BLE001 - NER is optional for the cache
+            return {}
+        if not published:
+            return {}
+        payload = published.get("payload") if isinstance(published, dict) else None
+        if not isinstance(payload, dict):
+            payload = published
+        entities = payload.get("entities") if isinstance(payload, dict) else None
+        if not isinstance(entities, list):
+            return {}
+        by_page: dict[str, list[dict[str, str]]] = {}
+        for row in entities:
+            if not isinstance(row, dict):
+                continue
+            surface = row.get("surface") or row.get("text")
+            label = row.get("label")
+            unit_id = row.get("unit_id")
+            if not isinstance(surface, str) or not surface.strip():
+                continue
+            if not isinstance(label, str) or not isinstance(unit_id, str):
+                continue
+            by_page.setdefault(unit_id, []).append(
+                {"surface": surface.strip(), "label": label}
+            )
+        return by_page
+
     def _parse_date(self, raw: str | None) -> ApproximateDate | None:
         if not raw:
             return None
@@ -568,12 +679,27 @@ class ArchiveService:
                        n.date_start_json AS nb_date_start_json,
                        n.date_end_json AS nb_date_end_json,
                        n.tags_json AS notebook_tags_json,
+                       n.archived AS notebook_archived,
+                       n.collections_json AS notebook_collections_json,
                        n.cover_page_id AS notebook_cover_page_id
                 FROM pages p
                 JOIN notebooks n ON n.project_id = p.project_id
                 """))
 
     def _row_matches(self, row: sqlite3.Row, filters: ArchiveFilters) -> bool:
+        if not filters.include_archived:
+            try:
+                if row["notebook_archived"]:
+                    return False
+            except (KeyError, IndexError):
+                pass
+        if filters.collection_id:
+            try:
+                members = json.loads(row["notebook_collections_json"] or "[]")
+            except (ValueError, KeyError, IndexError):
+                members = []
+            if filters.collection_id not in members:
+                return False
         page_date = self._parse_date(row["date_json"])
         if not _page_in_period(page_date, filters):
             return False
@@ -587,6 +713,10 @@ class ArchiveService:
             return False
         # Category toggles are OR: any selected project tag may match.
         if filters.project_tags and not (set(filters.project_tags) & project_tags):
+            return False
+        if not _entities_match(row, filters.people, _PERSON_LABELS):
+            return False
+        if not _entities_match(row, filters.places, _PLACE_LABELS):
             return False
         q = filters.query.strip().lower()
         if q:
@@ -657,6 +787,10 @@ class ArchiveService:
             tags=filters.tags,
             notebook_ids=filters.notebook_ids,
             include_undated=filters.include_undated,
+            people=filters.people,
+            places=filters.places,
+            include_archived=filters.include_archived,
+            collection_id=filters.collection_id,
         )
         with self._connect() as conn:
             return self._type_counts_from_rows(self._load_page_rows(conn), base)
@@ -707,6 +841,10 @@ class ArchiveService:
                 tags=filters.tags,
                 notebook_ids=filters.notebook_ids,
                 include_undated=filters.include_undated,
+                people=filters.people,
+                places=filters.places,
+                include_archived=filters.include_archived,
+                collection_id=filters.collection_id,
             )
             return TimelineResult(
                 bins=bins,
@@ -735,6 +873,16 @@ class ArchiveService:
 
             summaries: list[NotebookSummary] = []
             for nb in notebooks:
+                is_archived = bool(nb["archived"]) if "archived" in nb.keys() else False
+                if is_archived and not filters.include_archived:
+                    continue
+                if filters.collection_id:
+                    try:
+                        member_ids = json.loads(nb["collections_json"] or "[]")
+                    except (ValueError, KeyError, IndexError):
+                        member_ids = []
+                    if filters.collection_id not in member_ids:
+                        continue
                 proj_pages = by_project.get(nb["project_id"], [])
                 matched = [r for r in proj_pages if self._row_matches(r, filters)]
                 if _filters_active_for_notebooks(filters):
@@ -798,6 +946,12 @@ class ArchiveService:
                         pages_per_day=pages_per_day(page_count, start, end),
                         activity=activity,
                         media_types=media,
+                        archived=is_archived,
+                        collection_ids=(
+                            json.loads(nb["collections_json"] or "[]")
+                            if "collections_json" in nb.keys()
+                            else []
+                        ),
                     )
                 )
 
@@ -841,6 +995,10 @@ class ArchiveService:
             project_tags=base.project_tags,
             notebook_ids=base.notebook_ids,
             include_undated=base.include_undated,
+            people=base.people,
+            places=base.places,
+            include_archived=base.include_archived,
+            collection_id=base.collection_id,
         )
         limit = max(1, min(int(limit), 500))
         offset = max(0, int(offset))
@@ -892,6 +1050,26 @@ class ArchiveService:
             for tag in merged.tags:
                 where.append("p.tags_json LIKE ?")
                 params.append(f'%"{tag}"%')
+
+            if not merged.include_archived:
+                where.append("(n.archived IS NULL OR n.archived = 0)")
+            if merged.collection_id:
+                where.append("n.collections_json LIKE ?")
+                params.append(f'%"{merged.collection_id}"%')
+
+            # Published-NER mention filters (AND across requested surfaces).
+            # entities_json rows are {"surface": ..., "label": ...} in that order.
+            def _entity_like(surface: str, label: str) -> str:
+                safe = surface.replace('"', " ").strip()
+                return f'%"surface": "{safe}", "label": "{label}"%'
+
+            for person in merged.people:
+                where.append("p.entities_json LIKE ?")
+                params.append(_entity_like(person, "PERSON"))
+            for place in merged.places:
+                ors = " OR ".join("p.entities_json LIKE ?" for _ in ("GPE", "LOC", "FAC"))
+                where.append(f"({ors})")
+                params.extend(_entity_like(place, label) for label in ("GPE", "LOC", "FAC"))
 
             # Project category tags OR.
             if merged.project_tags:
@@ -953,6 +1131,10 @@ class ArchiveService:
                     project_tags=merged.project_tags,
                     notebook_ids=merged.notebook_ids,
                     include_undated=merged.include_undated,
+                    people=merged.people,
+                    places=merged.places,
+                    include_archived=merged.include_archived,
+                    collection_id=merged.collection_id,
                 )
                 all_rows = self._load_page_rows(conn)
                 matched = [r for r in all_rows if self._row_matches(r, sub)]

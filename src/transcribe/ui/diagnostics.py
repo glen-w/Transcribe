@@ -12,6 +12,7 @@ from transcribe.ports import SystemClock, UuidGenerator
 from transcribe.runtime_paths import RuntimePaths
 from transcribe.services.corpus_doctor import CorpusDoctorService
 from transcribe.services.doctor import DoctorService
+from transcribe.net_guard import redact_sensitive
 from transcribe.services.project import ProjectService, open_project_paths
 from transcribe.ui import icons as ic
 from transcribe.ui.home import ollama_health_line
@@ -28,7 +29,7 @@ def _render_findings(findings) -> None:
         st.success("No findings.")
         return
     for f in findings:
-        line = f"**{f.severity}** `{f.code}` — {f.message}"
+        line = f"**{f.severity}** `{f.code}` — {redact_sensitive(f.message)}"
         if f.severity == "error":
             st.error(line)
         elif f.severity == "warning":
@@ -125,3 +126,56 @@ def render_diagnostics(runtime: RuntimePaths, *, root: str | None) -> None:
     else:
         st.error("Notebook doctor reported errors.")
     _render_findings(nb_report.findings)
+
+    try:
+        from transcribe.services.quality import QualityRatingStore
+
+        quality = QualityRatingStore(runtime).summary()
+    except Exception:  # noqa: BLE001
+        quality = None
+    if quality is not None and quality["total"]:
+        st.markdown("#### Quality (local ratings)")
+        st.caption(
+            "Collect-only local signals from Review corrections, cleanup "
+            "accept/reject, and analysis ratings. Nothing leaves this machine."
+        )
+        st.markdown(
+            f"Ratings: **{quality['total']}** · OCR samples: "
+            f"**{quality['ocr_samples']}** · Mean character error rate: "
+            f"**{quality['mean_cer'] if quality['mean_cer'] is not None else '—'}**"
+        )
+
+    if root:
+        from transcribe.services.job_timeline import build_job_timeline
+
+        st.markdown("#### Job timeline")
+        st.caption(
+            "Recent OCR, Analyse, and Detect runs for this notebook. "
+            "The run id is the correlation id for its records on disk."
+        )
+        try:
+            entries = build_job_timeline(open_project_paths(Path(root)), limit=25)
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"Job timeline unavailable: {exc}")
+            entries = []
+        if not entries:
+            st.caption("No job records yet for this notebook.")
+        for entry in entries:
+            when = entry.started_at or entry.ended_at or "unknown time"
+            counts = (
+                f"{entry.completed}/{entry.total} done"
+                if entry.total
+                else "—"
+            )
+            label = (
+                f"**{entry.kind}** `{entry.status}` · {when} · {counts}"
+                f" · `{entry.correlation_id[:12]}`"
+            )
+            if entry.detail:
+                label += f" · {entry.detail}"
+            if not entry.valid:
+                st.error(f"{label} — unreadable record: {redact_sensitive(entry.error)}")
+            else:
+                st.markdown(label)
+                if entry.message:
+                    st.caption(redact_sensitive(entry.message))

@@ -73,7 +73,7 @@ Within a notebook (normative; doctor/`validate_project` must enforce):
 
 ### Visual declutter provenance (additive)
 
-Import may run **visual declutter** on the staged page PNG before it becomes the active render (workspace `ingest.visual_declutter_enabled`, default on). This is **not** OCR preprocess. Current identity (`DECLUTTER_VERSION` 4) crops scanner beds, stark-white overscan, residual corner wedges, dark binding gutters, and remaining edge shadows — Pillow insets only, never interior inpaint.
+Import may run **visual declutter** on the staged page PNG before it becomes the active render (workspace `ingest.visual_declutter_enabled`, default on). This is **not** OCR preprocess. Current identity (`DECLUTTER_VERSION` 5) crops scanner beds, stark-white overscan, residual corner wedges, dark binding gutters, remaining edge shadows, and thin lid slivers — Pillow insets only, never interior inpaint.
 
 When present on a render, declutter fields are authoritative for that render’s pixels:
 

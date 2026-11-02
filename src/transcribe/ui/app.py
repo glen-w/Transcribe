@@ -774,6 +774,15 @@ def cli_main() -> None:
     app_path = str(Path(__file__).resolve())
     port = os.getenv("TRANSCRIBE_PORT", "8510")
     address = os.getenv("TRANSCRIBE_HOST", "127.0.0.1")
+    from transcribe.net_guard import bind_warning, check_bind_allowed
+
+    refusal = check_bind_allowed(address)
+    if refusal is not None:
+        print(refusal, file=sys.stderr)
+        raise SystemExit(2)
+    warning = bind_warning(address)
+    if warning is not None:
+        print(f"warning: LAN bind acknowledged for {address}", file=sys.stderr)
     sys.argv = [
         "streamlit",
         "run",

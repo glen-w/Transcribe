@@ -181,7 +181,33 @@ def _render_notebook_export_tab(
             help="Omit pages marked as ignored from exported reading formats.",
         )
 
+    st.markdown("#### Page tag filters")
+    st.caption(
+        "Reading formats only (Markdown, text, HTML, EPUB, PDF). "
+        "The notebook JSON always keeps every page."
+    )
+    include_tags_raw = st.text_input(
+        "Only pages with all these tags (comma-separated)",
+        key="export_include_tags",
+    )
+    exclude_tags_raw = st.text_input(
+        "Skip pages with any of these tags (comma-separated)",
+        key="export_exclude_tags",
+    )
+    include_tags = tuple(
+        x.strip().lower() for x in include_tags_raw.split(",") if x.strip()
+    )
+    exclude_tags = tuple(
+        x.strip().lower() for x in exclude_tags_raw.split(",") if x.strip()
+    )
+
     st.markdown("#### Typography")
+    custom_font_name = st.text_input(
+        "Custom body font family (optional; overrides Body font)",
+        key="export_custom_font",
+        help="Name of a font family available to the reader, e.g. from a file "
+        "registered with transcribe.services.custom_fonts.register_custom_font.",
+    ).strip()
     t1, t2, t3 = st.columns(3)
     with t1:
         body_font = st.selectbox(
@@ -228,6 +254,8 @@ def _render_notebook_export_tab(
             key="export_heading_scale",
         )
 
+    effective_body_font = f"custom:{custom_font_name}" if custom_font_name else body_font
+
     if st.button("Save as workspace export defaults", key="export_save_workspace", icon=ic.SAVE):
         try:
             loaded = load_workspace_settings()
@@ -241,13 +269,15 @@ def _render_notebook_export_tab(
                 title_page=title_page,
                 cover_image=cover_image,
                 typography=ExportTypography(
-                    body_font=body_font,  # type: ignore[arg-type]
+                    body_font=effective_body_font,  # type: ignore[arg-type]
                     body_size_pt=float(body_size),
                     line_height=float(line_height),
                     paragraph_spacing_em=float(para_spacing),
                     margin_in=float(margin),
                     heading_scale=float(heading_scale),
                 ),
+                include_tags=include_tags,
+                exclude_tags=exclude_tags,
             ).as_dict()
             acts = loaded.activations
             if acts.export != "default":
@@ -268,12 +298,47 @@ def _render_notebook_export_tab(
     st.markdown("#### Notebooks")
     scope = st.radio(
         "Scope",
-        ["This notebook", "Multiple notebooks"],
+        ["This notebook", "Multiple notebooks", "Collection"],
         horizontal=True,
         key="export_scope",
     )
     selected_roots: list[str] = [root]
-    if scope == "Multiple notebooks":
+    if scope == "Collection":
+        from transcribe.services.archive import ArchiveFilters as _AF
+        from transcribe.services.collections import NotebookCollectionsStore
+
+        try:
+            org_state = NotebookCollectionsStore(runtime).load()
+        except Exception:  # noqa: BLE001
+            org_state = None
+        if org_state is None or not org_state.collections:
+            st.caption("No collections yet. Create one in Library → Collections.")
+            selected_roots = []
+        else:
+            labels = {c.collection_id: c.name for c in org_state.collections}
+            picked = st.selectbox(
+                "Collection",
+                list(labels),
+                format_func=lambda cid: labels.get(cid, cid),
+                key="export_collection_pick",
+            )
+            collection = org_state.collection(picked)
+            by_id = {}
+            if archive is not None:
+                by_id = {
+                    nb.project_id: str(nb.root)
+                    for nb in archive.list_notebooks(
+                        order="oldest", filters=_AF(include_archived=True)
+                    )
+                }
+            selected_roots = [
+                by_id[pid]
+                for pid in (collection.project_ids if collection else ())
+                if pid in by_id
+            ]
+            if not selected_roots:
+                st.caption("This collection has no notebooks on disk.")
+    elif scope == "Multiple notebooks":
         if archive is None:
             st.warning("Archive service unavailable; exporting the open notebook only.")
         else:
@@ -316,13 +381,15 @@ def _render_notebook_export_tab(
             title_page=title_page,
             cover_image=cover_image,
             typography=ExportTypography(
-                body_font=body_font,  # type: ignore[arg-type]
+                body_font=effective_body_font,  # type: ignore[arg-type]
                 body_size_pt=float(body_size),
                 line_height=float(line_height),
                 paragraph_spacing_em=float(para_spacing),
                 margin_in=float(margin),
                 heading_scale=float(heading_scale),
             ),
+            include_tags=include_tags,
+            exclude_tags=exclude_tags,
         )
         dest = Path(export_dest) if export_dest.strip() else None
         try:

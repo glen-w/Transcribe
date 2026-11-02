@@ -11,6 +11,7 @@ Prefer private disclosure. Use GitHub **privately reported vulnerabilities** ([R
 - Default Docker Compose publishes the web UI on **`127.0.0.1:8510` only** (`TRANSCRIBE_BIND_HOST`).
 - The process inside the container still listens so the published host port can reach it.
 - Setting `TRANSCRIBE_BIND_HOST=0.0.0.0` exposes the UI on the LAN **without authentication**.
+- Since 1.2, the native `transcribe-ui` entry refuses a non-loopback `TRANSCRIBE_HOST` bind unless `TRANSCRIBE_ALLOW_LAN=1` acknowledges that exposure (`transcribe.net_guard`). Inside the container the bind is `0.0.0.0` by design; the Compose host publish above is what decides real exposure.
 - LAN exposure grants unauthenticated access to **page images**, **OCR/analysis text**, **configuration-visible operations**, and **destructive** backup/restore or delete actions available in the UI.
 
 ## Related surfaces

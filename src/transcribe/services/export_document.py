@@ -151,6 +151,11 @@ def build_part_from_snapshot(
     for i, page in enumerate(project.pages):
         if options.exclude_ignored_pages and page.ignored:
             continue
+        page_tags = set(page.tags or [])
+        if options.include_tags and not set(options.include_tags).issubset(page_tags):
+            continue
+        if options.exclude_tags and set(options.exclude_tags) & page_tags:
+            continue
         result = snapshot.results.get(page.page_id)
         text = (result.effective_text() if result else None) or ""
         stripped = text.strip()

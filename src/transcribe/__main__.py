@@ -19,6 +19,14 @@ from transcribe.cli.export_cmd import (
 from transcribe.cli.notebook import dispatch_notebook
 from transcribe.cli.parser import build_parser
 from transcribe.cli.rag import _cmd_rag
+from transcribe.cli.workspace_cmd import (
+    _cmd_collections,
+    _cmd_quality,
+    _cmd_saved_search,
+    _cmd_search,
+    _cmd_verify_export,
+    _cmd_workspace_doctor,
+)
 from transcribe.errors import (
     JobConflictError,
     ProviderError,
@@ -51,6 +59,18 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_backup(args)
         if args.cmd == "restore":
             return _cmd_restore(args)
+        if args.cmd == "workspace-doctor":
+            return _cmd_workspace_doctor(args)
+        if args.cmd == "verify-export":
+            return _cmd_verify_export(args)
+        if args.cmd == "search":
+            return _cmd_search(args)
+        if args.cmd == "collections":
+            return _cmd_collections(args, clock=clock, ids=ids)
+        if args.cmd == "saved-search":
+            return _cmd_saved_search(args, clock=clock, ids=ids)
+        if args.cmd == "quality":
+            return _cmd_quality(args, clock=clock, ids=ids)
         if args.cmd == "export":
             return _cmd_export(args, clock=clock, ids=ids)
         if args.cmd == "export-finetune":

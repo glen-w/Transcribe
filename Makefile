@@ -10,7 +10,7 @@ PYTHON ?= .venv/bin/python
 endif
 PYTEST ?= $(PYTHON) -m pytest
 
-.PHONY: help lint test-smoke test-fast test-contracts test-acceptance test-coverage docker-smoke docs docs-media docs-clean pages-site release-hygiene
+.PHONY: help lint test-smoke test-fast test-contracts test-acceptance test-scale test-coverage docker-smoke docs docs-media docs-clean pages-site release-hygiene
 
 help:
 	@echo "Transcribe Makefile"
@@ -55,7 +55,11 @@ test-contracts:
 
 test-acceptance:
 	@echo "Running acceptance gates..."
-	@$(PYTEST) -q tests/acceptance -m "not quarantined and not requires_ollama and not requires_docker and not requires_network and not slow and not integration"
+	@$(PYTEST) -q tests/acceptance -m "not quarantined and not requires_ollama and not requires_docker and not requires_network and not slow and not scale and not integration"
+
+test-scale:
+	@echo "Running synthetic scale budgets (nightly lane)..."
+	@$(PYTEST) -q tests/acceptance/scale -m "scale"
 
 test-coverage:
 	@echo "Default offline suite with coverage (see .coveragerc fail_under)..."

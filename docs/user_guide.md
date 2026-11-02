@@ -187,9 +187,32 @@ Formats, anthology, OCR fine-tune, and **detection** fine-tune packages:
 [export](runtime/export.md). After training a hand-specific model elsewhere,
 the fine-tune export includes a bring-back checklist: [fine-tune export](finetune_export.md).
 
+**1.2 export extras:** under **Page tag filters** you can keep only pages
+carrying all of a set of tags, or skip pages carrying any of them (reading
+formats only — the notebook JSON always keeps every page). Scope can be a
+whole **Collection** (below), and **Custom body font family** names a font
+available to the reader instead of the curated list.
+
+## Organise and find (Library & Search)
+
+- **Collections** — Library → **Collections & archived notebooks**: create a
+  named shelf, tick its notebooks, rename or delete it. Shelves span
+  notebooks; they are not tags.
+- **Archive a notebook** — same panel: archived notebooks disappear from
+  default Library, Search, and pickers but are never deleted and stay in
+  backups. Tick **Include archived notebooks** to see them again.
+- **Saved searches** — on Search, run a search, then **Saved searches → Save
+  current search**. Applying a saved search re-runs its filters against the
+  current notebooks (it stores filters, not results).
+- **People & Places filters** — Search and Library accept published-NER
+  people/place names: a notebook only matches once Analyse has published
+  NER for it.
+- **Click a scan** in Reading or Review to view it fullscreen on black;
+  Esc or a click closes it.
+
 ## Integrity, backup, and settings
 
-- **System → Diagnostics** — workspace health, and notebook health when one is selected.
+- **System → Diagnostics** — workspace health, notebook health when one is selected, a **job timeline** (recent OCR / Analyse / Detect runs), and the local **quality** summary (OCR samples from your Review corrections; nothing is sent anywhere). CLI equivalents: `transcribe workspace-doctor`, `transcribe quality summary`, `transcribe verify-export <export-dir>`.
 - **Settings → Configuration → Backup** — full-workspace ZIP. Guide: [backup and restore](backup_and_restore.md).
 - **Settings** tabs: Configuration · Analysis · Detection · Tags · Prompts · Interface · Models · Profiles · Export. [Settings](runtime/settings.md).
 

@@ -954,6 +954,9 @@ def _render_viewer_body(session: _ViewerSession) -> None:
         left, right = st.columns([3, 2])
 
     def _render_scan_and_metrics(*, image_width: int | str) -> None:
+        from transcribe.ui.page_lightbox import inject_page_lightbox
+
+        inject_page_lightbox()
         st.image(str(img_path), width=image_width)
         # Reader cover pages are outside page-metrics, including first-page fallback.
         if page.page_id == _reader_cover_page_id(project):

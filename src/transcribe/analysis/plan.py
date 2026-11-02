@@ -256,6 +256,7 @@ def build_analysis_run_plan(
     from transcribe.analysis.parents import batch_module_order
     from transcribe.analysis.presets import expand_with_hard_parents
 
+    # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
     project = project or project_service.load(reconcile=True)
     ordered = tuple(batch_module_order(list(expand_with_hard_parents(list(module_ids)))))
     detectors = tuple(dict.fromkeys(str(d).strip() for d in detector_ids if str(d).strip()))

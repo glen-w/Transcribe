@@ -106,7 +106,7 @@ variables already set in the shell or Compose.
 | `TRANSCRIBE_EXPORT_DIR` | Optional export root |
 | `TRANSCRIBE_DATA_DIR` | Workspace data (caches, config, corpus) |
 | `TRANSCRIBE_OLLAMA_BASE_URL` | Ollama server root URL |
-| `TRANSCRIBE_HOST` / `TRANSCRIBE_PORT` | UI listen (default port **8510**) |
+| `TRANSCRIBE_HOST` / `TRANSCRIBE_PORT` | UI listen (default port **8510**); non-loopback hosts need `TRANSCRIBE_ALLOW_LAN=1` (1.2 bind guard) |
 | `TRANSCRIBE_BIND_HOST` | Compose publish bind (default `127.0.0.1`) |
 | `TRANSCRIBE_PYTHON` | Interpreter for `transcribe.sh` venv creation |
 

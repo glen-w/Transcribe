@@ -101,6 +101,15 @@ Bulk-import generation is **runtime-normative**; the [acceptance gate](contracts
 | UI **Workflow → Transcribe → Batch** | Streamlit Transcribe Target=Batch | Single-model or multipass Compare models × N notebooks; pending / import-run / pick; resume; live progress |
 | UI **Workflow → Analyse → Batch** | Streamlit Analyse Target=Batch | Same Analyse plan × N notebooks; pick (default, labels show published status) / needing-analysis / import-run; batch text-model freeze when LLM modules included; dual-bar live progress |
 | CLI `backup create\|verify` / `restore` | `transcribe backup …` / `transcribe restore …` | Full-workspace ZIP; replace-only restore with safety ZIP; see [workspace-backup.md](contracts/workspace-backup.md) · [backup_and_restore.md](backup_and_restore.md) |
+| CLI `search` (1.2) | `transcribe search …` (`--tags`, `--people`, `--places`, `--saved`, `--collection`) | Cross-notebook page search; people/places are published-NER surfaces |
+| CLI `saved-search` (1.2) | `transcribe saved-search list\|save\|delete` | Named filter sets (filters only, no result snapshots); [saved-searches.md](contracts/saved-searches.md) |
+| CLI `collections` (1.2) | `transcribe collections …` | Notebook shelves + archive/unarchive; [notebook-collections.md](contracts/notebook-collections.md) |
+| CLI `quality` (1.2) | `transcribe quality summary\|rate` | Local collect-only quality ratings; [quality-ratings.md](contracts/quality-ratings.md) |
+| CLI `workspace-doctor` (1.2) | `transcribe workspace-doctor` (`--deep`) | Corpus doctor + per-notebook doctor sweep |
+| CLI `verify-export` (1.2) | `transcribe verify-export <dir>` | Prove an export directory is readable standalone |
+| UI **Library → Collections** (1.2) | Streamlit Library expander | Create/rename shelves, set members, archive notebooks |
+| UI **Search → Saved searches** (1.2) | Streamlit Search expander | Apply / save / delete saved searches |
+| UI **Export tag filters / Collection scope** (1.2) | Streamlit Export panel | Reading-format page tag filters, anthology by collection, custom font family |
 | UI **Settings → Configuration → Backup** | Streamlit Configuration | Path-based create / verify / dry-run / restore (no browser zip transfer) |
 
 ## Explicitly unsupported

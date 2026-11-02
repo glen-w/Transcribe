@@ -37,7 +37,7 @@ Product buckets imported / failed / duplicated / needs-review over existing Impo
 
 ## Wave 5 — Visual declutter v4 — [x]
 
-`remove_binding_gutter` then `remove_edge_shadows`. Pillow crop insets only. `DECLUTTER_VERSION` 4.
+`remove_binding_gutter` then `remove_edge_shadows`. Pillow crop insets only. `DECLUTTER_VERSION` 4 (superseded by v5 lid slivers in 1.2).
 
 ## Wave 6 — Page reorder kernel — [x]
 
@@ -51,10 +51,10 @@ Thumbnail/Review move controls; optional JS island; Date lane cluster action.
 
 Export-tab checklist + install/verify docs. Training stays outside the app.
 
-## Wave 9 — L2 load default
+## Wave 9 — L2 load default — [x] (landed in 1.2 Wave 0)
 
-`ProjectService.load(reconcile=False)` by default. Explicit `reconcile_interrupted()` / first-open remain writes.
+`ProjectService.load(reconcile=False)` by default. Explicit `reconcile_interrupted()` / first-open remain writes. See [expansion_hardening_wave_1_2.md](expansion_hardening_wave_1_2.md).
 
-## Waves 10–11 — Docs, coverage, tag
+## Waves 10–11 — Docs, coverage, tag — [x] (folded into 1.2)
 
-Whole-suite tests; coverage floor if stable; package **1.1.0**; `# pre-release` then tag when governance is green.
+Whole-suite tests and docs landed with the 1.2 programme; the single tag is package **1.2.0** (no separate 1.1.0 tag was cut — W1–W8 shipped in its Unreleased section).

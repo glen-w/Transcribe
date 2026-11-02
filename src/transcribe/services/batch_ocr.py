@@ -368,6 +368,7 @@ class BatchOcrCoordinator:
                     provider=provider,
                     archive_runtime=self.archive_runtime,
                 )
+                # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
                 project = projects.load(reconcile=True)
                 if not project.pages:
                     item.state = "skipped"

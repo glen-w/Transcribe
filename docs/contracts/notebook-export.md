@@ -42,9 +42,12 @@ options **do not** participate in `content_revision` / `bundle_revision`.
 Workspace subtree `export` (see [workspace-settings.md](workspace-settings.md))
 and profile target `export` control formats, page-break mode, date/blank
 inclusion, **exclude ignored pages** (default on for reading formats; JSON keeps
-the full notebook), title page, and typography (body font/size, line height,
-paragraph spacing, margins, heading scale). The same `exclude_ignored_pages`
-default hides ignored pages in Reading.
+the full notebook), **include/exclude tag filters** (1.2; reading formats only —
+JSON is always the full notebook), title page, and typography (body font/size, line height,
+paragraph spacing, margins, heading scale; a body font may be a `custom:<Family>`
+key from a registered drop-in font). The same `exclude_ignored_pages`
+default hides ignored pages in Reading. A **Collection** scope exports its
+member notebooks as an anthology (CLI `--collection <id>`).
 
 Builtin profiles: `default`, `readable`, `compact`, `large_print`.
 

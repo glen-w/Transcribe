@@ -48,7 +48,7 @@ Scan on the left; one lane at a time on the right: **Transcription**, **Date**,
 - **OCR → Re-run OCR** — this page, all pages, or pages not marked reviewed
 - **Rank and merge** — build a merged draft from existing readings
 - **Cleanup** — re-apply visual declutter (scanner beds, white gutters, corner
-  wedges, dark binding gutters, edge shadows) without re-running OCR
+  wedges, dark binding gutters, edge shadows, lid slivers — v5) without re-running OCR
 - **Other** — **Ignore in Reader**, **Page order**, notebook cover, delete page
 
 Moving to another page with unsaved changes asks you to **Stay** or

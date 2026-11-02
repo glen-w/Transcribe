@@ -169,6 +169,30 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
     )
     p_export.add_argument("--title", default=None, help="Override anthology title")
+    p_export.add_argument(
+        "--include-tag",
+        dest="include_tags",
+        action="append",
+        default=[],
+        help="Reading formats only: require this page tag (repeatable, AND)",
+    )
+    p_export.add_argument(
+        "--exclude-tag",
+        dest="exclude_tags",
+        action="append",
+        default=[],
+        help="Reading formats only: skip pages with this tag (repeatable)",
+    )
+    p_export.add_argument(
+        "--collection",
+        default=None,
+        help="Export the notebooks in this collection id (anthology)",
+    )
+    p_export.add_argument(
+        "--custom-font",
+        default=None,
+        help="Custom body font family name (overrides --body-font)",
+    )
 
     p_pages = sub.add_parser("pages", help="Reorder notebook pages (pages array only)")
     pages_sub = p_pages.add_subparsers(dest="pages_cmd", required=True)
@@ -477,6 +501,88 @@ def build_parser() -> argparse.ArgumentParser:
     p_ba_status.add_argument("analysis_batch_id")
     p_ba_resume = bulk_ax_sub.add_parser("resume", help="Resume a non-terminal AnalysisBatchRun")
     p_ba_resume.add_argument("analysis_batch_id")
+
+    p_ws_doctor = sub.add_parser(
+        "workspace-doctor",
+        help="Corpus doctor plus a doctor pass over every notebook",
+    )
+    p_ws_doctor.add_argument("--deep", action="store_true", help="Deep hashing (slower)")
+
+    p_verify_export = sub.add_parser(
+        "verify-export",
+        help="Verify an export directory is readable without Transcribe",
+    )
+    p_verify_export.add_argument("dest", type=Path, help="Export directory with export.manifest.json")
+
+    p_search = sub.add_parser("search", help="Search page text across notebooks")
+    p_search.add_argument("query", nargs="?", default="")
+    p_search.add_argument("--tags", default=None, help="Comma-separated page tags (AND)")
+    p_search.add_argument("--people", default=None, help="Comma-separated published-NER people")
+    p_search.add_argument("--places", default=None, help="Comma-separated published-NER places")
+    p_search.add_argument("--include-archived", action="store_true")
+    p_search.add_argument("--collection", default=None, help="Collection id to search within")
+    p_search.add_argument("--saved", default=None, help="Saved search id or name")
+    p_search.add_argument("--order", choices=["oldest", "newest"], default="oldest")
+    p_search.add_argument("--limit", type=int, default=50)
+    p_search.add_argument("--offset", type=int, default=0)
+
+    p_collections = sub.add_parser(
+        "collections", help="Manage notebook collections and archived state"
+    )
+    col_sub = p_collections.add_subparsers(dest="collections_cmd", required=True)
+    col_sub.add_parser("list", help="List collections and archived notebooks")
+    p_col_create = col_sub.add_parser("create", help="Create a collection")
+    p_col_create.add_argument("name")
+    p_col_create.add_argument("--description", default="")
+    p_col_rename = col_sub.add_parser("rename", help="Rename a collection")
+    p_col_rename.add_argument("collection_id")
+    p_col_rename.add_argument("name")
+    p_col_delete = col_sub.add_parser("delete", help="Delete a collection")
+    p_col_delete.add_argument("collection_id")
+    p_col_assign = col_sub.add_parser("assign", help="Add a notebook to a collection")
+    p_col_assign.add_argument("collection_id")
+    p_col_assign.add_argument("project_id")
+    p_col_unassign = col_sub.add_parser("unassign", help="Remove a notebook from a collection")
+    p_col_unassign.add_argument("collection_id")
+    p_col_unassign.add_argument("project_id")
+    p_col_archive = col_sub.add_parser("archive", help="Archive a notebook (hide by default)")
+    p_col_archive.add_argument("project_id")
+    p_col_unarchive = col_sub.add_parser("unarchive", help="Unarchive a notebook")
+    p_col_unarchive.add_argument("project_id")
+
+    p_saved = sub.add_parser("saved-search", help="Manage saved searches")
+    saved_sub = p_saved.add_subparsers(dest="saved_cmd", required=True)
+    saved_sub.add_parser("list", help="List saved searches")
+    p_saved_save = saved_sub.add_parser("save", help="Save (or update) a search by name")
+    p_saved_save.add_argument("name")
+    p_saved_save.add_argument("--query", default="")
+    p_saved_save.add_argument("--tags", default=None)
+    p_saved_save.add_argument("--people", default=None)
+    p_saved_save.add_argument("--places", default=None)
+    p_saved_save.add_argument("--include-archived", action="store_true")
+    p_saved_save.add_argument("--order", choices=["oldest", "newest"], default="oldest")
+    p_saved_delete = saved_sub.add_parser("delete", help="Delete a saved search")
+    p_saved_delete.add_argument("search_id")
+
+    p_quality = sub.add_parser(
+        "quality", help="Local quality ratings (collect-only; no telemetry)"
+    )
+    quality_sub = p_quality.add_subparsers(dest="quality_cmd", required=True)
+    p_quality_summary = quality_sub.add_parser("summary", help="Summarise local ratings")
+    p_quality_summary.add_argument("--project", default=None, help="Filter by project id")
+    p_quality_rate = quality_sub.add_parser("rate", help="Record a local rating")
+    p_quality_rate.add_argument(
+        "kind", choices=["ocr_sample", "cleanup", "analysis"]
+    )
+    p_quality_rate.add_argument(
+        "verdict",
+        choices=["accept", "edit", "reject", "up", "down"],
+        help="ocr_sample: accept/edit/reject; cleanup: accept/reject; analysis: up/down",
+    )
+    p_quality_rate.add_argument("--project", default=None)
+    p_quality_rate.add_argument("--page", default=None)
+    p_quality_rate.add_argument("--module", default=None)
+    p_quality_rate.add_argument("--notes", default="")
 
     p_rag = sub.add_parser("rag", help="Ask RAG index (embed only; no Ask LLM)")
     rag_sub = p_rag.add_subparsers(dest="rag_cmd", required=True)

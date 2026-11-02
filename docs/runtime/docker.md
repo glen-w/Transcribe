@@ -101,7 +101,7 @@ Published port defaults to loopback:
 "${TRANSCRIBE_BIND_HOST:-127.0.0.1}:8510:8510"
 ```
 
-LAN opt-in: `TRANSCRIBE_BIND_HOST=0.0.0.0` (unauthenticated UI access on your network).
+LAN opt-in: `TRANSCRIBE_BIND_HOST=0.0.0.0` (unauthenticated UI access on your network). Since 1.2 the native `transcribe-ui` entry also refuses an unacknowledged non-loopback `TRANSCRIBE_HOST` (`TRANSCRIBE_ALLOW_LAN=1` opts in); inside the container the host publish above is what decides exposure — see [SECURITY.md](../../SECURITY.md).
 
 ## Ownership
 

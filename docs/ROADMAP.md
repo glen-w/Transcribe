@@ -1,7 +1,7 @@
 # Transcribe roadmap
 
 **Product definition:** [PRODUCT.md](PRODUCT.md)  
-**Active product focus:** [1.1 deepen-in-place](dev/deepen_waves_1_1.md) — ranked backlog + leftover architecture bits after **1.0.1**  
+**Active product focus:** [1.2 expansion & hardening](dev/expansion_hardening_wave_1_2.md) — balanced-max H/E/Q wave after **1.0.1** (folds in 1.1 deepen W1–W9)
 **Wave plans (done tracks):** [usability_wave_plan.md](usability_wave_plan.md) · [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md)  
 **Critical path:** [Active backlog](#active-backlog--ranked) · [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)  
 **Historical 0.9 / 1.0 path:** [Path to 0.9.0 / 1.0](#path-to-090--10) — tagged; Track C signed off  
@@ -40,17 +40,17 @@
 
 ## Status at a glance
 
-**Package:** **1.0.1**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **Now** is the [1.1 deepen-in-place](dev/deepen_waves_1_1.md) programme.
+**Package:** **1.2.0**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **Now** is the [1.2 expansion & hardening](dev/expansion_hardening_wave_1_2.md) programme (1.1 deepen W1–W9 folded in).
 
 ```text
-0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1 → 1.1.0
+0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1 → 1.2.0
          I0–I1    I2–I3   patch   product  patch   I5+docs  U2+I6   freeze  decoupling  deepen
                                   cut      cut
 ```
 
 | Horizon | Status | What it means |
 |---------|--------|---------------|
-| **Now** | [~] | **1.1 deepen-in-place** ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)): Inbox, declutter v4, page reorder, hand-model bring-back, leftover architecture |
+| **Now** | [x] | **1.2 expansion & hardening** ([dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md)): L2 load default, failure/security/scale hardening, search + collections + export expansion, quality loop, declutter v5 — tagged **1.2.0** |
 | **0.9.0** | [x] | Changelog cut — U2 + I0–I6 |
 | **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch; Track C signed off |
 | **Parked** | [−] | Autobiography programme — [on file](#after-10--notebook-anchored-autobiography-workbench----on-file), future separate product |
@@ -70,7 +70,7 @@
 | Notebook corpus / bulk import | [x] | [notebook-corpus](contracts/notebook-corpus.md) |
 | Bulk Analyse (GUI + CLI) | [x] | [analysis-batch-run](contracts/analysis-batch-run.md) |
 | Workspace backup / restore | [x] | [workspace-backup](contracts/workspace-backup.md) |
-| Visual declutter (scanner bed / overscan / wedges / gutter / shadows) | [x] | v4 binding gutter + edge shadows |
+| Visual declutter (scanner bed / overscan / wedges / gutter / shadows / lid slivers) | [x] | v4 binding gutter + edge shadows; **v5 lid slivers (1.2)** |
 | Hand-specific model (external fine-tune) | [x] | Export + install/verify docs; training stays outside the app |
 
 A stranger-testing round is **not** a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)).
@@ -119,7 +119,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 
 ## Active backlog — ranked
 
-**1.1 deepen-in-place** ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)). Rank 1 is the next maintainer action. Do not schedule autobiography from this list.
+**1.1 deepen-in-place** ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md)) — all ranks landed and folded into **1.2**. The live programme is [1.2 expansion & hardening](dev/expansion_hardening_wave_1_2.md). Do not schedule autobiography from this list.
 
 | Rank | Item | Status | Wave | Detail |
 |------|------|--------|------|--------|
@@ -130,15 +130,15 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 | 5 | **Visual declutter expansion** | [x] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
 | 6 | **Page reorder / date repair** | [x] | W6–W7 | `pages` array permute + Date-lane cluster action; drag island optional |
 | 7 | **Hand-model bring-back (external)** | [x] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |
-| 8 | **L2 `load()` default** | [?] | W9 | `reconcile=False` by default; explicit reopen path |
+| 8 | **L2 `load()` default** | [x] | W9→1.2 | `reconcile=False` by default; explicit reopen path (landed in 1.2 Wave 0) |
 
-**Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling.
+**Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling · 1.1 deepen W1–W9 · **1.2 expansion & hardening (H1–H4, E1–E5)**.
 
 ---
 
 ## Path to 0.9.0 / 1.0
 
-**Status:** [x] done — **0.9.0** (2026-10-23) and **1.0.0** notebook freeze tagged; **1.0.1** decoupling patch. Historical sequencing from package **0.8.8**. Companion tracks: [usability_wave_plan.md](usability_wave_plan.md) (U2), [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (I0–I6). A stranger-testing round is not a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)). Live work is the [1.1 deepen-in-place](dev/deepen_waves_1_1.md) backlog above.
+**Status:** [x] done — **0.9.0** (2026-10-23) and **1.0.0** notebook freeze tagged; **1.0.1** decoupling patch. Historical sequencing from package **0.8.8**. Companion tracks: [usability_wave_plan.md](usability_wave_plan.md) (U2), [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (I0–I6). A stranger-testing round is not a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)). Live work is the [1.2 expansion & hardening](dev/expansion_hardening_wave_1_2.md) programme.
 
 **Thesis:** Cut an operable **0.9.0**, then declare **1.0** as the notebook contract. Harden the existing notebook/OCR/analysis/corpus stack. Do **not** ship photos-as-context, WhatsApp, a People store, Slices, reconstruction, or time-of-day storage in this repo.
 
@@ -240,9 +240,9 @@ Autobiography does **not** start afterwards inside this repo. The write-up stays
 
 ---
 
-## Now — 1.1 deepen-in-place — [~] active
+## Now — 1.2 expansion & hardening — [x] landed
 
-Authority: [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md). Usability **U0–U4** and infra **I0–I6** are done (U4 Inbox polish may continue as W4). Do **not** schedule deferred-reinterpretation ports or autobiography while this focus is open.
+Authority: [dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md). The 1.1 deepen-in-place waves (W1–W9) are folded in. Usability **U0–U4** and infra **I0–I6** are done. Do **not** schedule deferred-reinterpretation ports or autobiography.
 
 ## Usability wave — [x] done (Inbox polish may continue)
 
@@ -421,11 +421,11 @@ Uncommitted deepen-in-place. May land before or after 1.0, but **must not** dela
 
 ### Preprocessing expansion — [x] partial
 
-**Visual declutter v4 — binding gutter + edge shadows — [x] shipped**
+**Visual declutter v4 — binding gutter + edge shadows — [x] shipped** (v5 lid slivers added in 1.2)
 
 Stay outside the page: high-confidence, edge-anchored artefacts only — never alter pixels inside the detected page area. That keeps declutter distinct from document restoration (no bleed-through, whitening, stains, ruled lines, hole punching, creases, page-wide shadow fix, or handwritten-margin cleanup).
 
-Shipped after scanner-bed borders + stark-white overscan + corner wedges: **binding gutter** → **edge shadows**. Other safe candidates when detection is conservative: scanner lid/background slivers (non-white/non-grey uniform edge bands), punch-hole *margins* (trim blank outer strip only), scanner calibration stripes.
+Shipped after scanner-bed borders + stark-white overscan + corner wedges: **binding gutter** → **edge shadows** → (1.2) **lid slivers** (thin uniform dark/coloured edge bands). Remaining safe candidates when detection is conservative: punch-hole *margins* (trim blank outer strip only), scanner calibration stripes.
 
 ### Corpus & product lifecycle — remaining rows — [?]
 
@@ -433,24 +433,24 @@ Primary direction for living with many notebooks. **U3** pulled Review UX, readi
 
 | Outcome | Intent | Wave / status |
 |---------|--------|---------------|
-| **Search (first-class)** | Full-text across notebooks; date / tag / entity filters; jump-to-page; eventually saved searches | **U3** date/tag/jump done; Moments/chart jump → Reading done; entity filters → After 1.0 **1.1/1.3**; saved searches still candidate |
-| **Notebook organisation** | Titles, descriptions, tags/collections, archive state, sort order, cover/thumbnail | **U3** tag chips + sort polish done; catalogue/filter/auto-tag shipped; collections/archive-state candidate |
-| **Page reordering & date repair** | Drag/drop thumbnail grid to reorder after scan upload errors; “move suspiciously dated page to end of confirmed date cluster”. Plan: [page reorder plan](../../.cursor/plans/page_reorder_plan_6d561135.plan.md) (may be local-only) | candidate |
+| **Search (first-class)** | Full-text across notebooks; date / tag / entity filters; jump-to-page; saved searches | **[x] done (1.2)** — U3 date/tag/jump; 1.2 published-NER entity filters + saved searches ([saved-searches](contracts/saved-searches.md)) |
+| **Notebook organisation** | Titles, descriptions, tags/collections, archive state, sort order, cover/thumbnail | **[x] done (1.2)** — U3 tag chips + sort; 1.2 collections + archived state ([notebook-collections](contracts/notebook-collections.md)) |
+| **Page reordering & date repair** | Drag/drop thumbnail grid to reorder after scan upload errors; “move suspiciously dated page to end of confirmed date cluster” | **[x] done** (1.1 W6–W7) |
 | **Import recovery / inbox** | Continuations of bulk import as a daily workflow | **U4** (gate green; polish open) |
 | **Reading mode** | Clean chronological in-app reading | **U3** (done) |
 | **Backup / restore / portability** | Full-workspace ZIP | **[x] done** |
-| **Data longevity / upgrades** | Migration UX, pre-upgrade backup, refusal/recovery, “archive remains readable without Transcribe” | **0.9 path (thin):** pre-upgrade backup + restore verify. Full offline-archive story remains candidate |
+| **Data longevity / upgrades** | Migration UX, pre-upgrade backup, refusal/recovery, “archive remains readable without Transcribe” | **0.9 path (thin)** done; **1.2:** `verify-export` standalone proof + `workspace-doctor` sweep + migration rehearsal. Per-notebook restore still not shipped |
 | **Model & runtime management** | Product abstraction over installed OCR/text models | **U3** (done) |
-| **Quality / evaluation loop** | Sampled OCR accuracy review, cleanup accept/reject, analysis usefulness ratings, local regression fixtures | candidate |
-| **Quality ratings (thumbs)** | Collect-only local ratings; shape from TranscriptX LLM feedback v1 | candidate |
+| **Quality / evaluation loop** | Sampled OCR accuracy review, cleanup accept/reject, analysis usefulness ratings, local regression fixtures | **[x] done (1.2)** — [quality-ratings](contracts/quality-ratings.md) + import→OCR smoke kit |
+| **Quality ratings (thumbs)** | Collect-only local ratings | **[x] done (1.2)** — analysis `up`/`down` in the quality store (CLI) |
 | **Ignore pages (Reader)** | Mark/unmark in Review; Reader hide-by-default + **Show ignored**; export exclude ignored | **[x] done** |
 | **Detection fine-tune export** | Approved/rejected Detect labels → external training datasets | **[x] done** — see [Shipped — Detection fine-tune export](#shipped--detection-fine-tune-export--x) |
 | **OCR cleanup quality** | Improve second-pass cleanup / verification without a separate analysis module | candidate |
 | **People & places / Patterns** | Places map shipped; Patterns tab only if usage justifies. First-class Person identity is After 1.0 **1.3** | Places shipped; Patterns optional |
-| **Page scan fullscreen** | Today: Streamlit `st.image` hover toolbar (**View fullscreen**). **Candidate — click image → black lightbox:** Streamlit has no API for click-to-fullscreen or a black backdrop ([streamlit#8031](https://github.com/streamlit/streamlit/issues/8031)). Revisit when that lands; until then, optional custom JS below (parent-frame overlay, same pattern as Review hotkeys). | candidate |
+| **Page scan fullscreen** | Click scan → black lightbox, with `st.image` hover toolbar as fallback | **[x] done (1.2)** — `ui/page_lightbox.py` island (JS safekeeping below is its source) |
 
 <details>
-<summary>Custom JS lightbox (safekeeping — not wired in app)</summary>
+<summary>Custom JS lightbox (source of the wired `ui/page_lightbox.py` island, kept for reference)</summary>
 
 ```javascript
 (function () {
@@ -1025,7 +1025,7 @@ Not on the critical path to the **0.9.0** tag (U2 + I0–I6 already landed). Evi
 
 | ID | Outcome | Review | Notes |
 |----|---------|--------|-------|
-| **L2** | `ProjectService.load` is a read by default; reconcile interrupted attempts is an explicit reopen path | P2 #3, L2 **partial** | `load()` documents `reconcile=False` as the mid-run read; `reconcile_interrupted()` is the explicit reopen path. Default remains `reconcile=True` (changing it still touches every caller). |
+| **L2** | `ProjectService.load` is a read by default; reconcile interrupted attempts is an explicit reopen path | P2 #3, L2 | **[x] done (1.2)** — `load()` defaults to `reconcile=False`; `reconcile_interrupted()` / deliberate `reconcile=True` at notebook-open and run-freeze are the explicit reopen paths. |
 | **L3** | Names / people detector consumes **published** NER only — no nested `AnalysisRunner.run_module("ner")` | P2 #4, L3 | **[x] done** — Detect returns `unavailable_dependency` when NER is missing/stale. |
 | **L4** | One schema registry for every written `format` (including job-record, settings, profiles, interface-menus) | P2 #7, L4 | **[x] done** — `SUPPORTED` lists settings, profile, job-record, interface-menus, geocode-cache. Settings/profile still load via `ConfigError`; interface-menus on-disk files may omit `format`. |
 | **P1 leftover** | Cleanup LLM failure must not seal cleanup into the OCR skip fingerprint while the page keeps raw text | P1 #2 | **[x] done** — `cleanup_fingerprint_for_attempt` omits cleanup on `provider_failed`. |
@@ -1070,4 +1070,5 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 | 2026-09+ | Stranger-testing is **not** a release gate | Stranger-testing as I7 / path-to-1.0 step |
 | Expansion wave (#47) | U2.2/U2.4, ignore-pages Reader, detection fine-tune export, I6 landed | Treating those as open 0.9.0 blockers |
 | 2026-11-02 | **1.1 deepen-in-place** is the active product focus after 1.0.1; Track C signed off as already met on 1.0.0; 0.9.0/1.0 path is historical | Stale active-backlog ranks 1–2 (0.9.0 cut / Track C as open) |
+| 2026-11-02 | **1.2 expansion & hardening** (balanced-max, one release): H1–H4 hardening + E1–E5 expansion on shipped surfaces only; L2 landed; package **1.2.0** | Treating saved searches / collections / quality loop / declutter v5 as uncommitted candidates |
 

@@ -63,7 +63,14 @@ See [finetune_export.md](../finetune_export.md). Contracts:
 [finetune-export](../contracts/finetune-export.md) ·
 [detection-finetune-export](../contracts/detection-finetune-export.md).
 
-Reading exports can **Exclude ignored pages** (default on). JSON keeps the full
+Reading exports can **Exclude ignored pages** (default on) and, since 1.2,
+filter by page tags: **Only pages with all these tags** / **Skip pages with
+any of these tags** (CLI `--include-tag` / `--exclude-tag`). Scope can be a
+**Collection** of notebooks (anthology; CLI `--collection <id>`), and a
+**Custom body font family** can replace the curated body font (CLI
+`--custom-font`). Verify a finished export without Transcribe with
+`transcribe verify-export <dir>` (manifest, checksums, revision stamps).
+JSON keeps the full
 notebook including the `ignored` flag.
 
 ## Related

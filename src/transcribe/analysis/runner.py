@@ -353,6 +353,7 @@ class AnalysisRunner:
         stack = _stack or frozenset()
         if module_id in stack:
             return None
+        # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
         project = project or self.project_service.load(reconcile=True)
 
         if module.module_id in LLM_MODULES and llm_ctx is None:
@@ -454,6 +455,7 @@ class AnalysisRunner:
         module = modules.get(module_id)
         if module is None:
             raise KeyError(f"unknown module_id: {module_id}")
+        # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
         project = project or self.project_service.load(reconcile=True)
         try:
             document = _build_document(project, self.project_service, module.module_id)
@@ -759,6 +761,7 @@ class AnalysisRunner:
     def run_batch(self, module_ids: list[str] | None = None) -> dict[str, dict[str, Any]]:
         ids = module_ids or list(get_registered_modules().keys())
         ids = batch_module_order(ids)
+        # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
         project = self.project_service.load(reconcile=True)
         self.reconcile()
         snap = snapshot_for_operation(
@@ -806,6 +809,7 @@ class AnalysisRunner:
             raise TypeError("plan must be an AnalysisRunPlan")
 
         # Reconcile only when no live analysis lock (coordinator holds it during run).
+        # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
         project = self.project_service.load(reconcile=True)
         modules = get_registered_modules()
         results: dict[str, dict[str, Any]] = {}

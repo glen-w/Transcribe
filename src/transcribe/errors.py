@@ -36,3 +36,9 @@ class BackupError(TranscribeError):
 
 class JobConflictError(TranscribeError):
     pass
+
+
+class DiskFullError(TranscribeError):
+    """Free-disk headroom is too low to start a writing job safely."""
+
+    retriable = True

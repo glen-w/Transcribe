@@ -38,6 +38,10 @@ SUPPORTED: dict[str, int] = {
     "transcribe.job-record": 1,
     "transcribe.interface-menus": 1,
     "transcribe.geocode-cache": 1,
+    # 1.2 expansion wave: workspace organisation / saved filters / quality.
+    "transcribe.saved-searches": 1,
+    "transcribe.notebook-collections": 1,
+    "transcribe.quality-ratings": 1,
 }
 
 

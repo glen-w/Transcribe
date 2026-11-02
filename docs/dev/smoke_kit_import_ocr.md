@@ -1,6 +1,6 @@
 # Import → OCR smoke kit (design)
 
-**Status:** design only. Do not implement in the scope-lean docs pull request. PR CI does not run a vision model and does not need a GPU.
+**Status:** implemented in 1.2 as `tests/acceptance/ocr_lifecycle/test_import_ocr_smoke_kit.py` (offline stub vision; PR CI runs no vision model and needs no GPU).
 
 ## One path
 

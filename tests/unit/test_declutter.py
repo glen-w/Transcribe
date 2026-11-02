@@ -302,8 +302,8 @@ def test_enabled_ops_include_uniform_overscan() -> None:
     assert "remove_edge_shadows" in result.params
 
 
-def test_identity_version_4_differs_from_v3() -> None:
-    assert DECLUTTER_VERSION == 4
+def test_identity_version_5_differs_from_v3() -> None:
+    assert DECLUTTER_VERSION == 5
     v3 = identity_payload(
         enabled=True,
         version=3,
@@ -431,13 +431,15 @@ def test_tiny_image_noop() -> None:
     assert result.image_bytes == src
 
 
-def test_narrow_gutter_below_min_band_noop() -> None:
-    # min_band for width 400 is max(8, 4) = 8; bed of 4 must noop
+def test_narrow_gutter_below_min_band_crops_as_lid_sliver() -> None:
+    # v5: a 4px uniform grey bed is below the normal min band (8) but is a
+    # lid sliver (remove_lid_slivers), so it now crops instead of no-op.
     paper = _paper(400, 500)
     src = _png_bytes(_with_right_grey_bed(paper, bed=4))
     result = apply_declutter(src, enabled=True)
-    assert result.state == "enabled_noop"
-    assert result.image_bytes == src
+    assert result.state == "enabled_cropped"
+    assert result.inset_right >= 4
+    assert "remove_lid_slivers" in result.ops
 
 
 def test_black_border_not_treated_as_scanner_grey() -> None:
