@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standalone Detect can Stop after the current window (background coordinator, same cancel path Analyse already used).
 - Import Batch shows imported / failed / duplicated / needs-review outcomes and can scan `TRANSCRIBE_INBOX_DIR`.
 - Visual declutter v4 crops dark binding gutters and remaining edge shadows (Pillow insets only). Existing notebooks stay as stored until Re-apply / Cleanup.
-- Notebook page order can be permuted (`transcribe pages reorder` / `move-to-date-cluster`) without renaming on-disk `page_index` directories.
+- Notebook page order can be permuted (`transcribe pages reorder` / `move-to-date-cluster`) without renaming on-disk `page_index` directories. Review Other / Thumbnails expose Move up/down/to position; Date lane can move a regression to its date cluster.
 
 ## [1.0.1] - 2026-11-02
 

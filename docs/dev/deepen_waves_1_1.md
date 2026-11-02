@@ -43,7 +43,7 @@ Product buckets imported / failed / duplicated / needs-review over existing Impo
 
 `ProjectService.reorder_pages` permutes the `pages` array. `move_page_to_date_cluster` inserts after a confirmed date cluster. CLI. No on-disk `page_index` reindex.
 
-## Wave 7 — Page reorder UI
+## Wave 7 — Page reorder UI — [x]
 
 Thumbnail/Review move controls; optional JS island; Date lane cluster action.
 

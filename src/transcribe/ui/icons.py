@@ -7,6 +7,8 @@ CHEVRON_LEFT = ":material/chevron_left:"
 CHEVRON_RIGHT = ":material/chevron_right:"
 ARROW_BACK = ":material/arrow_back:"
 ARROW_FORWARD = ":material/arrow_forward:"
+ARROW_UPWARD = ":material/arrow_upward:"
+ARROW_DOWNWARD = ":material/arrow_downward:"
 
 # Common actions
 SAVE = ":material/save:"

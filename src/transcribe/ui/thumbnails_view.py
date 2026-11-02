@@ -61,11 +61,7 @@ def render_thumbs_toggle_button(*, key: str) -> None:
     """Icon button that enters or leaves the thumbnails overview."""
     active = thumbs_mode_active()
     label = "Page view" if active else "Thumbnails"
-    help_text = (
-        "Return to the single-page view"
-        if active
-        else "Browse pages as a thumbnail grid"
-    )
+    help_text = "Return to the single-page view" if active else "Browse pages as a thumbnail grid"
     if st.button(
         label,
         key=key,
@@ -84,9 +80,7 @@ def render_thumbs_toggle_button(*, key: str) -> None:
         st.rerun()
 
 
-def _entry_for_page(
-    entries: list[dict[str, str]], page_id: str
-) -> dict[str, str] | None:
+def _entry_for_page(entries: list[dict[str, str]], page_id: str) -> dict[str, str] | None:
     for entry in entries:
         if entry.get("page_id") == page_id:
             return entry
@@ -248,6 +242,8 @@ def _render_page_info_panel(
     selected_id: str,
     key_prefix: str,
     cache: dict[str, tuple[ProjectPaths, ProjectService, Project]],
+    allow_reorder: bool = False,
+    dirty: bool = False,
 ) -> None:
     entry = _entry_for_page(entries, selected_id)
     if entry is None and entries:
@@ -322,12 +318,37 @@ def _render_page_info_panel(
         args=(entry["page_id"], str(entry.get("project_root") or "")),
     )
 
+    roots = {str(e.get("project_root") or "") for e in entries}
+    if allow_reorder and len(roots) == 1:
+        from transcribe.ui.page_reorder import (
+            inject_thumbs_reorder_island,
+            render_move_controls,
+            render_thumbs_reorder_apply,
+        )
+
+        notebook_ids = [p.page_id for p in project.pages]
+        render_move_controls(
+            projects=projects,
+            page_id=page.page_id,
+            key_prefix=f"{key_prefix}_ord",
+            dirty=dirty,
+        )
+        inject_thumbs_reorder_island(notebook_ids, key_prefix=key_prefix)
+        render_thumbs_reorder_apply(
+            projects=projects,
+            notebook_ids=notebook_ids,
+            key_prefix=key_prefix,
+            dirty=dirty,
+        )
+
 
 def render_thumbnails_view(
     *,
     entries: list[dict[str, str]],
     current_page_id: str,
     key_prefix: str = "thumbs",
+    allow_reorder: bool = False,
+    dirty: bool = False,
 ) -> None:
     """Full thumbnails overview: grid on the left, page info on the right."""
     if not entries:
@@ -370,4 +391,6 @@ def render_thumbnails_view(
             selected_id=selected,
             key_prefix=key_prefix,
             cache=cache,
+            allow_reorder=allow_reorder,
+            dirty=dirty,
         )

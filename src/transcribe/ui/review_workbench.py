@@ -491,6 +491,8 @@ def _render_review_chrome(session: _ReviewSession, projects: ProjectService) -> 
             entries=entries,
             current_page_id=page_id,
             key_prefix="rw_thumbs",
+            allow_reorder=True,
+            dirty=_is_dirty(page_id),
         )
         return True
 
@@ -1523,6 +1525,15 @@ def _render_date_tab(projects, project, page, result) -> None:
             st.rerun()
         except (ValueError, TranscribeError) as exc:
             st.error(str(exc))
+    from transcribe.ui.page_reorder import render_date_cluster_action
+
+    render_date_cluster_action(
+        projects=projects,
+        page=page,
+        project=project,
+        key_prefix=f"rw_date_{page.page_id}",
+        dirty=_is_dirty(page.page_id),
+    )
 
 
 def _render_tags_tab(projects, page) -> None:
@@ -1727,6 +1738,15 @@ def _render_other_tab(paths, projects, project, page) -> None:
             st.rerun()
         except TranscribeError as exc:
             st.error(str(exc))
+
+    from transcribe.ui.page_reorder import render_move_controls
+
+    render_move_controls(
+        projects=projects,
+        page_id=page.page_id,
+        key_prefix=f"rw_other_{page.page_id}",
+        dirty=_is_dirty(page.page_id),
+    )
 
     thumbs = ThumbnailService(paths)
     if st.button(

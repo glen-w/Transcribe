@@ -30,11 +30,11 @@ Two-pane: **scan** (left) and **lane switcher** (right) so only one review lane 
 | Lane | Purpose |
 |------|---------|
 | **Transcription** | Editor, current-disagreement excerpt, OCR evidence strip, disagreement navigation, Save / Save + Mark reviewed / Skip / Undo |
-| **Date** | Manual date entry, approve/ignore suggestions (✓ / ✓✓ / ✕), regression confirm; label shows **Date ⚠** when a suggestion is pending |
+| **Date** | Manual date entry, approve/ignore suggestions (✓ / ✓✓ / ✕), regression confirm, **Move to date cluster**; label shows **Date ⚠** when a suggestion is pending |
 | **Tags** | Page tag assignment (catalog + ad-hoc); **💾 Save tags** |
 | **OCR** | Per-notebook OCR settings (below), **Re-run OCR** (vision model; this page / all pages / not reviewed), rank and merge this page / all comparable pages (all-pages behind confirm) |
 | **Cleanup** | Visual declutter (scanner beds, white gutters, corner wedges, binding gutters, edge shadows) on this page or all pages in the notebook; does not re-run OCR |
-| **Other** | Notebook cover, delete page |
+| **Other** | Notebook cover, page order (Move up/down/to position), delete page |
 
 Nav bar **✓ date** remains for quick approve without opening the Date lane.
 

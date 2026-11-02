@@ -190,3 +190,16 @@ def test_cli_pages_reorder(tmp_path: Path, capsys) -> None:
     assert out == flipped
     loaded = projects.load(reconcile=False)
     assert [p.page_id for p in loaded.pages] == flipped
+
+
+def test_permutation_move_and_position() -> None:
+    from transcribe.ui.page_reorder import permutation_move, permutation_to_position
+
+    ids = ["a", "b", "c"]
+    assert permutation_move(ids, "b", -1) == ["b", "a", "c"]
+    assert permutation_move(ids, "a", -1) == ["a", "b", "c"]
+    assert permutation_move(ids, "c", 1) == ["a", "b", "c"]
+    assert permutation_to_position(ids, "c", 1) == ["c", "a", "b"]
+    assert permutation_to_position(ids, "a", 1) == ["a", "b", "c"]
+    with pytest.raises(ProjectError, match="unknown"):
+        permutation_move(ids, "z", 1)
