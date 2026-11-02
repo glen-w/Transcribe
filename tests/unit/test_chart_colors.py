@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from transcribe.ui.chart_colors import (
+from transcribe.config.chart_colors import (
     DEFAULT_EMOTION_COLORS,
     DEFAULT_SENTIMENT_COLORS,
     color_for_label,
@@ -46,11 +46,18 @@ def test_chart_color_defaults_do_not_import_streamlit() -> None:
     script = """
 import sys
 from transcribe.config.models import ChartColorsConfig
-from transcribe.ui.chart_colors import sanitise_chart_colors
+from transcribe.config.chart_colors import sanitise_chart_colors
 
 ChartColorsConfig.from_dict({"sentiment": {"positive": "#2f8f4e"}})
 sanitise_chart_colors(None)
-leaked = [name for name in sys.modules if name == "streamlit" or name.startswith("streamlit.")]
+leaked = [
+    name
+    for name in sys.modules
+    if name == "streamlit"
+    or name.startswith("streamlit.")
+    or name == "transcribe.ui"
+    or name.startswith("transcribe.ui.")
+]
 assert not leaked, leaked
 """
     env = os.environ.copy()

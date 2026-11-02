@@ -1020,7 +1020,7 @@ Not on the critical path to the **0.9.0** tag (U2 + I0–I6 already landed). Evi
 |----|---------|--------|-------|
 | **L2** | `ProjectService.load` is a read by default; reconcile interrupted attempts is an explicit reopen path | P2 #3, L2 **partial** | Detection already skips reconcile when either long lock is held. Changing the load default touches every caller of `load()`. |
 | **L3** | Names / people detector consumes **published** NER only — no nested `AnalysisRunner.run_module("ner")` | P2 #4, L3 | **[x] done** — Detect returns `unavailable_dependency` when NER is missing/stale. |
-| **L4** | One schema registry for every written `format` (including job-record, settings, profiles, interface-menus) | P2 #7, L4 | `persistence.schema.SUPPORTED` is incomplete today. |
+| **L4** | One schema registry for every written `format` (including job-record, settings, profiles, interface-menus) | P2 #7, L4 | **[x] done** — `SUPPORTED` lists settings, profile, job-record, interface-menus, geocode-cache. Settings/profile still load via `ConfigError`; interface-menus on-disk files may omit `format`. |
 | **P1 leftover** | Cleanup LLM failure must not seal cleanup into the OCR skip fingerprint while the page keeps raw text | P1 #2 | **[x] done** — `cleanup_fingerprint_for_attempt` omits cleanup on `provider_failed`. |
 | **P2 split** | Split `ProjectService` along SoT I/O vs review / dates / declutter / reconcile | P2 #6 | High blast radius; not a Review workbench rewrite and not a database. |
 | **Detect cancel** | Detect can be stopped like OCR/Analyse | P3 | Detect is request-synchronous today; Analyse+detect lock behaviour already tightened. |
@@ -1028,7 +1028,7 @@ Not on the critical path to the **0.9.0** tag (U2 + I0–I6 already landed). Evi
 | **Cover Open** | Library cover Open is a visible control | P3 | Opacity-0 overlay today. |
 | **Dirty leave** | Review dirty-leave does not require a second Prev/Next to discard | P3 | `rw_force_leave`. |
 | **Auto-tag** | Re-running auto-tag does not re-apply slugs the user removed | P3 | Current contract: additive re-add; turn the checkbox off to stop. |
-| **Chart palettes** | Config chart-colour defaults do not import `transcribe.ui` | residual | Streamlit no longer loads on `ProjectService.create`; `ChartColorsConfig` still imports `ui.chart_colors`. |
+| **Chart palettes** | Config chart-colour defaults do not import `transcribe.ui` | residual | **[x] done** — defaults live in `config.chart_colors`; `ChartColorsConfig` no longer imports `ui`. |
 
 Leave `effective_text()` as the integration bus, session-only routing, and on-disk `completed` + `circuit_open` unless a later review reopens them with evidence.
 

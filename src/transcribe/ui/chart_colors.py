@@ -1,61 +1,31 @@
-"""Chart colour palettes for analysis View bar charts."""
+"""Streamlit rendering for analysis View bar charts.
+
+Palette defaults and sanitise live in ``transcribe.config.chart_colors`` so
+workspace config can resolve colours without importing this package.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
 
-from transcribe.tagging.colors import parse_hex_color
+from transcribe.config.chart_colors import (
+    DEFAULT_EMOTION_COLORS,
+    DEFAULT_SENTIMENT_COLORS,
+    EMOTION_ORDER,
+    SENTIMENT_ORDER,
+    color_for_label,
+    sanitise_chart_colors,
+)
 
-DEFAULT_SENTIMENT_COLORS: dict[str, str] = {
-    "negative": "#c43c3c",
-    "neutral": "#e6b422",
-    "positive": "#2f8f4e",
-}
-
-DEFAULT_EMOTION_COLORS: dict[str, str] = {
-    "anger": "#c43c3c",
-    "fear": "#e07070",
-    "joy": "#2f8f4e",
-    "sadness": "#888888",
-    "surprise": "#e6b422",
-    "trust": "#4a7ab8",
-}
-
-SENTIMENT_ORDER = ("negative", "neutral", "positive")
-EMOTION_ORDER = ("anger", "fear", "joy", "sadness", "surprise", "trust")
-
-
-def _sanitise_palette(
-    raw: Any,
-    *,
-    defaults: Mapping[str, str],
-) -> dict[str, str]:
-    out = dict(defaults)
-    if not isinstance(raw, Mapping):
-        return out
-    for key, value in raw.items():
-        label = str(key).strip().casefold()
-        if not label or label not in defaults:
-            continue
-        try:
-            out[label] = parse_hex_color(str(value))
-        except ValueError:
-            continue
-    return out
-
-
-def sanitise_chart_colors(data: Mapping[str, Any] | None) -> dict[str, dict[str, str]]:
-    data = data or {}
-    return {
-        "sentiment": _sanitise_palette(data.get("sentiment"), defaults=DEFAULT_SENTIMENT_COLORS),
-        "emotion": _sanitise_palette(data.get("emotion"), defaults=DEFAULT_EMOTION_COLORS),
-    }
-
-
-def color_for_label(label: str, palette: Mapping[str, str], *, fallback: str = "#888888") -> str:
-    key = str(label).casefold()
-    return palette.get(key, fallback)
+__all__ = [
+    "DEFAULT_EMOTION_COLORS",
+    "DEFAULT_SENTIMENT_COLORS",
+    "EMOTION_ORDER",
+    "SENTIMENT_ORDER",
+    "color_for_label",
+    "render_colored_bar_pairs",
+    "sanitise_chart_colors",
+]
 
 
 def render_colored_bar_pairs(

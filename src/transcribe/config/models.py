@@ -507,7 +507,7 @@ class ChartColorsConfig:
     emotion: dict[str, str] = field(default_factory=dict)
 
     def resolved(self) -> dict[str, dict[str, str]]:
-        from transcribe.ui.chart_colors import sanitise_chart_colors
+        from transcribe.config.chart_colors import sanitise_chart_colors
 
         return sanitise_chart_colors(
             {"sentiment": self.sentiment, "emotion": self.emotion}
@@ -523,8 +523,8 @@ class ChartColorsConfig:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any] | None) -> ChartColorsConfig:
+        from transcribe.config.chart_colors import DEFAULT_EMOTION_COLORS, DEFAULT_SENTIMENT_COLORS
         from transcribe.tagging.colors import parse_hex_color
-        from transcribe.ui.chart_colors import DEFAULT_EMOTION_COLORS, DEFAULT_SENTIMENT_COLORS
 
         data = data or {}
         sentiment: dict[str, str] = {}

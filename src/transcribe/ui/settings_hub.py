@@ -451,7 +451,7 @@ def render_configuration_panel() -> None:
         "Bar colours on View → Overview / Mood for sentiment tone mix and emotion lexicon totals. "
         "Defaults use red shades for anger/fear, green for joy, grey for sadness, and so on."
     )
-    from transcribe.ui.chart_colors import (
+    from transcribe.config.chart_colors import (
         DEFAULT_EMOTION_COLORS,
         DEFAULT_SENTIMENT_COLORS,
     )

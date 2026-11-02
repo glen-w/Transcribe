@@ -14,6 +14,7 @@ from typing import Any
 import streamlit as st
 
 from transcribe.analysis.health import AnalysisHealth, ModuleHealth
+from transcribe.analysis.units import page_id_from_unit_id
 from transcribe.config.models import OVERVIEW_CARD_IDS
 from transcribe.markdown_plain import escape_markdown_plain
 from transcribe.services.analysis_compare import COMPARABLE_SPECS, extract_foundations_display
@@ -50,7 +51,6 @@ from transcribe.ui.chart_colors import (
     render_colored_bar_pairs,
 )
 from transcribe.ui.page_series_charts import maybe_jump, render_clickable_page_series
-from transcribe.ui.page_series_selection import page_id_from_unit_id
 from transcribe.ui.wordcloud_render import render_wordcloud_section
 
 

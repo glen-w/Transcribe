@@ -29,6 +29,15 @@ SUPPORTED: dict[str, int] = {
     "personal_corpus.tag-catalog": 1,
     "transcribe.detection-auto-tag": 1,
     "transcribe.ocr-model-recipes": 1,
+    # Workspace / job envelopes (L4 registry completeness). Settings and
+    # profiles keep their own ConfigError codes on load; job-record and
+    # geocode-cache are write-side today. Interface-menus identity is this
+    # format even though on-disk files currently omit the ``format`` key.
+    "transcribe.settings": 1,
+    "transcribe.profile": 1,
+    "transcribe.job-record": 1,
+    "transcribe.interface-menus": 1,
+    "transcribe.geocode-cache": 1,
 }
 
 

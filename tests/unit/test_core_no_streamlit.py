@@ -32,3 +32,20 @@ def test_core_packages_do_not_import_streamlit() -> None:
                 if mod == "streamlit" or mod.startswith("streamlit."):
                     offenders.append(str(path.relative_to(_CORE_ROOT.parent)))
     assert offenders == []
+
+
+def test_core_packages_do_not_import_transcribe_ui() -> None:
+    """Config, domain, services, analysis, and providers must not import the UI package."""
+    offenders: list[str] = []
+    for path in _python_files(_CORE_ROOT):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name == "transcribe.ui" or alias.name.startswith("transcribe.ui."):
+                        offenders.append(str(path.relative_to(_CORE_ROOT.parent)))
+            elif isinstance(node, ast.ImportFrom):
+                mod = node.module or ""
+                if mod == "transcribe.ui" or mod.startswith("transcribe.ui."):
+                    offenders.append(str(path.relative_to(_CORE_ROOT.parent)))
+    assert offenders == []

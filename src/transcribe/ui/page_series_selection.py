@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from transcribe.analysis.units import page_id_from_unit_id
+
 PAGE_SELECT = "page_select"
+
+__all__ = ["PAGE_SELECT", "page_id_from_unit_id", "selected_page_id"]
 
 
 def selected_page_id(event: object) -> str | None:
@@ -30,15 +34,3 @@ def selected_page_id(event: object) -> str | None:
         return None
     page_id = first.get("page_id")
     return str(page_id) if page_id else None
-
-
-def page_id_from_unit_id(unit_id: str | None) -> str | None:
-    """Map analysis ``unit_id`` to a notebook ``page_id``.
-
-    page_v1 unit ids equal page ids; paragraph_v1 uses ``{page_id}/span:…``.
-    """
-    if not isinstance(unit_id, str) or not unit_id:
-        return None
-    if "/span:" in unit_id:
-        return unit_id.split("/span:", 1)[0] or None
-    return unit_id

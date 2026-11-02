@@ -36,6 +36,7 @@ CLI ──────────────────┘              │
 | Page ink / blankness / hue metrics | [contracts/page-metrics.md](contracts/page-metrics.md) |
 | Portable interchange | Export snapshot — [contracts/notebook-export.md](contracts/notebook-export.md) |
 | OCR HTTP | `VisionOCRProvider` (Ollama implementation) |
+| Chart palettes (`ui.chart_colors`) | `transcribe.config.chart_colors` — UI renders only |
 | UI widgets | `transcribe.ui` only — must not invent OCR/persistence rules |
 | Organisation tag catalog (slugs, labels, colours) | [contracts/tag-catalog.md](contracts/tag-catalog.md) |
 | Workspace search/timeline | `ArchiveService` over rebuildable SQLite |

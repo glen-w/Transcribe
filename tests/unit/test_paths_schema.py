@@ -40,3 +40,42 @@ def test_schema_rejects_wrong_format():
             {"format": "transcribe.notebook", "schema_version": 1},
             "transcribe.project",
         )
+
+
+def test_schema_rejects_non_object_payload():
+    with pytest.raises(SchemaError, match="expected object"):
+        require_format([], "transcribe.project")
+
+
+def test_schema_rejects_non_int_schema_version():
+    with pytest.raises(SchemaError, match="schema_version must be int"):
+        require_format(
+            {"format": "transcribe.project", "schema_version": "1"},
+            "transcribe.project",
+        )
+
+
+def test_schema_accepts_known_format():
+    payload = {"format": "transcribe.project", "schema_version": 1, "id": "x"}
+    assert require_format(payload, "transcribe.project") is payload
+
+
+def test_schema_rejects_unsupported_format_key():
+    with pytest.raises(SchemaError, match="unsupported format"):
+        require_format(
+            {"format": "transcribe.not-a-real-format", "schema_version": 1},
+            "transcribe.not-a-real-format",
+        )
+
+
+def test_schema_registry_includes_workspace_job_envelopes():
+    from transcribe.persistence.schema import SUPPORTED
+
+    for fmt in (
+        "transcribe.settings",
+        "transcribe.profile",
+        "transcribe.job-record",
+        "transcribe.interface-menus",
+        "transcribe.geocode-cache",
+    ):
+        assert SUPPORTED.get(fmt) == 1, fmt

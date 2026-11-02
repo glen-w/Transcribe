@@ -300,8 +300,8 @@ def test_model_preference_hints_round_trip(runtime: RuntimePaths) -> None:
 
 
 def test_chart_colors_round_trip(runtime: RuntimePaths) -> None:
+    from transcribe.config.chart_colors import DEFAULT_EMOTION_COLORS, DEFAULT_SENTIMENT_COLORS
     from transcribe.config.models import ChartColorsConfig, UiConfig
-    from transcribe.ui.chart_colors import DEFAULT_EMOTION_COLORS, DEFAULT_SENTIMENT_COLORS
 
     view = get_config(runtime=runtime)
     assert view.effective.ui.chart_colors.resolved()["sentiment"] == DEFAULT_SENTIMENT_COLORS

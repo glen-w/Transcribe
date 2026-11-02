@@ -8,6 +8,8 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from typing import Any
 
+from transcribe.analysis.units import page_id_from_unit_id
+
 _ANALYSE_PICKER_STATUS = {
     "missing": "no analysis",
     "degraded": "existing degraded analysis",
@@ -60,8 +62,6 @@ def unit_series_rows(
     order_key: str = "order",
 ) -> list[dict[str, Any]]:
     """Return chart rows with ``order``, ``page_id``, and ``field`` value."""
-    from transcribe.ui.page_series_selection import page_id_from_unit_id
-
     out: list[dict[str, Any]] = []
     for u in units:
         if not isinstance(u, dict) or u.get(field) is None:
@@ -92,8 +92,6 @@ def unit_series_rows(
 
 def topic_shift_series_rows(consecutive: list[Any]) -> list[dict[str, Any]]:
     """Rows for adjacent-page similarity charts (``from_order`` / ``from_unit_id``)."""
-    from transcribe.ui.page_series_selection import page_id_from_unit_id
-
     out: list[dict[str, Any]] = []
     for c in consecutive:
         if not isinstance(c, dict):
@@ -119,8 +117,6 @@ def topic_shift_series_rows(consecutive: list[Any]) -> list[dict[str, Any]]:
 
 def epistemic_page_series_rows(units: list[Any]) -> list[dict[str, Any]]:
     """Hedges vs boosters by page for clickable bar charts."""
-    from transcribe.ui.page_series_selection import page_id_from_unit_id
-
     out: list[dict[str, Any]] = []
     for u in units:
         if not isinstance(u, dict):
