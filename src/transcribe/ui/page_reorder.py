@@ -205,6 +205,11 @@ def inject_thumbs_reorder_island(page_ids: Sequence[str], *, key_prefix: str) ->
     order_key = f"{key_prefix}_dnd_order"
     if order_key not in st.session_state:
         st.session_state[order_key] = " ".join(page_ids)
+    # The field is only a bridge for the drag script; keep it in the DOM but out of sight.
+    st.html(
+        f"<style>.st-key-{order_key}{{position:absolute;height:0;width:0;"
+        "overflow:hidden;opacity:0;pointer-events:none;margin:0;padding:0}}</style>"
+    )
     st.text_input(
         _ORDER_INPUT_LABEL,
         key=order_key,

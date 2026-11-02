@@ -1,11 +1,12 @@
-"""Shell tax contracts — logo cache + once-per-session CSS inject."""
+"""Shell contracts — logo cache + global CSS survives reruns."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 
-def test_inject_global_styles_once_per_session(monkeypatch) -> None:
+def test_inject_global_styles_emitted_every_run(monkeypatch) -> None:
+    """Streamlit drops elements a rerun does not re-emit; the sheet must be re-sent."""
     import transcribe.ui.shell as shell
 
     markdown_calls: list[int] = []
@@ -17,15 +18,14 @@ def test_inject_global_styles_once_per_session(monkeypatch) -> None:
         def markdown(*_a, **_k):
             markdown_calls.append(1)
 
-    _St.session_state = {}
     monkeypatch.setattr(shell, "st", _St)
 
     shell.inject_global_styles()
     shell.inject_global_styles()
-    assert len(markdown_calls) == 1
+    assert len(markdown_calls) == 2
 
     shell.inject_global_styles(force=True)
-    assert len(markdown_calls) == 2
+    assert len(markdown_calls) == 3
 
 
 def test_render_brand_uses_dark_wordmark_asset_on_dark_theme(monkeypatch) -> None:

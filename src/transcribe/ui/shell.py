@@ -54,9 +54,6 @@ _LOGO_PATH = _ASSETS / "logo.png"
 _LOGO_DARK_PATH = _ASSETS / "logo-dark.png"
 _FAVICON_PATH = _ASSETS / "favicon.png"
 
-# Session key: avoid re-pushing ~19KB CSS on every full-app rerun.
-_GLOBAL_STYLES_SESSION_KEY = "_tx_global_styles_injected_v4"
-
 
 @lru_cache(maxsize=8)
 def _logo_data_uri(path_str: str, mtime_ns: int) -> str:
@@ -122,12 +119,13 @@ def configure_streamlit_page() -> None:
 def inject_global_styles(*, force: bool = False) -> None:
     """Inject sidebar nav + page chrome CSS (shape/style matched to TranscriptX).
 
-    Once per browser session by default — Streamlit keeps the DOM styles across
-    full-app reruns; re-pushing the sheet on every nav click is pure tax.
-    Pass ``force=True`` after intentional style revisions.
+    Emitted on every full-app run. Streamlit drops elements a rerun does not
+    re-emit, so a once-per-session push loses the sheet after the first click
+    (unstyled nav, visible cover-overlay buttons). Re-sending identical markup
+    keeps the same DOM node and is cheap. ``force`` is kept for callers and is a
+    no-op now.
     """
-    if not force and st.session_state.get(_GLOBAL_STYLES_SESSION_KEY):
-        return
+    del force
     st.markdown(
         """
 <style>
@@ -718,7 +716,6 @@ def inject_global_styles(*, force: bool = False) -> None:
 """,
         unsafe_allow_html=True,
     )
-    st.session_state[_GLOBAL_STYLES_SESSION_KEY] = True
 
 
 def render_brand() -> None:
