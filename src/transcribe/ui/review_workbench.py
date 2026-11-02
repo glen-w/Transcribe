@@ -1686,9 +1686,9 @@ def _run_review_declutter(projects, *, page_ids: list[str] | None) -> None:
 def _render_cleanup_tab(projects, project, page) -> None:
     n_pages = len(project.pages)
     st.caption(
-        "Crop scanner beds, stark-white gutters, and residual corner wedges from "
-        "page images (visual declutter). Does not re-run OCR. Already-cropped "
-        "margins cannot be restored."
+        "Crop scanner beds, stark-white gutters, residual corner wedges, binding "
+        "gutters, and edge shadows from page images (visual declutter). Does not "
+        "re-run OCR. Already-cropped margins cannot be restored."
     )
     this_col, all_col = st.columns(2)
     with this_col:

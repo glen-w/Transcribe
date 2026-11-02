@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
+from hashlib import sha256
 from io import BytesIO
 
 import pytest
@@ -12,10 +14,21 @@ from transcribe.declutter import (
     ENABLED_OPS,
     apply_declutter,
     encode_declutter_png,
+    identity_payload,
     identity_sha256_for,
 )
-from transcribe.declutter.borders import SCAN_BORDER_PARAMS, detect_scan_border_insets
-from transcribe.domain.fingerprint import compute_input_fingerprint, sha256_bytes
+from transcribe.declutter.borders import (
+    BINDING_GUTTER_PARAMS,
+    CORNER_WEDGE_PARAMS,
+    SCAN_BORDER_PARAMS,
+    UNIFORM_OVERSCAN_PARAMS,
+    detect_scan_border_insets,
+)
+from transcribe.domain.fingerprint import (
+    canonical_json_bytes,
+    compute_input_fingerprint,
+    sha256_bytes,
+)
 
 
 def _png_bytes(image: Image.Image) -> bytes:
@@ -56,6 +69,36 @@ def _kraft_paper(
 ) -> Image.Image:
     """Brown kraft-like page that contrasts with stark white gutters."""
     return Image.new("RGB", (width, height), fill)
+
+
+def _with_left_binding_gutter(
+    paper: Image.Image,
+    *,
+    gutter: int = 48,
+    dark: tuple[int, int, int] = (22, 22, 22),
+) -> Image.Image:
+    w, h = paper.size
+    canvas = Image.new("RGB", (w + gutter, h), dark)
+    canvas.paste(paper, (gutter, 0))
+    return canvas
+
+
+def _with_left_textured_shadow(
+    paper: Image.Image,
+    *,
+    band: int = 24,
+    base: int = 180,
+    amp: int = 35,
+) -> Image.Image:
+    """Left shadow whose column variance sits above grey noisy-bed (800)."""
+    w, h = paper.size
+    canvas = Image.new("RGB", (w + band, h), paper.getpixel((0, 0)))
+    canvas.paste(paper, (band, 0))
+    for x in range(band):
+        for y in range(h):
+            v = base + (amp if (x + y) % 2 == 0 else -amp)
+            canvas.putpixel((x, y), (v, v, v))
+    return canvas
 
 
 def test_disabled_preserves_bytes_exactly() -> None:
@@ -248,11 +291,73 @@ def test_enabled_ops_include_uniform_overscan() -> None:
     assert "remove_scan_borders" in ENABLED_OPS
     assert "remove_uniform_overscan" in ENABLED_OPS
     assert "remove_corner_wedges" in ENABLED_OPS
+    assert "remove_binding_gutter" in ENABLED_OPS
+    assert "remove_edge_shadows" in ENABLED_OPS
     src = _png_bytes(_paper())
     result = apply_declutter(src, enabled=True)
     assert list(result.ops) == list(ENABLED_OPS)
     assert "remove_uniform_overscan" in result.params
     assert "remove_corner_wedges" in result.params
+    assert "remove_binding_gutter" in result.params
+    assert "remove_edge_shadows" in result.params
+
+
+def test_identity_version_4_differs_from_v3() -> None:
+    assert DECLUTTER_VERSION == 4
+    v3 = identity_payload(
+        enabled=True,
+        version=3,
+        ops=(
+            "remove_scan_borders",
+            "remove_uniform_overscan",
+            "remove_corner_wedges",
+        ),
+        params={
+            "remove_scan_borders": asdict(SCAN_BORDER_PARAMS),
+            "remove_uniform_overscan": asdict(UNIFORM_OVERSCAN_PARAMS),
+            "remove_corner_wedges": asdict(CORNER_WEDGE_PARAMS),
+        },
+    )
+    v3_sha = sha256(canonical_json_bytes(v3)).hexdigest()
+    assert identity_sha256_for(enabled=True) != v3_sha
+
+
+def test_crops_left_binding_gutter() -> None:
+    paper = _paper(400, 500)
+    ImageDraw.Draw(paper).rectangle((20, 20, 80, 80), fill=(30, 60, 180))
+    src = _png_bytes(_with_left_binding_gutter(paper, gutter=48))
+    result = apply_declutter(src, enabled=True)
+    assert result.state == "enabled_cropped"
+    assert result.inset_left >= 48
+    assert abs(result.width - 400) <= BINDING_GUTTER_PARAMS.paper_inset_px + 1
+    out = Image.open(BytesIO(result.image_bytes)).convert("L")
+    col = [out.getpixel((0, y)) for y in range(out.size[1])]
+    mean = sum(col) / len(col)
+    assert mean > 38
+
+
+def test_crops_textured_edge_shadow_grey_bed_misses() -> None:
+    paper = _paper(400, 500)
+    ImageDraw.Draw(paper).rectangle((20, 20, 80, 80), fill=(30, 60, 180))
+    src = _png_bytes(_with_left_textured_shadow(paper, band=24))
+    result = apply_declutter(src, enabled=True)
+    assert result.state == "enabled_cropped"
+    assert result.inset_left >= 24
+    assert abs(result.width - 400) <= SCAN_BORDER_PARAMS.paper_inset_px + 2
+
+
+def test_binding_gutter_does_not_crop_interior_or_kraft() -> None:
+    cream = _paper(400, 500)
+    ImageDraw.Draw(cream).rectangle((80, 80, 160, 200), fill=(20, 20, 20))
+    cream_src = _png_bytes(cream)
+    cream_result = apply_declutter(cream_src, enabled=True)
+    assert cream_result.state == "enabled_noop"
+    assert cream_result.image_bytes == cream_src
+
+    kraft_src = _png_bytes(_kraft_paper(400, 500))
+    kraft_result = apply_declutter(kraft_src, enabled=True)
+    assert kraft_result.state == "enabled_noop"
+    assert kraft_result.image_bytes == kraft_src
 
 
 def test_light_grey_top_and_right_bed_on_green_cover() -> None:
@@ -336,12 +441,16 @@ def test_narrow_gutter_below_min_band_noop() -> None:
 
 
 def test_black_border_not_treated_as_scanner_grey() -> None:
+    """Black lid/binding is outside the grey-bed band; v4 crops it as a gutter."""
     paper = _paper(400, 500)
     canvas = Image.new("RGB", (480, 500), (0, 0, 0))
     canvas.paste(paper, (0, 0))
+    insets, _reason = detect_scan_border_insets(canvas.convert("L"), SCAN_BORDER_PARAMS)
+    assert insets is None
     src = _png_bytes(canvas)
     result = apply_declutter(src, enabled=True)
-    assert result.state == "enabled_noop"
+    assert result.state == "enabled_cropped"
+    assert result.inset_right >= 80
 
 
 def test_dark_page_edge_noop() -> None:

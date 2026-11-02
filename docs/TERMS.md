@@ -29,7 +29,7 @@ This document is an **index of terms only**. It aggregates terminology from auth
 - **Doctor** — Integrity check CLI / Diagnostics. See [public_surfaces.md](public_surfaces.md) · [corpus-integrity.md](contracts/corpus-integrity.md).
 - **Prompt Hub** — Settings catalogue for OCR, cleanup, and detection prompts. See [contracts/prompt-definition.md](contracts/prompt-definition.md).
 - **Detector / DetectionFinding** — Prompt-backed scan and derived span finding. See [detection-definition.md](contracts/detection-definition.md) · [detection-finding.md](contracts/detection-finding.md).
-- **Visual declutter** — Import-time (and Settings re-apply) scanner-border crop; not OCR preprocess. See [contracts/source-asset.md](contracts/source-asset.md).
+- **Visual declutter** — Import-time (and Settings re-apply) scanner-border / binding-gutter / edge-shadow crop; not OCR preprocess. See [contracts/source-asset.md](contracts/source-asset.md).
 - **Library cover-grid paging** — `ui.archive_notebooks_initial` — cover cards before Show more (`0` = all). See [contracts/workspace-settings.md](contracts/workspace-settings.md).
 - **Overview cards** — `ui.overview_cards` — which Overview cards are visible (status strip always on). See [contracts/workspace-settings.md](contracts/workspace-settings.md).
 - **View Advanced expanders** — `ui.view_show_advanced` — show raw module JSON under **Advanced · …** on View pages (default off). See [contracts/workspace-settings.md](contracts/workspace-settings.md).

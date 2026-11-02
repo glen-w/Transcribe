@@ -35,7 +35,7 @@ Standalone Detect can Stop after the current window (`DetectionRunCoordinator` +
 
 Product buckets imported / failed / duplicated / needs-review over existing ImportRun fields. Prefill/scan `TRANSCRIBE_INBOX_DIR`. Corpus-integrity gate stays green.
 
-## Wave 5 — Visual declutter v4
+## Wave 5 — Visual declutter v4 — [x]
 
 `remove_binding_gutter` then `remove_edge_shadows`. Pillow crop insets only. `DECLUTTER_VERSION` 4.
 

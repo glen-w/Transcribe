@@ -58,7 +58,7 @@ Supported inputs: JPEG, PNG, PDF (unencrypted). PDFs become one PNG per page.
 **UI:** select a notebook → **Workflow → Import** → Target **This notebook** →
 upload → Import files. A live panel shows per-file status.
 
-Visual declutter (scanner-border crop) defaults **on**. Toggle or re-apply under
+Visual declutter (scanner-border / gutter / shadow crop) defaults **on**. Toggle or re-apply under
 **Settings → Configuration → Import** (does not re-run OCR).
 
 **CLI:**

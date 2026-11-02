@@ -70,7 +70,7 @@
 | Notebook corpus / bulk import | [x] | [notebook-corpus](contracts/notebook-corpus.md) |
 | Bulk Analyse (GUI + CLI) | [x] | [analysis-batch-run](contracts/analysis-batch-run.md) |
 | Workspace backup / restore | [x] | [workspace-backup](contracts/workspace-backup.md) |
-| Visual declutter (scanner bed / overscan / wedges) | [x] | deepen-in-place candidates remain |
+| Visual declutter (scanner bed / overscan / wedges / gutter / shadows) | [x] | v4 binding gutter + edge shadows |
 | Hand-specific model (external fine-tune) | [~] ongoing | Export shipped; training stays outside the app |
 
 A stranger-testing round is **not** a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)).
@@ -127,7 +127,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 | 2 | **Auto-tag suppression** | [x] | W2 | Re-run does not re-apply slugs the user removed |
 | 3 | **Detect cancel** | [x] | W3 | Stop after current window; kernel `cancel_check` already exists |
 | 4 | **U4 Inbox polish** | [x] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
-| 5 | **Visual declutter expansion** | [?] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
+| 5 | **Visual declutter expansion** | [x] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
 | 6 | **Page reorder / date repair** | [?] | W6–W7 | `pages` array permute + date-cluster action; drag/drop island optional |
 | 7 | **Hand-model bring-back (external)** | [~] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |
 | 8 | **L2 `load()` default** | [?] | W9 | `reconcile=False` by default; explicit reopen path |
@@ -387,13 +387,13 @@ Contracts: [finetune-export](contracts/finetune-export.md), [detection-finetune-
 
 Built-ins `poetry`, `todo_lists`, `lists`, `quotations`, `beer_labels`, lexical `first_person` / `swear_words`, `names` (people from NER) + declarative custom detectors; View → Detect; findings under `detection/`. Settings → Prompts hub for OCR, cleanup, and detection prompts. See [detection_wave2_plan.md](archive/plans/detection_wave2_plan.md) + detection contracts.
 
-### Shipped — Preprocessing (visual declutter lane) — [x] partial
+### Shipped — Preprocessing (visual declutter lane) — [x]
 
 Two separate lanes. Do not conflate human-facing scan cleanup with OCR input transforms.
 
 | Lane | Audience | Default | Intent |
 |------|----------|---------|--------|
-| **1. Visual declutter** | Human (reading / review of scans) | **On** for imports; global off-switch in settings | Clean up scanned page images for people. **Shipped:** `remove_scan_borders` + `remove_uniform_overscan` + `remove_corner_wedges` (Pillow, deterministic; grey/light-grey scanner beds, stark-white gutters, residual rounded-corner bed wedges). Applies at **import** and via explicit **Re-apply visual declutter** (Settings → Configuration). Changing the setting alone does not rewrite notebooks. Render provenance records state, geometry, and declutter identity. |
+| **1. Visual declutter** | Human (reading / review of scans) | **On** for imports; global off-switch in settings | Clean up scanned page images for people. **Shipped:** `remove_scan_borders` + `remove_uniform_overscan` + `remove_corner_wedges` + `remove_binding_gutter` + `remove_edge_shadows` (Pillow, deterministic; grey/light-grey scanner beds, stark-white gutters, residual rounded-corner bed wedges, dark binding/lid strips, remaining edge-anchored shadows). Applies at **import** and via explicit **Re-apply visual declutter** (Settings → Configuration). Changing the setting alone does not rewrite notebooks. Render provenance records state, geometry, and declutter identity. |
 | **2. OCR optimisation** | Vision model input | **Off** (`none`); opt-in | Transforms meant to help OCR. Shipped today: optional Pillow **`gentle_contrast`**. Further OCR preprocess profiles are **deferred**. |
 
 **Rules of thumb**
@@ -403,7 +403,7 @@ Two separate lanes. Do not conflate human-facing scan cleanup with OCR input tra
 - Declutter identity (`enabled` + `DECLUTTER_VERSION` + ordered ops + frozen detection params) is frozen into ingest journal / render provenance; crash recovery never pairs mismatched pixels and metadata. OCR invalidation follows the final active render SHA.
 - Explicit declutter re-apply is shipped; OCR-optimisation reprocess remains opt-in / future. Defaults above are unchanged.
 
-Further declutter ops stay under [Near-term candidates](#near-term-candidates--not-on-the-090-path).
+Further declutter ops (lid slivers, punch-hole margins, calibration stripes) stay under [Near-term candidates](#near-term-candidates--not-on-the-090-path).
 
 ### Shipped — Export / backup / tagging (highlights)
 
@@ -419,13 +419,13 @@ Further declutter ops stay under [Near-term candidates](#near-term-candidates--n
 
 Uncommitted deepen-in-place. May land before or after 1.0, but **must not** delay the **0.9.0** tag.
 
-### Preprocessing expansion — [?]
+### Preprocessing expansion — [x] partial
 
-**Later — visual declutter expansion (Pillow-only, uncommitted)**
+**Visual declutter v4 — binding gutter + edge shadows — [x] shipped**
 
 Stay outside the page: high-confidence, edge-anchored artefacts only — never alter pixels inside the detected page area. That keeps declutter distinct from document restoration (no bleed-through, whitening, stains, ruled lines, hole punching, creases, page-wide shadow fix, or handwritten-margin cleanup).
 
-Suggested sequence after scanner-bed borders + stark-white overscan + corner wedges: **binding gutter** → **edge shadows**. Other safe candidates when detection is conservative: scanner lid/background slivers (non-white/non-grey uniform edge bands), punch-hole *margins* (trim blank outer strip only), scanner calibration stripes, and combined page-edge-shadow + exposed-bed as one page-boundary problem rather than stacked aggressive ops.
+Shipped after scanner-bed borders + stark-white overscan + corner wedges: **binding gutter** → **edge shadows**. Other safe candidates when detection is conservative: scanner lid/background slivers (non-white/non-grey uniform edge bands), punch-hole *margins* (trim blank outer strip only), scanner calibration stripes.
 
 ### Corpus & product lifecycle — remaining rows — [?]
 

@@ -10,10 +10,14 @@ from typing import Any, Literal
 from PIL import Image
 
 from transcribe.declutter.borders import (
+    BINDING_GUTTER_PARAMS,
     CORNER_WEDGE_PARAMS,
+    EDGE_SHADOW_PARAMS,
     SCAN_BORDER_PARAMS,
     UNIFORM_OVERSCAN_PARAMS,
+    BindingGutterParams,
     CornerWedgeParams,
+    EdgeShadowParams,
     ScanBorderParams,
     UniformOverscanParams,
     detect_declutter_border_insets,
@@ -21,8 +25,8 @@ from transcribe.declutter.borders import (
 )
 from transcribe.domain.fingerprint import canonical_json_bytes
 
-# v3: light-grey top beds + remove_corner_wedges (rounded-corner residual beds).
-DECLUTTER_VERSION = 3
+# v4: remove_binding_gutter + remove_edge_shadows (crop insets only).
+DECLUTTER_VERSION = 4
 
 DECLUTTER_STATES = frozenset({"disabled", "enabled_noop", "enabled_cropped", "error_fallback"})
 
@@ -32,6 +36,8 @@ ENABLED_OPS: tuple[str, ...] = (
     "remove_scan_borders",
     "remove_uniform_overscan",
     "remove_corner_wedges",
+    "remove_binding_gutter",
+    "remove_edge_shadows",
 )
 
 NOTE_MAX_LEN = 200
@@ -98,6 +104,8 @@ def _default_params_block() -> dict[str, Any]:
         "remove_scan_borders": asdict(SCAN_BORDER_PARAMS),
         "remove_uniform_overscan": asdict(UNIFORM_OVERSCAN_PARAMS),
         "remove_corner_wedges": asdict(CORNER_WEDGE_PARAMS),
+        "remove_binding_gutter": asdict(BINDING_GUTTER_PARAMS),
+        "remove_edge_shadows": asdict(EDGE_SHADOW_PARAMS),
     }
 
 
@@ -222,6 +230,8 @@ def _apply_declutter_inner(image_bytes: bytes, *, enabled: bool) -> DeclutterRes
             scan_params=SCAN_BORDER_PARAMS,
             overscan_params=UNIFORM_OVERSCAN_PARAMS,
             wedge_params=CORNER_WEDGE_PARAMS,
+            gutter_params=BINDING_GUTTER_PARAMS,
+            shadow_params=EDGE_SHADOW_PARAMS,
         )
         if insets is None:
             return DeclutterResult(
@@ -280,10 +290,14 @@ __all__ = [
     "DECLUTTER_VERSION",
     "DECLUTTER_STATES",
     "ENABLED_OPS",
+    "BINDING_GUTTER_PARAMS",
     "CORNER_WEDGE_PARAMS",
+    "EDGE_SHADOW_PARAMS",
     "SCAN_BORDER_PARAMS",
     "UNIFORM_OVERSCAN_PARAMS",
+    "BindingGutterParams",
     "CornerWedgeParams",
+    "EdgeShadowParams",
     "ScanBorderParams",
     "UniformOverscanParams",
     "DeclutterResult",

@@ -351,7 +351,7 @@ Supported bulk-import UI/CLI and inbox-as-product required:
 | Track | Coordination rule |
 |-------|-------------------|
 | Detection Wave 2 ([PR #6](https://github.com/glen-w/Transcribe/pull/6); [detection_wave2_plan.md](archive/plans/detection_wave2_plan.md)) | **Shipped**; may share page-viewer finding captions and Prompt Hub settings; must not redefine Analyse health or block U1 |
-| Visual declutter expansion | Remains ROADMAP preprocessing candidate; explicit re-apply is **shipped**; further ops not required for usability-wave exit |
+| Visual declutter expansion | **Shipped** v4 (binding gutter + edge shadows); explicit re-apply remains; further ops not required for usability-wave exit |
 | OCR lifecycle (multipass / prefer / promote / composite / fine-tune) | **Shipped** (W0–W5 / [PR #15](https://github.com/glen-w/Transcribe/pull/15)); Review queue only needs honesty around suggested dates / force re-OCR |
 | Quality thumbs / prompt management UI | Candidates; Detection Prompt Hub may absorb prompt browse — do not duplicate |
 

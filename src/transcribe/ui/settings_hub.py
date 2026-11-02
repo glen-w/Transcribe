@@ -196,13 +196,13 @@ def render_configuration_panel() -> None:
         key="settings_ingest_render_dpi",
     )
     declutter = st.checkbox(
-        "Visual declutter (remove scanner borders / white gutters on import)",
+        "Visual declutter (remove scanner borders / gutters / shadows on import)",
         value=bool(view.effective.ingest.visual_declutter_enabled),
         key="settings_ingest_visual_declutter",
         help=widget_help(
             "On by default for new imports. Use Re-apply below to crop scanner "
-            "beds, stark white gutters, and residual corner wedges on an existing "
-            "notebook."
+            "beds, stark white gutters, residual corner wedges, binding gutters, "
+            "and edge shadows on an existing notebook."
         ),
     )
     if st.button("Save import defaults", type="primary", key="settings_ingest_save", icon=ic.SAVE):
@@ -222,8 +222,9 @@ def render_configuration_panel() -> None:
 
     st.markdown("#### Re-apply visual declutter")
     st.caption(
-        "Re-crop scanner beds on an existing notebook’s page images. "
-        "Uses the checkbox above as the on/off switch. Does not re-run OCR."
+        "Re-crop scanner beds, binding gutters, and edge shadows on an existing "
+        "notebook’s page images. Uses the checkbox above as the on/off switch. "
+        "Does not re-run OCR."
     )
     project_roots = sorted(
         p for p in Path(runtime.projects_dir).expanduser().glob("*") if p.is_dir()

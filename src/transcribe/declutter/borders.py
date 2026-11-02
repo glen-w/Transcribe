@@ -1,4 +1,4 @@
-"""Deterministic scanner-bed and stark-white overscan border detection (Pillow-only)."""
+"""Deterministic scanner-bed, overscan, binding-gutter, and edge-shadow crop (Pillow-only)."""
 
 from __future__ import annotations
 
@@ -91,13 +91,68 @@ class CornerWedgeParams:
     aspect_max_den: int = 1
 
 
+@dataclass(frozen=True)
+class BindingGutterParams:
+    """Dark left/right binding or lid strip (below grey-bed luminance)."""
+
+    min_dimension_px: int = 64
+    # Stay below ScanBorderParams.grey_mean_min so grey-bed walk owns mid greys.
+    dark_mean_min: int = 0
+    dark_mean_max: int = 38
+    # Spine texture / JPEG noise; handwriting on paper is typically >>2e3.
+    max_strip_variance: float = 1200.0
+    gutter_ref_mean_tol: float = 25.0
+    interior_probe_px: int = 16
+    interior_probe_offset_px: int = 32
+    # Paper must be substantially brighter than the dark strip.
+    min_mean_delta: float = 40.0
+    paper_inset_px: int = 2
+    min_remaining_fraction_num: int = 70
+    min_remaining_fraction_den: int = 100
+    min_remaining_edge_px: int = 32
+    aspect_min_num: int = 1
+    aspect_min_den: int = 5
+    aspect_max_num: int = 5
+    aspect_max_den: int = 1
+    max_band_cap_px: int = 96
+
+
+@dataclass(frozen=True)
+class EdgeShadowParams:
+    """Short remaining edge-anchored shadow band (outside the page)."""
+
+    min_dimension_px: int = 64
+    shadow_mean_min: int = 80
+    # Above grey_mean_max so residual near-paper darkening can still qualify.
+    shadow_mean_max: int = 245
+    # Textured shadow that grey noisy-bed (800) rejects; handwriting is >>2e3.
+    max_strip_variance: float = 1500.0
+    # Tight so a soft page-edge gradient into paper stops before min_band.
+    shadow_ref_mean_tol: float = 8.0
+    interior_probe_px: int = 16
+    interior_probe_offset_px: int = 32
+    min_mean_delta: float = 25.0
+    paper_inset_px: int = 1
+    min_remaining_fraction_num: int = 70
+    min_remaining_fraction_den: int = 100
+    min_remaining_edge_px: int = 32
+    aspect_min_num: int = 1
+    aspect_min_den: int = 5
+    aspect_max_num: int = 5
+    aspect_max_den: int = 1
+    max_band_cap_px: int = 40
+
+
 SCAN_BORDER_PARAMS = ScanBorderParams()
 UNIFORM_OVERSCAN_PARAMS = UniformOverscanParams()
 CORNER_WEDGE_PARAMS = CornerWedgeParams()
+BINDING_GUTTER_PARAMS = BindingGutterParams()
+EDGE_SHADOW_PARAMS = EdgeShadowParams()
 
 # Multi-pass budget: L-shaped grey+white overscan needs a second crop after the
-# first edge type is removed so full-strip stats become uniform again.
-_MAX_BORDER_PASSES = 4
+# first edge type is removed so full-strip stats become uniform again. Extra
+# passes cover binding gutter / residual edge shadow after beds are gone.
+_MAX_BORDER_PASSES = 6
 
 
 def _min_band_px(dim: int) -> int:
@@ -246,6 +301,77 @@ def _walk_white_band(
     return k
 
 
+def _is_binding_gutter(mean: float, var: float, params: BindingGutterParams) -> bool:
+    return params.dark_mean_min <= mean <= params.dark_mean_max and var <= params.max_strip_variance
+
+
+def _walk_dark_gutter_band(
+    *,
+    dim: int,
+    params: BindingGutterParams,
+    sample: Callable[[int], tuple[float, float]],
+) -> int:
+    """Walk left/right while columns look like a dark binding or lid strip."""
+    soft_max = min(
+        _soft_max_band_px(
+            dim,
+            min_remaining_edge_px=params.min_remaining_edge_px,
+            min_remaining_fraction_num=params.min_remaining_fraction_num,
+            min_remaining_fraction_den=params.min_remaining_fraction_den,
+        ),
+        params.max_band_cap_px,
+    )
+    k = 0
+    ref_mean: float | None = None
+    while k < soft_max:
+        mean, var = sample(k)
+        if not _is_binding_gutter(mean, var, params):
+            break
+        if ref_mean is not None and abs(mean - ref_mean) > params.gutter_ref_mean_tol:
+            break
+        if ref_mean is None:
+            ref_mean = mean
+        k += 1
+    return k
+
+
+def _is_edge_shadow(mean: float, var: float, params: EdgeShadowParams) -> bool:
+    return (
+        params.shadow_mean_min <= mean <= params.shadow_mean_max
+        and var <= params.max_strip_variance
+    )
+
+
+def _walk_edge_shadow_band(
+    *,
+    dim: int,
+    params: EdgeShadowParams,
+    sample: Callable[[int], tuple[float, float]],
+) -> int:
+    """Walk a short remaining shadow band; stop on luminance drift into paper."""
+    soft_max = min(
+        _soft_max_band_px(
+            dim,
+            min_remaining_edge_px=params.min_remaining_edge_px,
+            min_remaining_fraction_num=params.min_remaining_fraction_num,
+            min_remaining_fraction_den=params.min_remaining_fraction_den,
+        ),
+        params.max_band_cap_px,
+    )
+    k = 0
+    ref_mean: float | None = None
+    while k < soft_max:
+        mean, var = sample(k)
+        if not _is_edge_shadow(mean, var, params):
+            break
+        if ref_mean is not None and abs(mean - ref_mean) > params.shadow_ref_mean_tol:
+            break
+        if ref_mean is None:
+            ref_mean = mean
+        k += 1
+    return k
+
+
 def _inset_from_band(
     *,
     dim: int,
@@ -257,6 +383,7 @@ def _inset_from_band(
     min_remaining_fraction_den: int,
     mu_band: float,
     mu_probe: float,
+    require_probe_brighter: bool = False,
 ) -> int:
     min_band = _min_band_px(dim)
     if k < min_band:
@@ -269,7 +396,10 @@ def _inset_from_band(
     )
     if k >= soft_max:
         return 0
-    if abs(mu_band - mu_probe) < min_mean_delta:
+    if require_probe_brighter:
+        if mu_probe - mu_band < min_mean_delta:
+            return 0
+    elif abs(mu_band - mu_probe) < min_mean_delta:
         return 0
     inset = k + paper_inset_px
     max_inset = dim - min_remaining_edge_px
@@ -303,7 +433,8 @@ def _edge_inset(
     edge: Edge,
     *,
     walk: Callable[..., int],
-    walk_params: ScanBorderParams | UniformOverscanParams,
+    walk_params: ScanBorderParams | UniformOverscanParams | BindingGutterParams | EdgeShadowParams,
+    require_probe_brighter: bool = False,
 ) -> int:
     width, height = gray.size
     dim = width if edge in ("left", "right") else height
@@ -371,6 +502,7 @@ def _edge_inset(
         min_remaining_fraction_den=walk_params.min_remaining_fraction_den,
         mu_band=band_mean(k),
         mu_probe=probe_mean(k, offset, probe),
+        require_probe_brighter=require_probe_brighter,
     )
 
 
@@ -469,6 +601,108 @@ def detect_white_border_insets(
     top = _edge_inset(gray, "top", walk=_walk_white_band, walk_params=params)
     bottom = _edge_inset(gray, "bottom", walk=_walk_white_band, walk_params=params)
 
+    return _validate_insets(
+        width,
+        height,
+        left,
+        top,
+        right,
+        bottom,
+        min_remaining_edge_px=params.min_remaining_edge_px,
+        min_remaining_fraction_num=params.min_remaining_fraction_num,
+        min_remaining_fraction_den=params.min_remaining_fraction_den,
+        aspect_min_num=params.aspect_min_num,
+        aspect_min_den=params.aspect_min_den,
+        aspect_max_num=params.aspect_max_num,
+        aspect_max_den=params.aspect_max_den,
+    )
+
+
+def detect_binding_gutter_insets(
+    gray: Image.Image, params: BindingGutterParams = BINDING_GUTTER_PARAMS
+) -> tuple[tuple[int, int, int, int] | None, str]:
+    """Return left/right dark-gutter insets or None. Top/bottom stay 0.
+
+    ``gray`` must be mode ``L``.
+    """
+    if gray.mode != "L":
+        raise ValueError(f"expected mode L, got {gray.mode!r}")
+    width, height = gray.size
+    if width < params.min_dimension_px or height < params.min_dimension_px:
+        return None, "noop: image below minimum dimension"
+
+    left = _edge_inset(
+        gray,
+        "left",
+        walk=_walk_dark_gutter_band,
+        walk_params=params,
+        require_probe_brighter=True,
+    )
+    right = _edge_inset(
+        gray,
+        "right",
+        walk=_walk_dark_gutter_band,
+        walk_params=params,
+        require_probe_brighter=True,
+    )
+    return _validate_insets(
+        width,
+        height,
+        left,
+        0,
+        right,
+        0,
+        min_remaining_edge_px=params.min_remaining_edge_px,
+        min_remaining_fraction_num=params.min_remaining_fraction_num,
+        min_remaining_fraction_den=params.min_remaining_fraction_den,
+        aspect_min_num=params.aspect_min_num,
+        aspect_min_den=params.aspect_min_den,
+        aspect_max_num=params.aspect_max_num,
+        aspect_max_den=params.aspect_max_den,
+    )
+
+
+def detect_edge_shadow_insets(
+    gray: Image.Image, params: EdgeShadowParams = EDGE_SHADOW_PARAMS
+) -> tuple[tuple[int, int, int, int] | None, str]:
+    """Return remaining edge-anchored shadow insets or None.
+
+    ``gray`` must be mode ``L``.
+    """
+    if gray.mode != "L":
+        raise ValueError(f"expected mode L, got {gray.mode!r}")
+    width, height = gray.size
+    if width < params.min_dimension_px or height < params.min_dimension_px:
+        return None, "noop: image below minimum dimension"
+
+    left = _edge_inset(
+        gray,
+        "left",
+        walk=_walk_edge_shadow_band,
+        walk_params=params,
+        require_probe_brighter=True,
+    )
+    right = _edge_inset(
+        gray,
+        "right",
+        walk=_walk_edge_shadow_band,
+        walk_params=params,
+        require_probe_brighter=True,
+    )
+    top = _edge_inset(
+        gray,
+        "top",
+        walk=_walk_edge_shadow_band,
+        walk_params=params,
+        require_probe_brighter=True,
+    )
+    bottom = _edge_inset(
+        gray,
+        "bottom",
+        walk=_walk_edge_shadow_band,
+        walk_params=params,
+        require_probe_brighter=True,
+    )
     return _validate_insets(
         width,
         height,
@@ -749,14 +983,17 @@ def detect_declutter_border_insets(
     scan_params: ScanBorderParams = SCAN_BORDER_PARAMS,
     overscan_params: UniformOverscanParams = UNIFORM_OVERSCAN_PARAMS,
     wedge_params: CornerWedgeParams = CORNER_WEDGE_PARAMS,
+    gutter_params: BindingGutterParams = BINDING_GUTTER_PARAMS,
+    shadow_params: EdgeShadowParams = EDGE_SHADOW_PARAMS,
 ) -> tuple[tuple[int, int, int, int] | None, str]:
-    """Detect grey/white scanner beds and residual corner wedges (multi-pass).
+    """Detect scanner beds, binding gutters, and residual edge shadows (multi-pass).
 
     L-shaped artefacts (e.g. grey bed on the right + white gutter on the bottom)
     make full-strip stats non-uniform on the shared corner. Cropping one edge
     type and re-detecting recovers the other. Rounded page corners leave bed
     wedges after axis-aligned bed crops; ``remove_corner_wedges`` clears those.
-    Insets are returned in original image coordinates.
+    Dark left/right binding strips and remaining edge-anchored shadows extend
+    the same crop. Insets are returned in original image coordinates.
     """
     if gray.mode != "L":
         raise ValueError(f"expected mode L, got {gray.mode!r}")
@@ -784,8 +1021,18 @@ def detect_declutter_border_insets(
                 overscan_params=overscan_params,
             )
             merged = _merge_insets(merged, wedge_insets)
+        gutter_insets, gutter_reason = detect_binding_gutter_insets(working, gutter_params)
+        merged = _merge_insets(merged, gutter_insets)
+        shadow_insets, shadow_reason = detect_edge_shadow_insets(working, shadow_params)
+        merged = _merge_insets(merged, shadow_insets)
         if merged == (0, 0, 0, 0):
-            for reason in (grey_reason, white_reason, wedge_reason):
+            for reason in (
+                grey_reason,
+                white_reason,
+                wedge_reason,
+                gutter_reason,
+                shadow_reason,
+            ):
                 if reason != "noop: no border detected":
                     last_reason = reason
                     break
