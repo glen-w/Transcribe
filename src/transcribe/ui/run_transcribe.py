@@ -1085,6 +1085,10 @@ def _render_ocr_settings_form(
     )
 
     with st.expander("Advanced", expanded=False):
+        st.caption(
+            "After a hand-specific model is in Ollama: Refresh models, select that tag, "
+            "then multipass this notebook against your baseline. Training stays outside Transcribe."
+        )
         if unknown:
             st.caption("Models with unknown capabilities")
             st.write(", ".join(unknown))

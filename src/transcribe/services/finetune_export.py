@@ -15,6 +15,31 @@ from transcribe.persistence.atomic import write_json_atomic
 from transcribe.services.export import ExportService
 from transcribe.services.project import ProjectService
 
+FINETUNE_EXPORT_README = """Transcribe fine-tune export package.
+
+Training is not performed inside Transcribe. After you train elsewhere:
+
+1. Keep samples.jsonl next to images/ (one PNG per page_id).
+2. Train with Unsloth, Hugging Face TRL, or any SFT tool that accepts image+text JSONL.
+3. Install the result in local Ollama, for example:
+
+   ollama create my-hand -f Modelfile
+
+   Example Modelfile:
+     FROM <base-vision-tag>
+     # ADAPTER ./path-to-adapter
+     # or FROM ./model.gguf
+
+4. In Transcribe: Settings → Models → Refresh, then select that tag for OCR.
+5. Optional recipe overlay (Settings → Models → OCR model recipes): add match_tokens
+   for your tag, overlay generation_options if needed, and freeze_prompt only when
+   the model needs a frozen Prompt Hub id instead of the notebook prompt.
+6. Verify with Transcribe → Advanced: multipass this notebook using your baseline
+   plus the new tag.
+
+See docs/finetune_export.md.
+"""
+
 
 @dataclass(frozen=True)
 class FinetuneExportOptions:
@@ -164,13 +189,7 @@ class FinetuneExportService:
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         write_json_atomic(out / "manifest.json", manifest)
-        (out / "README.txt").write_text(
-            "Transcribe fine-tune export package.\n"
-            "See docs/finetune_export.md for how to use samples.jsonl + images/\n"
-            "with an external trainer (Ollama / Unsloth / TRL). Training is not\n"
-            "performed inside Transcribe.\n",
-            encoding="utf-8",
-        )
+        (out / "README.txt").write_text(FINETUNE_EXPORT_README, encoding="utf-8")
         return out
 
     @staticmethod

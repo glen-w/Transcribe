@@ -324,6 +324,10 @@ def test_finetune_export(tmp_path: Path) -> None:
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["format"] == "transcribe.finetune-export-manifest"
     assert manifest["sample_count"] == 1
+    readme = (out / "README.txt").read_text(encoding="utf-8")
+    assert "ollama create" in readme
+    assert "match_tokens" in readme
+    assert "multipass" in readme.lower()
 
 
 def test_composite_stale_when_new_source_attempt_arrives() -> None:

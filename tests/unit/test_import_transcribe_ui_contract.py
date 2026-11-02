@@ -92,6 +92,15 @@ def test_import_and_transcribe_use_target_switcher() -> None:
     assert "request_cancel" in detect
 
 
+def test_finetune_export_tab_has_bring_back_checklist() -> None:
+    export = Path("src/transcribe/ui/export_panel.py").read_text(encoding="utf-8")
+    assert "_finetune_export_dir" in export
+    assert "ollama create" in export
+    assert "Bring the model back" in export
+    transcribe = Path("src/transcribe/ui/run_transcribe.py").read_text(encoding="utf-8")
+    assert "hand-specific model" in transcribe
+
+
 def test_create_notebook_does_not_clear_all_cache_resources() -> None:
     """Creating a notebook must not wipe live JobCoordinator / analysis resources."""
     create_fn = APP.split("def _render_new_notebook", 1)[1].split("\ndef ", 1)[0]

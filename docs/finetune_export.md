@@ -19,11 +19,17 @@ Contract detail: [contracts/finetune-export.md](contracts/finetune-export.md).
 ## Typical external workflow
 
 1. Prefer OCR attempts in Review (or rely on active / human edits per export knobs).
-2. Export the fine-tune package from Transcribe.
-3. Train a vision–language model elsewhere (examples: Unsloth, Hugging Face TRL, Ollama create/Modelfile flows, or any SFT tool that accepts image+text JSONL).
-4. Install the resulting model into your local Ollama (or other runtime).
-5. Select that model in Transcribe for future OCR runs.
-6. Optionally use multipass compare to verify quality against your previous models.
+2. Export the fine-tune package from Transcribe (Export → Fine-tune dataset, or `transcribe export-finetune`).
+3. Train a vision–language model elsewhere (Unsloth, Hugging Face TRL, or any SFT tool that accepts image+text JSONL). Transcribe does not train.
+4. **Install in local Ollama.** Example:
+
+   ```text
+   ollama create my-hand -f Modelfile
+   ```
+
+   A Modelfile is typically `FROM <base-vision-tag>` plus an adapter path or a GGUF `FROM`. The export folder’s `README.txt` repeats this.
+5. **Select the tag in Transcribe.** Settings → Models → Refresh, then pick it for OCR. If the tag needs a frozen prompt or generation overlay, add a recipe under **Settings → Models → OCR model recipes** (`match_tokens` for your tag; `freeze_prompt` only when the notebook prompt must not apply). See [ocr_model_recipes.md](runtime/ocr_model_recipes.md).
+6. **Verify with multipass.** Transcribe → Advanced: run a multipass on this notebook with your previous baseline plus the new tag. Prefer/compare in Review. A better hand model is the goal; an in-app trainer is a non-goal.
 
 ## Privacy
 

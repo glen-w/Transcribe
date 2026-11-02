@@ -47,7 +47,7 @@ Product buckets imported / failed / duplicated / needs-review over existing Impo
 
 Thumbnail/Review move controls; optional JS island; Date lane cluster action.
 
-## Wave 8 — Hand-model bring-back
+## Wave 8 — Hand-model bring-back — [x]
 
 Export-tab checklist + install/verify docs. Training stays outside the app.
 

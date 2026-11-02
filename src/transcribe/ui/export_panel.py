@@ -44,9 +44,7 @@ def render_export_panel(
 ) -> None:
     @st.fragment
     def _export_body() -> None:
-        _render_export_panel_body(
-            runtime, paths, projects, project, root, archive=archive
-        )
+        _render_export_panel_body(runtime, paths, projects, project, root, archive=archive)
 
     _export_body()
 
@@ -74,9 +72,7 @@ def _render_export_panel_body(
         label = choices[0]
         st.session_state[key] = label
     if label == "Notebook":
-        _render_notebook_export_tab(
-            runtime, paths, projects, project, root, archive=archive
-        )
+        _render_notebook_export_tab(runtime, paths, projects, project, root, archive=archive)
     elif label == "Fine-tune dataset":
         _render_finetune_export_tab(paths, projects)
     else:
@@ -415,6 +411,19 @@ def _render_finetune_export_tab(
             st.session_state["_finetune_export_dir"] = str(out)
         except Exception as exc:  # noqa: BLE001
             st.error(f"Fine-tune export failed: {exc}")
+    export_dir = st.session_state.get("_finetune_export_dir")
+    if export_dir:
+        st.success(f"Last package: `{export_dir}`")
+        st.markdown(
+            "**Bring the model back** (training stays outside Transcribe):\n"
+            "1. Train elsewhere with this folder (`samples.jsonl` + `images/`).\n"
+            "2. Install locally: `ollama create <tag> -f Modelfile`.\n"
+            "3. **Settings → Models → Refresh**, then select that tag for OCR.\n"
+            "4. Optional: recipe overlay (`match_tokens`, `freeze_prompt`) under "
+            "Settings → Models → OCR model recipes.\n"
+            "5. Verify: Transcribe **Advanced** → multipass this notebook vs your baseline."
+        )
+        st.caption("Details: docs/finetune_export.md")
 
 
 def _render_detection_finetune_export_tab(projects: ProjectService) -> None:

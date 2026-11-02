@@ -10,6 +10,8 @@ generation-option overlay at job start, without a different HTTP template.
 
 **Settings:** **Settings → Models → OCR model recipes** (enable, disable, add,
 edit). Stored at `data/config/ocr-model-recipes.json` — not notebook settings.
+A hand-specific tag you `ollama create` after external fine-tune can use a custom
+recipe (`match_tokens`, optional `freeze_prompt`) the same way; see [finetune_export.md](../finetune_export.md).
 **Contract:** [ocr-model-recipes.md](../contracts/ocr-model-recipes.md)  
 **Advice UI:** [`model_advice.py`](../../src/transcribe/services/model_advice.py)  
 **Applied in:** `JobCoordinator._build_plan` (single-model, Review re-run, and

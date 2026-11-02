@@ -71,7 +71,7 @@
 | Bulk Analyse (GUI + CLI) | [x] | [analysis-batch-run](contracts/analysis-batch-run.md) |
 | Workspace backup / restore | [x] | [workspace-backup](contracts/workspace-backup.md) |
 | Visual declutter (scanner bed / overscan / wedges / gutter / shadows) | [x] | v4 binding gutter + edge shadows |
-| Hand-specific model (external fine-tune) | [~] ongoing | Export shipped; training stays outside the app |
+| Hand-specific model (external fine-tune) | [x] | Export + install/verify docs; training stays outside the app |
 
 A stranger-testing round is **not** a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)).
 
@@ -129,7 +129,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 | 4 | **U4 Inbox polish** | [x] | W4 | Richer needs-review taxonomy / `TRANSCRIBE_INBOX_DIR` scan |
 | 5 | **Visual declutter expansion** | [x] | W5 | Binding gutter → edge shadows (Pillow-only, outside page area) |
 | 6 | **Page reorder / date repair** | [x] | W6–W7 | `pages` array permute + Date-lane cluster action; drag island optional |
-| 7 | **Hand-model bring-back (external)** | [~] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |
+| 7 | **Hand-model bring-back (external)** | [x] | W8 | Export exists; install in Ollama; verify with multipass; no in-app trainer |
 | 8 | **L2 `load()` default** | [?] | W9 | `reconcile=False` by default; explicit reopen path |
 
 **Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling.
