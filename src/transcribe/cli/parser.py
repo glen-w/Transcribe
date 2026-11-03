@@ -233,10 +233,78 @@ def build_parser() -> argparse.ArgumentParser:
     p_pages_batch.add_argument(
         "--action",
         required=True,
-        choices=["approve_dates", "ignore", "unignore", "add_tag", "remove_tag"],
+        choices=[
+            "approve_dates",
+            "ignore_dates",
+            "ignore",
+            "unignore",
+            "add_tag",
+            "remove_tag",
+            "set_page_role",
+            "set_page_certainty",
+        ],
     )
     p_pages_batch.add_argument("--tag", default="")
     p_pages_batch.add_argument(
+        "--role",
+        default="",
+        choices=["", "text", "scan"],
+        help="For set_page_role",
+    )
+    p_pages_batch.add_argument(
+        "--certainty",
+        default="",
+        choices=["", "sure", "unsure"],
+        help="For set_page_certainty",
+    )
+    p_pages_batch.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write the change. Without this flag the command is a dry run.",
+    )
+
+    p_pages_batch_meta = pages_sub.add_parser(
+        "batch-meta",
+        help="Alias of pages batch (durable-notebook metadata)",
+        parents=[],
+    )
+    # Parents=[] still needs the same flags; copy from batch via a shared helper
+    # by registering identical arguments.
+    p_pages_batch_meta.add_argument("project", type=Path)
+    p_pages_batch_meta.add_argument(
+        "--page",
+        dest="page_ids",
+        action="append",
+        default=[],
+        help="Page id (repeatable). Or pass --saved.",
+    )
+    p_pages_batch_meta.add_argument("--saved", default=None, help="Saved search id or name")
+    p_pages_batch_meta.add_argument(
+        "--action",
+        required=True,
+        choices=[
+            "approve_dates",
+            "ignore_dates",
+            "ignore",
+            "unignore",
+            "add_tag",
+            "remove_tag",
+            "set_page_role",
+            "set_page_certainty",
+        ],
+    )
+    p_pages_batch_meta.add_argument("--tag", default="")
+    p_pages_batch_meta.add_argument(
+        "--role",
+        default="",
+        choices=["", "text", "scan"],
+    )
+    p_pages_batch_meta.add_argument(
+        "--certainty",
+        default="",
+        choices=["", "sure", "unsure"],
+    )
+    p_pages_batch_meta.add_argument(
         "--apply",
         action="store_true",
         help="Write the change. Without this flag the command is a dry run.",

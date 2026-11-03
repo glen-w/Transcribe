@@ -18,7 +18,18 @@ from transcribe.runtime_paths import RuntimePaths
 from transcribe.services.archive import ArchiveFilters, bump_archive_generation
 from transcribe.services.project import ProjectService
 
-ACTIONS = frozenset({"approve_dates", "ignore", "unignore", "add_tag", "remove_tag"})
+ACTIONS = frozenset(
+    {
+        "approve_dates",
+        "ignore_dates",
+        "ignore",
+        "unignore",
+        "add_tag",
+        "remove_tag",
+        "set_page_role",
+        "set_page_certainty",
+    }
+)
 
 
 def filters_are_empty(filters: ArchiveFilters) -> bool:
@@ -54,15 +65,23 @@ def apply_batch_metadata(
     action: str,
     *,
     tag: str = "",
+    role: str = "",
+    certainty: str = "",
     dry_run: bool = True,
     runtime: RuntimePaths | None = None,
 ) -> BatchMetadataResult:
+    from transcribe.domain.models import PAGE_CERTAINTIES, PAGE_ROLES
+
     if action not in ACTIONS:
         raise ProjectError(f"unknown batch action {action!r}")
     if not page_ids:
         raise ProjectError("batch metadata refuses an empty page selection")
     if action in ("add_tag", "remove_tag") and not normalize_tags([tag]):
         raise ProjectError("add_tag and remove_tag require a tag slug")
+    if action == "set_page_role" and role not in PAGE_ROLES:
+        raise ProjectError("set_page_role requires page_role text or scan")
+    if action == "set_page_certainty" and certainty not in PAGE_CERTAINTIES:
+        raise ProjectError("set_page_certainty requires sure or unsure")
     if job_lock_held(projects.paths.job_lock):
         raise JobConflictError("cannot edit page metadata while an OCR job is running")
     if analysis_lock_held(projects.paths.analysis_lock):
@@ -107,6 +126,16 @@ def apply_batch_metadata(
                 page.tags = [item for item in page.tags if item != slug]
                 if slug not in page.suppressed_auto_tags:
                     page.suppressed_auto_tags = normalize_tags([*page.suppressed_auto_tags, slug])
+                changed += 1
+            elif action == "ignore_dates":
+                if page.date is not None and not page.date_approved:
+                    page.set_date_state(None, approved=True, source=None)
+                    changed += 1
+            elif action == "set_page_role" and page.page_role != role:
+                page.page_role = role
+                changed += 1
+            elif action == "set_page_certainty" and page.page_certainty != certainty:
+                page.page_certainty = certainty
                 changed += 1
         if changed and not dry_run:
             current.updated_at = to_iso(projects.clock.now())

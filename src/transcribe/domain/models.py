@@ -431,6 +431,16 @@ class PageIndex:
     suppressed_auto_tags: list[str] = field(default_factory=list)
     # Absent on disk means transcribe. ``skip`` pages are not scheduled for OCR.
     ocr_policy: str = "transcribe"
+    # Absent on disk means text. ``scan`` is a kept drawing; not Failed OCR.
+    page_role: str = "text"
+    # Absent on disk means sure. Does not change review_status.
+    page_certainty: str = "sure"
+    # One plain note, omitted when empty. Not edited_text.
+    page_gloss: str = ""
+
+    def skip_ocr(self) -> bool:
+        """True when jobs must not schedule this page (skip policy or kept scan)."""
+        return self.ocr_policy == "skip" or self.page_role == "scan"
 
     def as_dict(self) -> dict[str, Any]:
         date, approved, source = canonicalize_page_date_state(
@@ -459,6 +469,13 @@ class PageIndex:
             payload["review_status"] = status
         if self.ocr_policy == "skip":
             payload["ocr_policy"] = "skip"
+        if self.page_role == "scan":
+            payload["page_role"] = "scan"
+        if self.page_certainty == "unsure":
+            payload["page_certainty"] = "unsure"
+        gloss = (self.page_gloss or "").strip()
+        if gloss:
+            payload["page_gloss"] = gloss[:PAGE_GLOSS_MAX]
         return payload
 
     @classmethod
@@ -483,6 +500,9 @@ class PageIndex:
             review_status=status,
             suppressed_auto_tags=normalize_tags(data.get("suppressed_auto_tags")),
             ocr_policy="skip" if data.get("ocr_policy") == "skip" else "transcribe",
+            page_role="scan" if data.get("page_role") == "scan" else "text",
+            page_certainty="unsure" if data.get("page_certainty") == "unsure" else "sure",
+            page_gloss=str(data.get("page_gloss") or "")[:PAGE_GLOSS_MAX],
         )
 
     def set_date_state(
@@ -583,6 +603,9 @@ TOKEN_REPEAT_CODE = "token_repeat"
 TOKEN_REPEAT_MESSAGE = "Ollama aborted this generate (token repeat limit)"
 TRUNCATED_REPEAT_MESSAGE = "Model output hit num_predict with repeated text"
 REVIEW_STATUSES = frozenset({"unreviewed", "needs_attention", "reviewed", "skipped"})
+PAGE_ROLES = frozenset({"text", "scan"})
+PAGE_CERTAINTIES = frozenset({"sure", "unsure"})
+PAGE_GLOSS_MAX = 500
 EFFECTIVE_TEXT_ORIGINS = frozenset(
     {"ocr_attempt", "composite", "human_selected", "human_corrected"}
 )

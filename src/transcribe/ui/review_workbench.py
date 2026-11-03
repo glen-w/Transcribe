@@ -736,6 +736,9 @@ def _render_transcription_lane(
     signals,
 ) -> None:
     st.caption(_provenance_line(result=result, origin=origin, dirty=dirty))
+    _render_edit_divergence_banner(result)
+    _render_cleanup_proposal_band(projects, project, page_id, result)
+    _render_spelling_suggestions(page_id, canonical)
     if signals is not None and signals.markdown_contamination:
         st.warning(
             "OCR text may include prompt instructions or markdown headings — "
@@ -818,6 +821,116 @@ def _render_transcription_lane(
         resolved,
         canonical,
     )
+
+
+def _render_edit_divergence_banner(result: PageResult) -> None:
+    from transcribe.config.facade import get_config
+    from transcribe.services.edit_divergence import DEFAULT_EDIT_DIVERGENCE_CER, result_edit_diverges
+
+    try:
+        threshold = float(get_config().effective.ocr.edit_divergence_cer)
+    except Exception:
+        threshold = DEFAULT_EDIT_DIVERGENCE_CER
+    if result_edit_diverges(result, threshold=threshold):
+        st.info(
+            "A newer reading diverges from your correction. "
+            "Your edit is unchanged."
+        )
+
+
+def _render_cleanup_proposal_band(
+    projects: ProjectService,
+    project: Project,
+    page_id: str,
+    result: PageResult,
+) -> None:
+    from transcribe.runtime_paths import build_runtime_paths
+    from transcribe.services.cleanup_verdict import (
+        accept_cleanup_proposal,
+        can_accept_proposal,
+        cleanup_proposal,
+        reject_cleanup_proposal,
+    )
+
+    attempt = result.active_attempt()
+    proposal = cleanup_proposal(attempt)
+    if proposal is None:
+        return
+    st.markdown("#### Text-cleanup proposal")
+    cols = st.columns(2)
+    cols[0].caption("Vision text")
+    cols[0].text(proposal.vision_text)
+    cols[1].caption("Proposal")
+    cols[1].text(proposal.proposal_text)
+    if not can_accept_proposal(proposal):
+        return
+    existing = result.edited_text is not None
+    if existing:
+        st.radio(
+            "An edit is already saved — accepting the proposal",
+            options=["keep_edit", "adopt_new"],
+            format_func=lambda x: (
+                "Keep my edit" if x == "keep_edit" else "Replace my edit with the proposal"
+            ),
+            key=f"rw_cu_gate_{page_id}",
+        )
+    act = st.columns(3)
+    if act[0].button("Accept proposal", key=f"rw_cu_accept_{page_id}", icon=ic.CHECK):
+        try:
+            gate = st.session_state.get(f"rw_cu_gate_{page_id}") if existing else None
+            accept_cleanup_proposal(
+                projects,
+                page_id,
+                edit_gate_choice=gate,
+                runtime=build_runtime_paths(),
+            )
+            bump_archive_generation(build_runtime_paths())
+            for key in (
+                f"rw_buf_{page_id}",
+                f"rw_gen_{page_id}",
+                f"rw_saved_{page_id}",
+                f"rw_origin_{page_id}",
+            ):
+                st.session_state.pop(key, None)
+            st.rerun()
+        except TranscribeError as exc:
+            st.error(str(exc))
+    if act[1].button("Reject proposal", key=f"rw_cu_reject_{page_id}"):
+        try:
+            reject_cleanup_proposal(projects, page_id, runtime=build_runtime_paths())
+            st.toast("Proposal rejected")
+            st.rerun()
+        except TranscribeError as exc:
+            st.error(str(exc))
+    if act[2].button("Edit proposal", key=f"rw_cu_edit_{page_id}", icon=ic.COPY):
+        _set_buffer(page_id, proposal.proposal_text, origin="human_selected")
+        st.rerun()
+
+
+def _render_spelling_suggestions(page_id: str, canonical: str) -> None:
+    from transcribe.services.hand_spellings import (
+        HandSpellingsStore,
+        apply_spelling_occurrence,
+        find_spelling_occurrences,
+    )
+
+    pairs = HandSpellingsStore().list()
+    if not pairs:
+        return
+    hits: list[tuple[str, str, int, str]] = []
+    for pair in pairs:
+        found = find_spelling_occurrences(canonical, pair.source)
+        for i, (_start, _end, matched) in enumerate(found):
+            hits.append((pair.source, pair.target, i, matched))
+    if not hits:
+        return
+    st.caption("Confirmed spellings — Apply changes the editor; Save is still required.")
+    for i, (source, target, occ, matched) in enumerate(hits[:8]):
+        label = f"Apply “{matched}” → “{target}”"
+        if st.button(label, key=f"rw_sp_{page_id}_{i}_{source}_{occ}"):
+            updated = apply_spelling_occurrence(canonical, source, target, occ)
+            _set_buffer(page_id, updated, origin="human_corrected")
+            st.rerun()
 
 
 def _render_ocr_comparison_band(
@@ -1763,15 +1876,50 @@ def _render_other_tab(paths, projects, project, page) -> None:
         marks.set_mark(page.page_id, bookmarked=want_bookmark)
         bump_archive_generation(build_runtime_paths())
         st.rerun()
+    sidecar_note = current_mark.note if current_mark else ""
+    gloss_seed = page.page_gloss or sidecar_note
     note_value = st.text_area(
-        "Marginal note",
-        value=(current_mark.note if current_mark else ""),
+        "Page note",
+        value=gloss_seed,
         key=f"rw_note_{page.page_id}",
-        help="Kept beside the page. Not part of the transcription.",
+        help="One note on the page (max 500). Not part of the transcription. Search does not index it.",
+        max_chars=500,
     )
     if st.button("Save note", key=f"rw_note_save_{page.page_id}"):
-        marks.set_mark(page.page_id, note=note_value)
-        st.rerun()
+        try:
+            projects.set_page_gloss(page.page_id, note_value)
+            if sidecar_note and not page.page_gloss:
+                marks.set_mark(page.page_id, note="")
+            bump_archive_generation(build_runtime_paths())
+            st.rerun()
+        except TranscribeError as exc:
+            st.error(str(exc))
+    want_unsure = st.checkbox(
+        "Unsure",
+        value=page.page_certainty == "unsure",
+        key=f"rw_unsure_{page.page_id}",
+        help="Page-level flag. Does not change reviewed status.",
+    )
+    if want_unsure != (page.page_certainty == "unsure"):
+        try:
+            projects.set_page_certainty(page.page_id, "unsure" if want_unsure else "sure")
+            bump_archive_generation(build_runtime_paths())
+            st.rerun()
+        except TranscribeError as exc:
+            st.error(str(exc))
+    want_scan = st.checkbox(
+        "Kept scan (drawing / image only)",
+        value=page.page_role == "scan",
+        key=f"rw_role_{page.page_id}",
+        help="Stays in Reading as an image. Not scheduled for OCR and not a fine-tune positive. Distinct from Ignore in Reader.",
+    )
+    if want_scan != (page.page_role == "scan"):
+        try:
+            projects.set_page_role(page.page_id, "scan" if want_scan else "text")
+            bump_archive_generation(build_runtime_paths())
+            st.rerun()
+        except TranscribeError as exc:
+            st.error(str(exc))
     want_skip = st.checkbox(
         "Do not OCR this page",
         value=page.ocr_policy == "skip",
@@ -1793,6 +1941,26 @@ def _render_other_tab(paths, projects, project, page) -> None:
             st.rerun()
         except TranscribeError as exc:
             st.error(str(exc))
+
+    from transcribe.services.hand_spellings import HandSpellingsStore
+
+    with st.expander("Confirmed spellings", expanded=False):
+        st.caption(
+            "Pairs for this handwriting. Apply on Transcription changes the editor; "
+            "Save is still required. Not a lexicon and not a person list."
+        )
+        store = HandSpellingsStore()
+        pairs = store.list()
+        if pairs:
+            st.write(" · ".join(f"{p.source} → {p.target}" for p in pairs[:20]))
+        src = st.text_input("From", key="rw_sp_from")
+        dst = st.text_input("To", key="rw_sp_to")
+        if st.button("Add spelling", key="rw_sp_add"):
+            try:
+                store.add(src, dst)
+                st.rerun()
+            except TranscribeError as exc:
+                st.error(str(exc))
 
     from transcribe.ui.page_reorder import render_move_controls
 

@@ -106,3 +106,14 @@ Fields:
 Whitespace-only vision OCR skips the cleanup model (`execution_status=skipped_empty_source`) and the **attempt is failed** (`empty_output`) — not a succeeded blank page. Plan-time misconfiguration (invalid mode, missing/unsuitable cleanup model, unverified digest) rejects **job start**. Runtime model disappearance or digest drift is page-level fail-soft (`provider_failed`) and keeps vision `raw_text`.
 
 `raw_text` and `cleanup` for a succeeded attempt are committed in one write. Interrupted `running` attempts must not leave cleaned `raw_text` without a complete `cleanup` record.
+
+## Human cleanup verdict
+
+Review can **Accept proposal**, **Reject proposal**, or **Edit proposal** when
+`execution_status=provider_ok` and `pre_cleanup_text` is distinct from
+`raw_text`. Accept writes the proposal into `edited_text` (or keeps the
+existing edit via the same keep-or-adopt gate as prefer-promote). Reject
+leaves effective text unchanged. Neither action deletes the `cleanup`
+object. Verdicts are also recorded on [quality-ratings.md](quality-ratings.md)
+(`kind=cleanup`, source Review or CLI). Visual Review **Cleanup** remains
+declutter and must not be this control.

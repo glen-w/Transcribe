@@ -42,6 +42,7 @@ finetune_export_<stamp>/
 - Default `text`: preferred attempt `raw_text` if set, else active `raw_text`
 - When `prefer_effective_text` and `edited_text` present: use effective text and set `had_human_edit=true`
 - `rejected` optional list of other succeeded vision raws when `include_rejected_candidates=true`
+- Pages with `page_role=scan` are omitted (kept scans are not training positives)
 
 ## Privacy
 

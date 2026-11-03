@@ -394,6 +394,9 @@ def _render_review_workbench(runtime, paths, projects, project) -> None:
             f"{ignored_n} ignored page{'s' if ignored_n != 1 else ''} "
             "(hidden in Reading unless Show ignored is on)."
         )
+    if filter_key == "failed_ocr":
+        _render_miss_desk(paths, projects, project)
+    _render_review_batch_metadata(projects, project, page_ids)
     from transcribe.ui.review_workbench import render_review_page
 
     render_review_page(
@@ -404,6 +407,111 @@ def _render_review_workbench(runtime, paths, projects, project) -> None:
         page_ids=page_ids,
         view_entries=view_entries,
     )
+
+
+def _render_miss_desk(paths, projects, project) -> None:
+    from transcribe.services.miss_desk import (
+        MISS_DESK_COPY,
+        MISS_GROUPS,
+        circuit_skipped_page_ids,
+        group_failed_ocr,
+        miss_desk_page_ids,
+    )
+    from transcribe.ui.run_transcribe import get_coordinator
+
+    skipped = circuit_skipped_page_ids(projects)
+    grouped = group_failed_ocr(project, projects.load_page_result, circuit_skipped_ids=skipped)
+    counts = {key: len(grouped[key]) for key in MISS_GROUPS if grouped[key]}
+    if not counts:
+        return
+    with st.expander("Miss desk", expanded=True):
+        st.caption(MISS_DESK_COPY)
+        st.write(" · ".join(f"{key}: {n}" for key, n in counts.items()))
+        group = st.selectbox("Retry group", list(counts), key="rw_miss_group")
+        model = st.text_input(
+            "Vision model",
+            value=(project.settings.model_name or "").strip(),
+            key="rw_miss_model",
+        )
+        if st.button("Retry these", key="rw_miss_retry"):
+            page_ids = miss_desk_page_ids(
+                project,
+                projects.load_page_result,
+                group=group,
+                circuit_skipped_ids=skipped,
+            )
+            if not page_ids:
+                st.error("No pages in that group.")
+                return
+            chosen = (model or "").strip()
+            if not chosen:
+                st.error("Select a vision model.")
+                return
+            try:
+                coord = get_coordinator(str(paths.root))
+                coord.start(page_ids=page_ids, force=True, model_name=chosen)
+                st.session_state["_job_was_running"] = True
+                st.toast(f"OCR started for {len(page_ids)} miss(es)")
+                st.rerun()
+            except TranscribeError as exc:
+                st.error(str(exc))
+
+
+def _render_review_batch_metadata(projects, project, page_ids: list[str]) -> None:
+    from transcribe.errors import JobConflictError, ProjectError
+    from transcribe.services.batch_metadata import apply_batch_metadata
+
+    with st.expander("Batch metadata (this notebook)", expanded=False):
+        selected = st.multiselect(
+            "Pages",
+            options=list(page_ids),
+            default=[],
+            key="rw_batch_pages",
+            help="Explicit page ids in the current notebook. Gloss is not a batch action.",
+        )
+        action = st.selectbox(
+            "Action",
+            [
+                "approve_dates",
+                "ignore_dates",
+                "ignore",
+                "unignore",
+                "add_tag",
+                "remove_tag",
+                "set_page_role",
+                "set_page_certainty",
+            ],
+            key="rw_batch_action",
+        )
+        tag = ""
+        role = ""
+        certainty = ""
+        if action in ("add_tag", "remove_tag"):
+            tag = st.text_input("Tag", key="rw_batch_tag")
+        if action == "set_page_role":
+            role = st.selectbox("Role", ["text", "scan"], key="rw_batch_role")
+        if action == "set_page_certainty":
+            certainty = st.selectbox("Certainty", ["sure", "unsure"], key="rw_batch_certainty")
+        apply = st.checkbox("Apply (otherwise dry run)", value=False, key="rw_batch_apply")
+        if st.button("Run batch", key="rw_batch_go"):
+            try:
+                result = apply_batch_metadata(
+                    projects,
+                    selected,
+                    action,
+                    tag=tag,
+                    role=role,
+                    certainty=certainty,
+                    dry_run=not apply,
+                    runtime=build_runtime_paths(),
+                )
+            except (JobConflictError, ProjectError) as exc:
+                st.error(str(exc))
+                return
+            st.success(
+                f"{'dry-run' if result.dry_run else 'applied'}: "
+                f"selected={result.selected} changed={result.changed}"
+            )
 
 
 def _render_reading_mode(paths, projects, project) -> None:

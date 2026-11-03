@@ -105,5 +105,6 @@ reviews/*
 - [User documentation sitemap](USER_INDEX.md)
 - [Developer documentation index](DEV_INDEX.md)
 - [Contract index](CONTRACT_INDEX.md)
-- [Usability wave](usability_wave_plan.md) (active product focus)
+- [Usability wave](usability_wave_plan.md) (U0–U4 done)
+- [Durable notebook](dev/durable_notebook_1_3.md) (active product focus: 1.4–1.5)
 - [Assessments](assessments/README.md) (Transcribe vs TranscriptX survey)

@@ -1,12 +1,12 @@
 # The durable notebook — 1.3–1.5
 
-PR-sized waves for package **1.3.0**, then exit gates for **1.4** and **1.5**. Product narrative, risks, and sequencing live in [ROADMAP.md](../ROADMAP.md) (Now — The durable notebook). This file is the acceptance authority for open waves.
+PR-sized waves for package **1.3.0**, then exit gates for **1.4** and **1.5**. Product narrative, risks, and sequencing live in [ROADMAP.md](../ROADMAP.md) (Now — The durable notebook). This file is the acceptance authority for **1.4–1.5**. Waves 1–8 (1.3 correct) are implemented; no package tag until an explicit release request.
 
 **Plan origin:** maintainer request to creatively and robustly expand and thicken the roadmap after **1.2.0** landed (2026-11-02).
 
 **Deep-test after wave N treats only that wave’s acceptance table as required.** Later waves stay sequenced, not missing.
 
-Package **1.3.0** has since shipped a first slice ([expansion_hardening_wave_1_3.md](expansion_hardening_wave_1_3.md)): per-notebook restore, format census, retry-failed, a correction scoreboard, reading-mark notes, `ocr_policy: skip`, batch metadata, and declutter v6. That slice does not close Waves 1–8 below. In particular it does not write cleanup into `edited_text`, and it does not add confirmed spellings or the hand shelf. Those rows stay open.
+Package **1.3.0** shipped a first slice ([expansion_hardening_wave_1_3.md](expansion_hardening_wave_1_3.md)): per-notebook restore, format census, retry-failed, a correction scoreboard, reading-mark notes, `ocr_policy: skip`, batch metadata, and declutter v6. Waves 1–8 below are now implemented (correction practice). They do not add the 1.4 hand shelf. No package tag until an explicit release request.
 
 ## Invariants (every wave)
 
@@ -39,7 +39,7 @@ Autobiography imports, backup encryption, page-level merge restore, character-sp
 
 ---
 
-## Wave 1 — Text-cleanup verdict — [ ]
+## Wave 1 — Text-cleanup verdict — [x]
 
 Second-pass OCR cleanup already stores `execution_status` / `acceptance_status` on the attempt. The quality store already has `cleanup` accept/reject, CLI only. This wave is the Review control.
 
@@ -56,7 +56,7 @@ Contract touch (write it in this wave, additive): [page-result](../contracts/pag
 
 ---
 
-## Wave 2 — Divergence banner — [ ]
+## Wave 2 — Divergence banner — [x]
 
 | Item | Acceptance |
 |------|------------|
@@ -68,7 +68,7 @@ Contract touch (write it in this wave, additive): [page-result](../contracts/pag
 
 ---
 
-## Wave 3 — Miss desk — [ ]
+## Wave 3 — Miss desk — [x]
 
 Review **Failed OCR** stays the queue. This wave groups it and can retry a subset.
 
@@ -82,7 +82,7 @@ Review **Failed OCR** stays the queue. This wave groups it and can retry a subse
 
 ---
 
-## Wave 4 — Kept scan — [ ]
+## Wave 4 — Kept scan — [x]
 
 A page that is a drawing, a pasted photo, a ticket, or a cover with no text to read. Distinct from **Ignore in Reader** (which hides a page). A kept scan stays in Reading as an image.
 
@@ -100,7 +100,7 @@ Schema note in [project-on-disk](../contracts/project-on-disk.md) / page index: 
 
 ---
 
-## Wave 5 — Unsure and gloss — [ ]
+## Wave 5 — Unsure and gloss — [x]
 
 | Item | Acceptance |
 |------|------------|
@@ -113,7 +113,7 @@ Character-offset uncertainty is out of this wave (offsets rot on the next edit).
 
 ---
 
-## Wave 6 — Confirmed spellings — [ ]
+## Wave 6 — Confirmed spellings — [x]
 
 Workspace file, one person’s hand across notebooks. Pairs, not a dictionary product.
 
@@ -129,7 +129,7 @@ Workspace file, one person’s hand across notebooks. Pairs, not a dictionary pr
 
 ---
 
-## Wave 7 — Batch metadata — [ ]
+## Wave 7 — Batch metadata — [x]
 
 | Item | Acceptance |
 |------|------------|
@@ -141,7 +141,7 @@ Workspace file, one person’s hand across notebooks. Pairs, not a dictionary pr
 
 ---
 
-## Wave 8 — 1.3 exit — [ ]
+## Wave 8 — 1.3 exit — [x]
 
 | Item | Acceptance |
 |------|------------|
@@ -152,13 +152,13 @@ Workspace file, one person’s hand across notebooks. Pairs, not a dictionary pr
 
 **1.3 exit gate:** Waves 1–7 acceptance tables green; a 1.2 notebook loads with default `page_role=text` and no gloss; `edited_text` survival re-OCR test still green; no context directory introduced.
 
-Stretch that may slip to **1.3.1** without a new product decision, if the exit note in the decision log says so: Wave 5 gloss export option, Wave 6 cleanup-hint switch. Waves 1–4 and the suggest/apply spelling path are tag blockers. A slip is a decision-log row, not a silent drop.
+Stretch **landed** with Waves 5–6 (not deferred to 1.3.1): Wave 5 gloss export option (`export.include_page_notes`, default off), Wave 6 cleanup-hint switch (`ocr.cleanup_spelling_hint`, default off). Waves 1–4 and the suggest/apply spelling path remain the original tag blockers. Tag only on an explicit release request.
 
 ---
 
-## 1.4 — Proof the hand came back — [ ] after 1.3 exit
+## 1.4 — Proof the hand came back — [ ] open (1.3 exit green)
 
-Do not open these waves while 1.3 is in progress. The shelf compares against corrections; those fields need to have stopped moving.
+1.3 correct waves 1–8 are implemented. The shelf compares against `edited_text` and cleanup verdicts; do not reopen those fields as 1.4 work.
 
 | ID | Outcome | Exit |
 |----|---------|------|

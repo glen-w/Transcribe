@@ -302,6 +302,62 @@ class ProjectService:
             write_json_atomic(self.paths.manifest, current.as_dict())
             return current
 
+    def set_page_role(self, page_id: str, role: str) -> Project:
+        """Set ``page_role`` to ``text`` or ``scan``.
+
+        ``scan`` pages stay in Reading as images, leave the OCR schedule, and
+        are not fine-tune positives. Orthogonal to Ignore in Reader. Refuses
+        while an OCR job lock is held. In-flight jobs are not rewritten.
+        """
+        from transcribe.domain.models import PAGE_ROLES
+
+        if role not in PAGE_ROLES:
+            raise ProjectError(f"page_role must be text or scan, got {role!r}")
+        if job_lock_held(self.paths.job_lock):
+            raise JobConflictError("cannot change page role while an OCR job is running")
+        with mutation_lock(self.paths.mutation_lock):
+            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
+            current = Project.from_dict(payload)
+            page = self._require_page(current, page_id)
+            page.page_role = role
+            current.updated_at = to_iso(self.clock.now())
+            validate_project(current)
+            write_json_atomic(self.paths.manifest, current.as_dict())
+            return current
+
+    def set_page_certainty(self, page_id: str, certainty: str) -> Project:
+        """Set ``page_certainty`` to ``sure`` or ``unsure``. Does not change review_status."""
+        from transcribe.domain.models import PAGE_CERTAINTIES
+
+        if certainty not in PAGE_CERTAINTIES:
+            raise ProjectError(f"page_certainty must be sure or unsure, got {certainty!r}")
+        with mutation_lock(self.paths.mutation_lock):
+            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
+            current = Project.from_dict(payload)
+            page = self._require_page(current, page_id)
+            page.page_certainty = certainty
+            current.updated_at = to_iso(self.clock.now())
+            validate_project(current)
+            write_json_atomic(self.paths.manifest, current.as_dict())
+            return current
+
+    def set_page_gloss(self, page_id: str, gloss: str) -> Project:
+        """Set the page gloss (one plain note). Empty clears. Max 500 characters."""
+        from transcribe.domain.models import PAGE_GLOSS_MAX
+
+        text = str(gloss or "")
+        if len(text) > PAGE_GLOSS_MAX:
+            raise ProjectError(f"page gloss is at most {PAGE_GLOSS_MAX} characters")
+        with mutation_lock(self.paths.mutation_lock):
+            payload = require_format(read_json(self.paths.manifest), "transcribe.project")
+            current = Project.from_dict(payload)
+            page = self._require_page(current, page_id)
+            page.page_gloss = text
+            current.updated_at = to_iso(self.clock.now())
+            validate_project(current)
+            write_json_atomic(self.paths.manifest, current.as_dict())
+            return current
+
     def set_ocr_policy(self, page_id: str, policy: str) -> Project:
         """Set ``ocr_policy`` to ``transcribe`` or ``skip``.
 

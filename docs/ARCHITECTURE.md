@@ -46,6 +46,8 @@ CLI (`transcribe.cli`) ─┘              │
 | Notebook collections / archived state (1.2) | [contracts/notebook-collections.md](contracts/notebook-collections.md) — workspace config is authority; SQLite carries derived flags only |
 | Saved searches (1.2) | [contracts/saved-searches.md](contracts/saved-searches.md) — filter JSON only, never result snapshots |
 | Quality ratings (1.2) | [contracts/quality-ratings.md](contracts/quality-ratings.md) — collect-only local file; no telemetry |
+| Confirmed spellings (1.3) | [contracts/hand-spellings.md](contracts/hand-spellings.md) — workspace `{from, to}` pairs; Apply is buffer-only |
+| Kept scan / gloss / skip-OCR (1.3) | Additive `page_role` / `page_certainty` / `page_gloss` / `ocr_policy` on [project-on-disk.md](contracts/project-on-disk.md); jobs use `skip_ocr()` |
 | Job timeline (1.2) | `services/job_timeline` read-model over validated OCR/analysis/detection run records (Diagnostics) |
 | Bind guard (1.2) | `transcribe.net_guard` — non-loopback UI binds require explicit acknowledgement |
 
@@ -66,6 +68,8 @@ CLI (`transcribe.cli`) ─┘              │
 - **TagService / TagCatalogStore** — workspace `personal_corpus.tag-catalog` at `data/config/tag-catalog.json`; assignments remain `tags: string[]` on notebooks/pages; host-agnostic kernel in `transcribe.tagging.kernel` for a future TranscriptX copy
 - **PageMetricsService** — Pillow ink coverage / blankness / dominant hue over active renders; publish under `page_metrics/`; cache identity = algorithm version + ordered `(page_id, render_sha256)` (not text Analyse)
 - **Visual declutter** — Pillow scanner-border / binding-gutter / edge-shadow crop at import and via `ProjectService.reapply_visual_declutter` (Settings → Configuration); provenance on renders ([contracts/source-asset.md](contracts/source-asset.md))
+- **CleanupVerdict / edit divergence / miss desk** — Review collaborators over existing cleanup records, quality-store CER, and attempt error codes. No new job status. Core must not import Streamlit
+- **HandSpellingsStore** — `data/config/hand-spellings.json`; packed by workspace backup with the rest of `data/config/`
 - **Ollama discovery cache** — thread-safe model metadata keyed by normalized base URL + transport timeout; providers stay lightweight execution clients. `/api/embed` is used only by opt-in Ask RAG
 
 ## Explicit non-goals for the core architecture

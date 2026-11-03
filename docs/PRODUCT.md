@@ -46,7 +46,7 @@ Supported entrypoints: [public_surfaces.md](public_surfaces.md).
 - Core notebook analysis modules and Analyse (optional local text Ollama for LLM modules)
 - Deepen-in-place: usability wave — trust, Analyse product UX, first-run operability (**U2** done), daily workbench (**U3** done); OCR fail-fast, Analyse corpus-compare, Moments/chart jump → Reading, and Analyse/View split are shipped deepen-in-place ([ROADMAP.md](ROADMAP.md) · [usability_wave_plan.md](usability_wave_plan.md))
 
-**Path to 1.0:** freeze tagged **1.0.0** (U2 + I0–I6, plus severity / ops / manual acceptance / analysis audit). **1.0.1** was layering/decoupling. Current package **1.3.0**: [durability and OCR truth](dev/expansion_hardening_wave_1_3.md) (restore one notebook, archive hot path, correction scoreboard, reading marks, skip-OCR pages, declutter v6) after [1.2](dev/expansion_hardening_wave_1_2.md). Next horizon, not yet shipped: [1.3–1.5 The durable notebook](dev/durable_notebook_1_3.md) (correction practice, hand-model shelf, per-notebook restore). A stranger-testing round is not a release gate. Historical: [ROADMAP.md](ROADMAP.md) Path to 0.9.0 / 1.0.
+**Path to 1.0:** freeze tagged **1.0.0** (U2 + I0–I6, plus severity / ops / manual acceptance / analysis audit). **1.0.1** was layering/decoupling. Current package **1.3.0**: [durability and OCR truth](dev/expansion_hardening_wave_1_3.md) after [1.2](dev/expansion_hardening_wave_1_2.md). 1.3 correct waves (cleanup verdict, miss desk, kept scan, spellings) are implemented; next horizon is [1.4–1.5](dev/durable_notebook_1_3.md) (hand-model shelf, continue-reading). A stranger-testing round is not a release gate. Historical: [ROADMAP.md](ROADMAP.md) Path to 0.9.0 / 1.0.
 
 **Out of scope for current core**
 

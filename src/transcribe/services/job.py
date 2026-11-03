@@ -228,7 +228,26 @@ class JobCoordinator:
     def _validate_cleanup_settings_or_raise(self) -> None:
         """Fail-fast cleanup config check before job start (plan freeze)."""
         project = self.projects.load(reconcile=False)
-        resolve_cleanup_plan_config(project.settings, client=self.cleanup_client)
+        resolve_cleanup_plan_config(
+            project.settings,
+            client=self.cleanup_client,
+            spelling_pairs=self._cleanup_spelling_pairs(),
+        )
+
+    def _cleanup_spelling_pairs(self) -> tuple[tuple[str, str], ...]:
+        """Pairs for the cleanup prompt when the workspace hint is on."""
+        runtime = self.archive_runtime
+        if runtime is None:
+            return ()
+        try:
+            from transcribe.config.facade import get_config
+            from transcribe.services.hand_spellings import HandSpellingsStore
+
+            if not get_config().effective.ocr.cleanup_spelling_hint:
+                return ()
+            return HandSpellingsStore(runtime).pairs()
+        except Exception:
+            return ()
 
     def _ensure_disk_budget_or_raise(self, page_ids: list[str] | None = None) -> None:
         """Fail before scheduling when free disk cannot absorb page writes.
@@ -482,7 +501,7 @@ class JobCoordinator:
         from transcribe.services.model_selection import validate_ocr_vision_model
 
         validate_ocr_vision_model(provider, resolved_model)
-        skip_ocr = {p.page_id for p in project.pages if p.ocr_policy == "skip"}
+        skip_ocr = {p.page_id for p in project.pages if p.skip_ocr()}
         if page_ids is None:
             targets = tuple(p.page_id for p in project.pages if p.page_id not in skip_ocr)
         else:
@@ -547,9 +566,17 @@ class JobCoordinator:
         elif cleanup_enabled is True:
             forced = copy.deepcopy(settings)
             forced.cleanup_enabled = True
-            cleanup = resolve_cleanup_plan_config(forced, client=self.cleanup_client)
+            cleanup = resolve_cleanup_plan_config(
+                forced,
+                client=self.cleanup_client,
+                spelling_pairs=self._cleanup_spelling_pairs(),
+            )
         else:
-            cleanup = resolve_cleanup_plan_config(settings, client=self.cleanup_client)
+            cleanup = resolve_cleanup_plan_config(
+                settings,
+                client=self.cleanup_client,
+                spelling_pairs=self._cleanup_spelling_pairs(),
+            )
         config_fp, _ = compute_input_fingerprint(
             provider=provider_id,
             model_name=resolved_model,

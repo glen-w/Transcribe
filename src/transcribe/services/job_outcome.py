@@ -66,11 +66,11 @@ def outcome_from_record(payload: dict[str, Any]) -> JobOutcome:
 def count_page_attempts(project: Project, projects: ProjectService) -> tuple[int, int, int]:
     """Return ``(failed, interrupted, pending)`` over the latest attempt per page.
 
-    Pages with ``ocr_policy=skip`` are not OCR work and are not counted.
+    Pages with ``ocr_policy=skip`` or ``page_role=scan`` are not OCR work.
     """
     failed = interrupted = pending = 0
     for page in project.pages:
-        if page.ocr_policy == "skip":
+        if page.skip_ocr():
             continue
         result = projects.load_page_result(page.page_id)
         if result is None or not result.attempts:
@@ -91,12 +91,12 @@ def count_page_attempts(project: Project, projects: ProjectService) -> tuple[int
 def retry_failed_page_ids(project: Project, projects: ProjectService) -> list[str]:
     """Pages whose latest attempt failed, was interrupted, or returned no text.
 
-    Skip-OCR pages are omitted. Verified successes stay out of this list so
-    the normal fingerprint skip still applies to them.
+    Skip-OCR and kept-scan pages are omitted. Verified successes stay out of
+    this list so the normal fingerprint skip still applies to them.
     """
     chosen: list[str] = []
     for page in project.pages:
-        if page.ocr_policy == "skip":
+        if page.skip_ocr():
             continue
         result = projects.load_page_result(page.page_id)
         if result is None or not result.attempts:

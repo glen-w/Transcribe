@@ -17,9 +17,9 @@ Active developer and maintainer docs. Historical material is listed only via [AR
 
 | Doc | Purpose |
 |-----|---------|
-| [ROADMAP.md](ROADMAP.md) | Product roadmap. **1.3.0** shipped durability and OCR truth. The longer durable-notebook programme is still open. Autobiography write-up is on file, not this repo’s backlog |
+| [ROADMAP.md](ROADMAP.md) | Product roadmap. **1.3.0** shipped durability and OCR truth. 1.3 correct waves 1–8 are implemented; 1.4 shelf and 1.5 continue-reading remain. Autobiography write-up is on file, not this repo’s backlog |
 | [dev/expansion_hardening_wave_1_3.md](dev/expansion_hardening_wave_1_3.md) | 1.3.0 durability and OCR truth (restore one notebook, scoreboard, reading marks, skip-OCR, declutter v6) |
-| [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md) | Remaining 1.3–1.5 waves: miss desk, confirmed spellings, hand shelf, continue-reading |
+| [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md) | 1.3 correct W1–W8 implemented. Remaining: 1.4 hand shelf, 1.5 continue-reading |
 | [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place waves (Inbox, declutter v4, reorder, hand-model bring-back, leftover architecture) — folded into 1.2 |
 | [dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md) | 1.2 expansion & hardening wave (H1–H4, E1–E5, Q) — shipped as **1.2.0** |
 | [usability_wave_plan.md](usability_wave_plan.md) | Usability-wave tracks U0–U4 (done; Inbox polish may continue) |

@@ -95,7 +95,7 @@ The core set admits only these `split_profile` values. New profiles require a co
 
 `page` profile canonicalisation (exact):
 
-- Walk manifest `pages` in order; skip `analysis_excluded` pages and blank/whitespace-only / failed-empty effective text
+- Walk manifest `pages` in order; skip `analysis_excluded` pages, `page_role=scan` pages, and blank/whitespace-only / failed-empty effective text
 - One unit per remaining page; `unit_id == page_id`
 - `source_ref`: `{"kind":"page","page_id":...}`
 - `order`: 0-based index among **emitted** units (not raw manifest index of omitted pages)

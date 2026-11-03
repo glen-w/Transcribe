@@ -876,12 +876,27 @@ def _render_page_batch_panel(runtime: RuntimePaths, archive: ArchiveService) -> 
         name = st.selectbox("Saved search", [row.name for row in saved], key="lib_batch_saved")
         action = st.selectbox(
             "Action",
-            ["approve_dates", "ignore", "unignore", "add_tag", "remove_tag"],
+            [
+                "approve_dates",
+                "ignore_dates",
+                "ignore",
+                "unignore",
+                "add_tag",
+                "remove_tag",
+                "set_page_role",
+                "set_page_certainty",
+            ],
             key="lib_batch_action",
         )
         tag = ""
+        role = ""
+        certainty = ""
         if action in ("add_tag", "remove_tag"):
             tag = st.text_input("Tag", key="lib_batch_tag")
+        if action == "set_page_role":
+            role = st.selectbox("Role", ["text", "scan"], key="lib_batch_role")
+        if action == "set_page_certainty":
+            certainty = st.selectbox("Certainty", ["sure", "unsure"], key="lib_batch_certainty")
         chosen = next(row for row in saved if row.name == name)
         if filters_are_empty(chosen.filters):
             st.warning("That saved search has no filter. It will not match the whole corpus.")
@@ -913,6 +928,8 @@ def _render_page_batch_panel(runtime: RuntimePaths, archive: ArchiveService) -> 
                     page_ids,
                     action,
                     tag=tag,
+                    role=role,
+                    certainty=certainty,
                     dry_run=dry_run or not confirm,
                     runtime=runtime,
                 )

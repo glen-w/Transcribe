@@ -4,7 +4,7 @@
 **Active product focus:** [1.3–1.5 The durable notebook](dev/durable_notebook_1_3.md) — correction, proof the hand came back, keep the corpus. Acceptance checklists live in that file  
 **Previous release:** [1.2 expansion & hardening](dev/expansion_hardening_wave_1_2.md) — tagged **1.2.0** (folds in 1.1 deepen W1–W9)  
 **Wave plans (done tracks):** [usability_wave_plan.md](usability_wave_plan.md) · [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md)  
-**Critical path:** [Active backlog](#active-backlog--ranked) · [Now — The durable notebook](#now--135-the-durable-notebook----planned)  
+**Critical path:** [Active backlog](#active-backlog--ranked) · [Now — The durable notebook](#now--135-the-durable-notebook)  
 **Historical 0.9 / 1.0 path:** [Path to 0.9.0 / 1.0](#path-to-090--10) — tagged; Track C signed off  
 **Scope boundary:** [Scope lean — 24 Sep 2026](#scope-lean--24-sep-2026)  
 **On file, not this product:** [After 1.0 — autobiography](#after-10--notebook-anchored-autobiography-workbench----on-file) — those old 1.1–2.0 labels are **not** package 1.3–1.5  
@@ -23,7 +23,7 @@
 | If you need… | Go to |
 |--------------|--------|
 | What this product is (and is not) | [Scope lean](#scope-lean--24-sep-2026) · [PRODUCT.md](PRODUCT.md) |
-| What to build next | [Active backlog](#active-backlog--ranked) · [The durable notebook](#now--135-the-durable-notebook----planned) · [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md) |
+| What to build next | [Active backlog](#active-backlog--ranked) · [The durable notebook](#now--135-the-durable-notebook) · [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md) |
 | Track detail for usability | [usability_wave_plan.md](usability_wave_plan.md) (authority for U0–U4) |
 | Track detail for maintainer infra | [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (authority for I0–I6) |
 | What already shipped | [Status at a glance](#status-at-a-glance) · [Shipped programmes](#shipped-programmes) |
@@ -41,7 +41,7 @@
 
 ## Status at a glance
 
-**Package:** **1.3.0**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **1.3.0** shipped [durability and OCR truth](dev/expansion_hardening_wave_1_3.md). The longer [durable notebook](dev/durable_notebook_1_3.md) programme (miss desk, confirmed spellings, hand shelf, continue-reading) is still open. **1.2** folded in the 1.1 deepen waves.
+**Package:** **1.3.0**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **1.3.0** shipped [durability and OCR truth](dev/expansion_hardening_wave_1_3.md). [Durable notebook](dev/durable_notebook_1_3.md) **1.3 correct** (W1–W8: cleanup verdict, miss desk, kept scan, gloss, spellings) is implemented. Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading. **1.2** folded in the 1.1 deepen waves.
 
 ```text
 0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1 → 1.2.0 → 1.3 → 1.4 → 1.5
@@ -51,7 +51,7 @@
 
 | Horizon | Status | What it means |
 |---------|--------|---------------|
-| **Now** | [~] | **1.3.0 shipped** [durability & OCR truth](dev/expansion_hardening_wave_1_3.md): restore one notebook, archive hot path, scoreboard, reading marks, skip-OCR, batch metadata, declutter v6. Still open on [the durable notebook](dev/durable_notebook_1_3.md): miss desk, confirmed spellings, hand shelf, continue-reading |
+| **Now** | [~] | **1.3 correct (W1–W8) implemented** on [the durable notebook](dev/durable_notebook_1_3.md). Package **1.3.0** already tagged the durability slice. Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading (restore-one and declutter v6 already shipped) |
 | **1.2.0** | [x] | **Expansion & hardening** ([dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md)): L2 load default, failure/security/scale hardening, search + collections + export expansion, quality loop, declutter v5 |
 | **0.9.0** | [x] | Changelog cut — U2 + I0–I6 |
 | **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch; Track C signed off |
@@ -90,7 +90,7 @@ A stranger-testing round is **not** a release gate ([dev/user_testing_0_9.md](de
 3. **Fine-tune for one person’s hand** — export page images + corrected text, train **outside** this app, install the model in Ollama, verify with multipass. Export is shipped ([finetune_export.md](finetune_export.md)). An in-app training loop is a non-goal. The open job is a model that reads that handwriting reliably, not a trainer inside Transcribe.
 4. **Read, tag, and explore notebooks** — Reading, Library, search, tag catalogue. Shipped with the daily workbench (U3). Maintain this. Do not grow it into a life view.
 
-**Scheduled remainder of those jobs:** [1.3–1.5 The durable notebook](#now--135-the-durable-notebook----planned). 1.3 thickens *correct*. 1.4 turns “verify with multipass” from a paragraph in the fine-tune README into a shelf the user can re-run. 1.5 makes a large corpus recoverable one notebook at a time. That programme does not add a fifth job.
+**Scheduled remainder of those jobs:** [1.3–1.5 The durable notebook](#now--135-the-durable-notebook). 1.3 thickens *correct*. 1.4 turns “verify with multipass” from a paragraph in the fine-tune README into a shelf the user can re-run. 1.5 makes a large corpus recoverable one notebook at a time. That programme does not add a fifth job.
 
 **Freeze (stop growing):**
 
@@ -128,26 +128,29 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 
 ## Active backlog — ranked
 
-**Now:** [1.3 The durable notebook](dev/durable_notebook_1_3.md) waves, in order. 1.4 and 1.5 are sequenced below and are not open. Do not schedule autobiography from this list.
+**Now:** **1.4** proof (hand shelf / bring-back report) and **1.5** keep (continue-reading). 1.3 correct waves 1–8 are implemented. Do not schedule autobiography from this list.
 
 | Rank | Item | Status | Wave | Detail |
 |------|------|--------|------|--------|
-| 1 | **Text-cleanup verdict** | [ ] | 1.3 W1 | Review can accept, reject, or edit a second-pass cleanup proposal. Visual Cleanup lane stays declutter |
-| 2 | **Divergence banner** | [ ] | 1.3 W2 | A newer reading that disagrees with `edited_text` is announced and does not clear the edit |
-| 3 | **Miss desk** | [ ] | 1.3 W3 | Failed OCR grouped by `error.code`; retry builds a plan for that page set only |
-| 4 | **Kept scan** | [ ] | 1.3 W4 | `page_role=scan` stays in Reading, leaves the OCR queue, and is not a fine-tune positive |
-| 5 | **Unsure + gloss** | [ ] | 1.3 W5 | Page-level unsure filter; one plain-text note, absent from effective text |
-| 6 | **Confirmed spellings** | [ ] | 1.3 W6 | `{from, to}` pairs, per-occurrence Apply into the buffer, Save still required |
-| 7 | **Batch metadata** | [ ] | 1.3 W7 | Tags, dates, ignore, role, certainty on an explicit page set; lock refuses |
-| 8 | **1.3 exit** | [ ] | 1.3 W8 | Docs, offline tests, known-limitations honesty. Tag only on a release request |
+| 1 | **Text-cleanup verdict** | [x] | 1.3 W1 | Review can accept, reject, or edit a second-pass cleanup proposal. Visual Cleanup lane stays declutter |
+| 2 | **Divergence banner** | [x] | 1.3 W2 | A newer reading that disagrees with `edited_text` is announced and does not clear the edit |
+| 3 | **Miss desk** | [x] | 1.3 W3 | Failed OCR grouped by `error.code`; retry builds a plan for that page set only |
+| 4 | **Kept scan** | [x] | 1.3 W4 | `page_role=scan` stays in Reading, leaves the OCR queue, and is not a fine-tune positive |
+| 5 | **Unsure + gloss** | [x] | 1.3 W5 | Page-level unsure filter; one plain-text note, absent from effective text |
+| 6 | **Confirmed spellings** | [x] | 1.3 W6 | `{from, to}` pairs, per-occurrence Apply into the buffer, Save still required |
+| 7 | **Batch metadata** | [x] | 1.3 W7 | Tags, dates, ignore, role, certainty on an explicit page set; lock refuses |
+| 8 | **1.3 exit** | [x] | 1.3 W8 | Docs, offline tests, known-limitations honesty. Tag only on a release request |
 
-**Next, not open:** 1.4 shelf and bring-back report (after 1.3 exit) · 1.5 per-notebook restore, longevity export, declutter v6, continue reading (after 1.3 exit; do not crop shelf pages mid-1.4).
+**Next, not open:** 1.4 shelf and bring-back report · 1.5 continue-reading and remaining keep work (restore-one and declutter v6 already shipped in 1.3.0). Do not crop shelf pages mid-1.4.
 
-**Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling · 1.1 deepen W1–W9 ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md): Cover Open, dirty leave, auto-tag suppression, Detect cancel, Inbox polish, declutter v4, reorder, hand-model docs) · **1.2 expansion & hardening (H1–H4, E1–E5)**.
+**Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling · 1.1 deepen W1–W9 ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md): Cover Open, dirty leave, auto-tag suppression, Detect cancel, Inbox polish, declutter v4, reorder, hand-model docs) · **1.2 expansion & hardening (H1–H4, E1–E5)** · **1.3 correct (W1–W8)**.
 
 ---
 
-## Now — 1.3–1.5 The durable notebook — [ ] planned
+<a id="now--135-the-durable-notebook"></a>
+<a id="now--135-the-durable-notebook----planned"></a>
+
+## Now — 1.3–1.5 The durable notebook
 
 Authority for acceptance: [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md). Usability **U0–U4**, infra **I0–I6**, and **1.2.0** are done. Do **not** schedule deferred-reinterpretation ports or autobiography.
 
@@ -161,7 +164,7 @@ Authority for acceptance: [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3
      └────────► 1.5 keep the corpus
 ```
 
-1.4 waits until the 1.3 exit gate is green, because the shelf scores `edited_text` and cleanup verdicts and those fields should stop moving. 1.5 may be designed alongside 1.4. Declutter v6 waits until a 1.4 shelf report is not mid-crop. Per-notebook restore does not wait on the shelf.
+The 1.3 exit gate is green. **1.4 is open.** 1.5 may be designed alongside 1.4. Declutter v6 already shipped in 1.3.0; do not crop shelf pages mid-1.4. Per-notebook restore does not wait on the shelf.
 
 ### What “thicker” means here
 
@@ -184,7 +187,7 @@ Each release has one sentence a user could say out loud.
 - Pins and glosses are one page each. They are not Slices.
 - No in-app trainer, no new analysis module, no `completed_partial`, no schema_version bump, no Streamlit replacement.
 
-### 1.3 — Correct — [ ] planned
+### 1.3 — Correct — [x] implemented (tag on release request)
 
 **Product goal:** The human step after OCR is **correct**. Make that step faster and harder to undo by accident.
 
@@ -199,15 +202,15 @@ Each release has one sentence a user could say out loud.
 - **Confirmed spellings.** A workspace list of pairs (`from` → `to`), capped at 200, no patterns. Review offers **Apply** on one occurrence into the unsaved buffer. There is no Apply-all. A switch, default off, may add the list to the cleanup prompt; turning it on changes the cleanup fingerprint so old skips stay valid.
 - **Batch metadata.** On an explicit set of pages in the open notebook: tag, approve or ignore dates, ignore, kept-scan, unsure. Refused while that notebook’s OCR or analysis lock is held. Gloss is not in the batch list, so a slip does not wipe notes.
 
-**Architecture.** New persisted shapes are additive page fields (`page_role`, `page_certainty`, `page_gloss`) and one config file `transcribe.hand-spellings`. Quality-store cleanup verdicts gain a Review writer beside the CLI. The miss desk is a read-model over attempt errors plus the existing plan/job path. No new job status.
+**Architecture.** New persisted shapes are additive page fields (`page_role`, `page_certainty`, `page_gloss`, `ocr_policy`) and one config file `transcribe.hand-spellings`. Quality-store cleanup verdicts gain a Review writer beside the CLI. The miss desk is a read-model over attempt errors plus the existing plan/job path. No new job status.
 
 **Reuse.** Cleanup object on the attempt, quality store CER, Failed OCR, prefer edit-gate, `JobCoordinator` page sets, tag catalogue, ignore flag, workspace backup of `data/config/`.
 
 **Risks.** Accept that silently replaces a careful edit. A spelling list that rewrites OCR before the user looks. Kept scan used as a side door for a photo corpus. Gloss growing threads, replies, or highlights. The miss desk growing a second queue with its own status enum. Naming spellings “lexicon” and colliding with analysis lexicons, or “people” and colliding with the parked Person store.
 
-**Exit.** [Wave plan](dev/durable_notebook_1_3.md) Waves 1–7. A 1.2 notebook round-trips. The existing “`edited_text` survives re-OCR” smoke stays green. Known limitations say spellings suggest, kept scans are pages, and the miss desk does not export unread pages as targets. Waves that may slip to 1.3.1, only by a decision-log row: gloss-in-export, and the cleanup-prompt hint. Tag blockers are the verdict, the banner, the miss desk, kept scan, and per-occurrence Apply.
+**Exit.** [Wave plan](dev/durable_notebook_1_3.md) Waves 1–8 met. A 1.2 notebook round-trips. The existing “`edited_text` survives re-OCR” smoke stays green. Known limitations say spellings suggest, kept scans are pages, gloss is one note, and the miss desk does not export unread pages as targets. Stretch that shipped with W5/W6 (not deferred to 1.3.1): gloss-in-export (`include_page_notes`) and the cleanup-prompt hint (`cleanup_spelling_hint`, default off). Tag only on an explicit release request.
 
-### 1.4 — Proof the hand came back — [ ] after 1.3
+### 1.4 — Proof the hand came back — [ ] open (1.3 exit green)
 
 **Product goal:** Job 3’s open remainder. Export and “install, then multipass” are shipped as docs. This release is the measurement the user can repeat after the next model, on pages they have already corrected, on this machine.
 
@@ -270,13 +273,13 @@ Worth keeping next to this programme so they are not reinvented as scope. They a
 
 ### Cross-cutting tests
 
-Contracts for `hand-spellings`, `hand-shelf`, and reading pins are written in the wave that first saves the file, then linked from [CONTRACT_INDEX.md](CONTRACT_INDEX.md). Offline default lane only: stub vision, no live Ollama, no network. The import→OCR smoke kit remains the regression for “a correction survives a re-run”; 1.4 adds a shelf fixture beside it rather than replacing it. Scale budgets from 1.2 stay in nightly. A 1.2 backup of a workspace that has none of the new files still restores with the existing replace-only command.
+`hand-spellings` is contracted ([contracts/hand-spellings.md](contracts/hand-spellings.md)). Contracts for `hand-shelf` and reading pins are written in the wave that first saves the file, then linked from [CONTRACT_INDEX.md](CONTRACT_INDEX.md). Offline default lane only: stub vision, no live Ollama, no network. The import→OCR smoke kit remains the regression for “a correction survives a re-run”; 1.4 adds a shelf fixture beside it rather than replacing it. Scale budgets from 1.2 stay in nightly. A 1.2 backup of a workspace that has none of the new files still restores with the existing replace-only command.
 
 ---
 
 ## Path to 0.9.0 / 1.0
 
-**Status:** [x] done — **0.9.0** (2026-10-23) and **1.0.0** notebook freeze tagged; **1.0.1** decoupling patch. Historical sequencing from package **0.8.8**. Companion tracks: [usability_wave_plan.md](usability_wave_plan.md) (U2), [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (I0–I6). A stranger-testing round is not a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)). Live work is [1.3–1.5 The durable notebook](#now--135-the-durable-notebook----planned). This path is historical.
+**Status:** [x] done — **0.9.0** (2026-10-23) and **1.0.0** notebook freeze tagged; **1.0.1** decoupling patch. Historical sequencing from package **0.8.8**. Companion tracks: [usability_wave_plan.md](usability_wave_plan.md) (U2), [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) (I0–I6). A stranger-testing round is not a release gate ([dev/user_testing_0_9.md](dev/user_testing_0_9.md)). Live work is [1.3–1.5 The durable notebook](#now--135-the-durable-notebook). This path is historical.
 
 **Thesis:** Cut an operable **0.9.0**, then declare **1.0** as the notebook contract. Harden the existing notebook/OCR/analysis/corpus stack. Do **not** ship photos-as-context, WhatsApp, a People store, Slices, reconstruction, or time-of-day storage in this repo.
 
@@ -583,7 +586,7 @@ Primary direction for living with many notebooks. **U3** pulled Review UX, readi
 | **Quality ratings (thumbs)** | Collect-only local ratings | **[x] done (1.2)** — analysis `up`/`down` in the quality store (CLI) |
 | **Ignore pages (Reader)** | Mark/unmark in Review; Reader hide-by-default + **Show ignored**; export exclude ignored | **[x] done** |
 | **Detection fine-tune export** | Approved/rejected Detect labels → external training datasets | **[x] done** — see [Shipped — Detection fine-tune export](#shipped--detection-fine-tune-export--x) |
-| **OCR cleanup quality** | Second-pass cleanup as a Review verdict, without a separate analysis module | **1.3** — [durable notebook](#now--135-the-durable-notebook----planned) |
+| **OCR cleanup quality** | Second-pass cleanup as a Review verdict, without a separate analysis module | **[x] done (1.3)** — [durable notebook](#now--135-the-durable-notebook) |
 | **People & places / Patterns** | Places map shipped; Patterns tab only if usage justifies. A Person store is the on-file autobiography label, not package **1.3** | Places shipped; Patterns unscheduled |
 | **Page scan fullscreen** | Click scan → black lightbox, with `st.image` hover toolbar as fallback | **[x] done (1.2)** — `ui/page_lightbox.py` island (JS safekeeping below is its source). Streamlit has no fullscreen API ([streamlit/streamlit/issues/8031](https://github.com/streamlit/streamlit/issues/8031)) |
 
@@ -653,7 +656,7 @@ Primary direction for living with many notebooks. **U3** pulled Review UX, readi
 
 ## Analysis surface
 
-The roadmap’s analysis surface is largely complete. **U2 shipped.** The open product work is [The durable notebook](#now--135-the-durable-notebook----planned) (correction, hand-model proof, corpus keep), not more analysis modules.
+The roadmap’s analysis surface is largely complete. **U2 shipped.** The open product work is [The durable notebook](#now--135-the-durable-notebook) (correction, hand-model proof, corpus keep), not more analysis modules.
 
 Architecture: verbatim-ish analytical cores plus thin notebook adapters over canonical `AnalysisDocument` units; durable analysis is project-local under optional `analysis/` ([project-on-disk](contracts/project-on-disk.md), [analysis-run-storage](contracts/analysis-run-storage.md)). Pins: [dev/analysis_port_pins.md](dev/analysis_port_pins.md).
 
@@ -907,7 +910,7 @@ Not a 1.x track. Do not block **1.0** or **1.1–1.7** on a frontend change. Str
 
 Each release has one product purpose. Do not dump “2.0 everything.”
 
-**These numerals are not package versions.** Package **1.0.0**, **1.0.1**, and **1.2.0** are already tagged. The live ladder is [The durable notebook](#now--135-the-durable-notebook----planned): package **1.3** correct, **1.4** proof, **1.5** keep. A row below that shares a number (People, WhatsApp, CSV) is this parked product, not that package.
+**These numerals are not package versions.** Package **1.0.0**, **1.0.1**, and **1.2.0** are already tagged. The live ladder is [The durable notebook](#now--135-the-durable-notebook): package **1.3** correct, **1.4** proof, **1.5** keep. A row below that shares a number (People, WhatsApp, CSV) is this parked product, not that package.
 
 | Release | Purpose | Status |
 |---------|---------|--------|
@@ -1213,4 +1216,5 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 | 2026-11-02 | **1.2 expansion & hardening** (balanced-max, one release): H1–H4 hardening + E1–E5 expansion on shipped surfaces only; L2 landed; package **1.2.0** | Treating saved searches / collections / quality loop / declutter v5 as uncommitted candidates |
 | 2026-11-02 | **1.3.0 durability & OCR truth** is the notebook-workbench release after 1.2.0. It is not the parked autobiography “1.3 People” row | Scheduling Person identities as Transcribe 1.3 |
 | 2026-11-02 | **1.3–1.5 The durable notebook** is the active horizon after 1.2.0: correct, prove an external hand model, keep the corpus. Package 1.3 is not the on-file “People” label | An empty backlog, and reading autobiography 1.3–1.5 as this repo’s next tags |
+| 2026-11-03 | **1.3 correct W1–W8 implemented** (cleanup verdict, divergence banner, miss desk, kept scan, unsure/gloss, confirmed spellings, batch-meta). Stretch included (gloss export, cleanup-hint). No version bump/tag until an explicit release request. Next open: 1.4 shelf | Treating W1–W8 as still the ranked Now backlog |
 

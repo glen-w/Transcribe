@@ -51,6 +51,9 @@ Builtin export profiles: `default`, `readable`, `compact`, `large_print`. Editin
 | Seed transcription from merged draft after multipass | Review → **OCR** · Transcribe Advanced · Transcribe multipass row | `auto_activate_composite` (default **on**) — [ocr.md](ocr.md#seed-transcription-from-merged-draft-after-multipass) |
 | Full-workspace backup | Configuration → Backup | [backup_and_restore.md](../backup_and_restore.md) |
 | Hide ignored pages | Workflow → Export → **Exclude ignored pages** (default on) | Same workspace `export.exclude_ignored_pages` default hides ignored pages in **Reading**. Review → **Ignore in Reader** marks a page. Reading has **Show ignored pages** as a session override. |
+| Include page notes | Workflow → Export → **Include page notes** (default off) | Reading formats include `page_gloss`. JSON always keeps the field. [notebook-export](../contracts/notebook-export.md) |
+| Edit divergence threshold | workspace `ocr.edit_divergence_cer` (default `0.15`) | Review Transcription banner only; changing it does not rewrite results. [workspace-settings](../contracts/workspace-settings.md) |
+| Cleanup spelling hint | workspace `ocr.cleanup_spelling_hint` (default off) | Appends confirmed spellings to the cleanup prompt and changes the cleanup fingerprint. [hand-spellings](../contracts/hand-spellings.md) |
 
 ## Env overrides
 

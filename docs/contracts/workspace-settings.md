@@ -27,7 +27,8 @@ Workspace `export.*` controls default export formats, structure, and typography
 (see [notebook-export.md](notebook-export.md)). `export.exclude_ignored_pages`
 (default **true**) is also the Reading hide-ignored default; the Reader
 **Show ignored pages** checkbox is a session override and does not write
-settings.
+settings. `export.include_page_notes` (default **false**) includes `page_gloss`
+in reading formats; notebook JSON always keeps the field.
 
 Workspace `ingest.*` seeds PDF rasterisation and visual declutter defaults for
 **Workflow → Import** (and Settings → Configuration → Import). Declutter may
@@ -75,6 +76,8 @@ job authority remains `project.json` → `settings`.
 | `auto_activate_composite` | `true` | **Seed transcription from merged draft after multipass** — auto-activate succeeded composite after multipass ([runtime/ocr.md](../runtime/ocr.md#seed-transcription-from-merged-draft-after-multipass)) |
 | `multipass_default_models` | `[]` | Optional UI default multi-select list |
 | `finetune_*` | see [finetune-export.md](finetune-export.md) | Fine-tune export defaults |
+| `edit_divergence_cer` | `0.15` | Review Transcription banner when a later OCR reading’s character error rate vs `edited_text` is at or above this. Display-only; changing it does not rewrite results. |
+| `cleanup_spelling_hint` | `false` | When on, append confirmed spellings to the cleanup prompt (changes cleanup fingerprint). Off keeps pre-hint fingerprints. See [hand-spellings.md](hand-spellings.md). |
 
 Project OCR may override `prefer_mode` and `auto_activate_composite` (and other
 allowlisted OCR fields). **Workflow → Review → OCR → OCR settings** and Transcribe Advanced write the project override.

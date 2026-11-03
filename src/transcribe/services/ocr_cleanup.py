@@ -31,6 +31,7 @@ class CleanupPlanConfig:
     prompt_template_sha256: str
     validator_policy_id: str = CLEANUP_VALIDATOR_POLICY_ID
     validator_policy_version: str = CLEANUP_VALIDATOR_POLICY_VERSION
+    spelling_pairs: tuple[tuple[str, str], ...] = ()
 
     def fingerprint_dict(self) -> dict[str, Any] | None:
         if not self.enabled:
@@ -78,6 +79,7 @@ def resolve_cleanup_plan_config(
     settings: OCRSettings,
     *,
     client: TextLLMClient | None = None,
+    spelling_pairs: tuple[tuple[str, str], ...] = (),
 ) -> CleanupPlanConfig:
     """Fail-fast plan resolution. Raises when cleanup enabled but misconfigured."""
     if not settings.cleanup_enabled:
@@ -125,7 +127,11 @@ def resolve_cleanup_plan_config(
             "cleanup requires verified model identity"
         )
 
-    prompt_id, prompt_version, prompt_text = render_cleanup_prompt(mode=mode, ocr_text="{ocr_text}")
+    prompt_id, prompt_version, prompt_text = render_cleanup_prompt(
+        mode=mode,
+        ocr_text="{ocr_text}",
+        spelling_pairs=spelling_pairs,
+    )
     return CleanupPlanConfig(
         enabled=True,
         mode=mode,
@@ -134,6 +140,7 @@ def resolve_cleanup_plan_config(
         prompt_id=prompt_id,
         prompt_version=prompt_version,
         prompt_template_sha256=sha256_text(prompt_text),
+        spelling_pairs=tuple(spelling_pairs),
     )
 
 
@@ -253,9 +260,14 @@ def run_ocr_cleanup(
         prompt_id, prompt_version, prompt_text = cleanup_render_for_job(
             mode=plan.mode, ocr_text=vision_text
         )
+        from transcribe.services.cleanup_prompts import spelling_hint_block
+
+        prompt_text = prompt_text + spelling_hint_block(plan.spelling_pairs)
     except Exception:  # noqa: BLE001
         prompt_id, prompt_version, prompt_text = render_cleanup_prompt(
-            mode=plan.mode, ocr_text=vision_text
+            mode=plan.mode,
+            ocr_text=vision_text,
+            spelling_pairs=plan.spelling_pairs,
         )
     prompt_sha = sha256_text(prompt_text)
     num_predict = compute_num_predict(len(vision_text))

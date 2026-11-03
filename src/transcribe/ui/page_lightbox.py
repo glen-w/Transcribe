@@ -84,7 +84,7 @@ _SCRIPT = """
 
 def inject_page_lightbox() -> None:
     """Emit the lightbox island once per page render (guard is parent-side)."""
-    st.iframe(_SCRIPT.replace("__MIN_WIDTH__", str(_MIN_CLICKABLE_WIDTH_PX)), height=0)
+    st.iframe(_SCRIPT.replace("__MIN_WIDTH__", str(_MIN_CLICKABLE_WIDTH_PX)), height=1)
 
 
 __all__ = ["inject_page_lightbox"]

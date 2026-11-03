@@ -2,7 +2,7 @@
 
 Single release after 1.2.0. Hardening (H) and expansion (E) stay on the four notebook jobs. This package version is **not** the parked autobiography row “1.3 People as confirmed identities”.
 
-The longer programme in [durable_notebook_1_3.md](durable_notebook_1_3.md) stays open for the miss desk, confirmed spellings, the hand shelf, and continue-reading. This tag does not close that file’s Waves 1–8.
+This tag did not close [durable_notebook_1_3.md](durable_notebook_1_3.md) Waves 1–8. Those 1.3 correct waves are now implemented (unreleased until a release request). Remaining on that file: **1.4** hand shelf / bring-back report, **1.5** continue-reading.
 
 Authority: [PRODUCT.md](../PRODUCT.md) · [ROADMAP.md](../ROADMAP.md).
 

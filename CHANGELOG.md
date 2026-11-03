@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Text-cleanup verdict:** Review Accept / Reject / Edit proposal writes or seeds `edited_text`; existing edits use the keep-or-adopt gate. Visual Cleanup stays declutter.
+- **Divergence banner:** Transcription announces when a newer OCR reading is far from the saved correction. No control on that banner clears the edit.
+- **Miss desk:** Failed OCR groups by error code; **Retry these** runs an ordinary OCR job for that page set only.
+- **Kept scan:** additive `page_role=scan` stays in Reading as an image, leaves the OCR schedule, and is not a fine-tune positive.
+- **Unsure + gloss:** page-level Unsure filter; one `page_gloss` note (max 500). Search does not index it. Export **Include page notes** is off by default.
+- **Confirmed spellings:** workspace `{from, to}` pairs (`transcribe.hand-spellings`); per-occurrence Apply into the editor. Optional cleanup-prompt hint, default off.
+- **Batch metadata:** Review multi-select and `transcribe pages batch-meta` (alias of `pages batch`) set role and certainty; selection-scoped ignore dates. Gloss is not a batch action.
+
 ### Changed
 
-- Roadmap: **Now** is [1.3–1.5 The durable notebook](docs/dev/durable_notebook_1_3.md) (correction practice, a shelf that scores an external hand model, per-notebook restore). Package **1.2.0** stays the shipped release. Autobiography’s old 1.3–1.5 labels are not these package numbers.
+- Roadmap: 1.3 correct waves 1–8 are implemented. **Now** remaining on [the durable notebook](docs/dev/durable_notebook_1_3.md) is 1.4 proof and 1.5 continue-reading. No package tag until an explicit release request.
+- Durable page note is `page_gloss` on the page index. Bookmarks stay in `reading-marks.json`. A leftover sidecar note migrates into gloss on first Save.
+
+### Fixed
+
+- Page-scan lightbox: `st.iframe` height is `1` (Streamlit rejects `height=0`). Esc / click-to-close is unchanged.
 
 ## [1.3.0] - 2026-11-02
 

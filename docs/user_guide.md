@@ -209,14 +209,26 @@ available to the reader instead of the curated list.
   NER for it.
 - **Click a scan** in Reading or Review to view it fullscreen on black;
   Esc or a click closes it.
-- **Bookmarks and marginal notes** — Review → Other. A bookmark is a flag.
-  A note sits beside the page and is not part of the transcription. Reading
-  can show **Bookmarks only**. Search has the same filter. Exports include
-  notes only when you ask for reading notes.
+- **Bookmarks and page notes** — Review → Other. A bookmark is a flag.
+  A page note (`page_gloss`) sits beside the page and is not part of the
+  transcription. Reading shows it. Search does not index it. Exports include
+  page notes only when you tick **Include page notes**.
 - **Do not OCR** — Review → Other. The page stays in the notebook as an image.
-  Jobs skip it. Reading export uses the note, not an OCR reading.
-- **Batch page metadata** — Library → **Batch page metadata**, or
-  `transcribe pages batch`. It previews until you confirm or pass `--apply`.
+  Jobs skip it. Reading export uses the page note, not an OCR reading.
+- **Kept scan** — Review → Other. A drawing or ticket stays in Reading as an
+  image, leaves the OCR queue, and is not training data. Distinct from Ignore.
+- **Unsure** — Review → Other, and a Review queue filter. It does not change
+  reviewed status.
+- **Text-cleanup proposal** — Review → Transcription. Accept / Reject / Edit
+  a second-pass proposal. Visual **Cleanup** is still declutter.
+- **Miss desk** — Review queue **Failed OCR**. Grouped by error; **Retry these**
+  re-runs that set. Uncorrected misses are not fine-tune targets.
+- **Confirmed spellings** — Review → Other. Add `{from → to}` pairs. On
+  Transcription, **Apply** changes one occurrence in the editor; Save is
+  still required.
+- **Batch page metadata** — Review expander, Library → **Batch page metadata**,
+  or `transcribe pages batch` / `batch-meta`. It previews until you confirm
+  or pass `--apply`.
 
 ## Integrity, backup, and settings
 

@@ -1004,6 +1004,20 @@ def _render_viewer_body(session: _ViewerSession) -> None:
         st.write(f"Status: **{status}**")
         if page.ignored:
             st.caption("Ignored — hidden in Reading and omitted from exported reading formats by default.")
+        if page.page_role == "scan":
+            st.caption("Kept scan — image only; not Failed OCR.")
+        gloss = (page.page_gloss or "").strip()
+        if not gloss:
+            try:
+                from transcribe.services.reading_marks import ReadingMarksStore
+
+                mark = ReadingMarksStore(paths).load().get(page.page_id) if paths else None
+                if mark and mark.note:
+                    gloss = mark.note
+            except Exception:
+                gloss = ""
+        if gloss:
+            st.caption(gloss)
         attempt = result.active_attempt() if result else None
         model_label = _transcription_model_label(attempt)
         if model_label:
@@ -1047,24 +1061,32 @@ def _render_viewer_body(session: _ViewerSession) -> None:
                 cleanup_col.caption("Cleanup candidate")
                 cleanup_col.text(attempt.raw_text)
                 st.caption(f"Validator: {cu.acceptance_status}")
-            if not read_only and cu.execution_status != "disabled":
-                accept_col, reject_col = st.columns(2)
-                from transcribe.services.quality import QualityRatingStore
+            if not read_only and projects is not None:
+                from transcribe.services.cleanup_verdict import (
+                    accept_cleanup_proposal,
+                    can_accept_proposal,
+                    cleanup_proposal,
+                    reject_cleanup_proposal,
+                )
 
-                def _rate_cleanup(verdict: str) -> None:
-                    QualityRatingStore().record(
-                        "cleanup",
-                        verdict,
-                        project_id=project.id,
-                        page_id=page.page_id,
-                        notes=cu.acceptance_status or "",
-                    )
-                    st.toast(f"Cleanup marked {verdict}")
+                proposal = cleanup_proposal(attempt)
+                if can_accept_proposal(proposal):
+                    accept_col, reject_col = st.columns(2)
 
-                if accept_col.button("Accept cleanup", key=f"cu_accept_{page.page_id}"):
-                    _rate_cleanup("accept")
-                if reject_col.button("Reject cleanup", key=f"cu_reject_{page.page_id}"):
-                    _rate_cleanup("reject")
+                    def _rate_cleanup(verdict: str) -> None:
+                        try:
+                            if verdict == "accept":
+                                accept_cleanup_proposal(projects, page.page_id)
+                            else:
+                                reject_cleanup_proposal(projects, page.page_id)
+                            st.toast(f"Cleanup marked {verdict}")
+                        except TranscribeError as exc:
+                            st.error(str(exc))
+
+                    if accept_col.button("Accept proposal", key=f"cu_accept_{page.page_id}"):
+                        _rate_cleanup("accept")
+                    if reject_col.button("Reject proposal", key=f"cu_reject_{page.page_id}"):
+                        _rate_cleanup("reject")
 
         _render_compare_in_review(
             project=project,

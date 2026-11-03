@@ -346,6 +346,7 @@ class ExportOptions:
     include_tags: tuple[str, ...] = ()
     exclude_tags: tuple[str, ...] = ()
     include_reading_notes: bool = False
+    include_page_notes: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -360,6 +361,7 @@ class ExportOptions:
             "include_tags": list(self.include_tags),
             "exclude_tags": list(self.exclude_tags),
             "include_reading_notes": self.include_reading_notes,
+            "include_page_notes": self.include_page_notes,
         }
 
     @classmethod
@@ -392,6 +394,7 @@ class ExportOptions:
             include_tags=tuple(normalize_tags(data.get("include_tags"))),
             exclude_tags=tuple(normalize_tags(data.get("exclude_tags"))),
             include_reading_notes=bool(data.get("include_reading_notes", False)),
+            include_page_notes=bool(data.get("include_page_notes", False)),
         )
 
     def wants(self, fmt: ExportFormat) -> bool:
@@ -413,6 +416,7 @@ class ExportConfig:
     include_tags: tuple[str, ...] = ()
     exclude_tags: tuple[str, ...] = ()
     include_reading_notes: bool = False
+    include_page_notes: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -427,6 +431,7 @@ class ExportConfig:
             "include_tags": list(self.include_tags),
             "exclude_tags": list(self.exclude_tags),
             "include_reading_notes": self.include_reading_notes,
+            "include_page_notes": self.include_page_notes,
         }
 
     @classmethod
@@ -444,6 +449,7 @@ class ExportConfig:
             include_tags=opts.include_tags,
             exclude_tags=opts.exclude_tags,
             include_reading_notes=opts.include_reading_notes,
+            include_page_notes=opts.include_page_notes,
         )
 
     def to_options(self) -> ExportOptions:

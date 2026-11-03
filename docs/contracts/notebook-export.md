@@ -42,7 +42,8 @@ options **do not** participate in `content_revision` / `bundle_revision`.
 Workspace subtree `export` (see [workspace-settings.md](workspace-settings.md))
 and profile target `export` control formats, page-break mode, date/blank
 inclusion, **exclude ignored pages** (default on for reading formats; JSON keeps
-the full notebook), **include/exclude tag filters** (1.2; reading formats only —
+the full notebook), **include page notes** (`export.include_page_notes`, default
+off — reading formats include `page_gloss`; JSON always keeps the field), **include/exclude tag filters** (1.2; reading formats only —
 JSON is always the full notebook), title page, and typography (body font/size, line height,
 paragraph spacing, margins, heading scale; a body font may be a `custom:<Family>`
 key from a registered drop-in font). The same `exclude_ignored_pages`

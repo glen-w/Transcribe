@@ -14,7 +14,7 @@ finetune_export_<stamp>/
   README.txt
 ```
 
-Contract detail: [contracts/finetune-export.md](contracts/finetune-export.md).
+Contract detail: [contracts/finetune-export.md](contracts/finetune-export.md). Pages with `page_role=scan` (kept scans) are omitted — they are not training positives.
 
 ## Typical external workflow
 

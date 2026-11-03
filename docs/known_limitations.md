@@ -31,10 +31,15 @@ Operational guide: [runtime/ocr.md](runtime/ocr.md).
 
 - **Restore one notebook** replaces that folder only. It does not merge page edits and it does not restore config or other notebooks.
 - **Scoreboard** character error rate is against pages you have corrected. Unedited pages are not scored. Nothing is uploaded.
-- **Marginal notes** are not part of the transcription. Default exports omit them. Turn on reading notes to include them.
-- **Do-not-OCR** pages are skipped by jobs. Any earlier OCR text stays on disk but is not exported as the page text.
+- **Page notes (gloss)** are the durable note (`page_gloss`). They are not the transcription, not a search corpus, and not an analysis unit. Default exports omit them; **Include page notes** adds them to reading formats.
+- **Bookmarks** live in `reading-marks.json`. A leftover sidecar note is shown only while gloss is empty and is copied into gloss on first Save. **Include reading notes** exports leftover sidecar notes, not gloss.
+- **Do-not-OCR** pages are skipped by jobs. Any earlier OCR text stays on disk but is not exported as the page text. Skip-page reading export uses the gloss when notes are opted in, otherwise the leftover sidecar note.
 - **Batch metadata** without `--apply` changes nothing. An empty page list is refused.
 - **Declutter v6** adds punch-hole margins and calibration stripes. Existing notebooks are not rewritten until re-apply.
+- **Confirmed spellings** suggest one occurrence at a time. They never rewrite OCR on their own. The cleanup-prompt hint is off unless you turn it on (that change invalidates old cleanup skip fingerprints).
+- **Kept scans** are notebook pages (a drawing in a diary). They are not a photo library and they do not open a context corpus. Reading-format export is empty unless notes are opted in. They are not fine-tune positives and they do not emit analysis units.
+- **Miss desk** retries failed OCR by error group. It does not export unread pages as fine-tune targets.
+- **Edit divergence** is a read-only banner. Changing the CER threshold does not rewrite results. Default is 0.15.
 
 ## Organisation, search, and quality (1.2)
 

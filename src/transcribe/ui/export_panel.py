@@ -180,6 +180,12 @@ def _render_notebook_export_tab(
             key="export_exclude_ignored",
             help="Omit pages marked as ignored from exported reading formats.",
         )
+        include_page_notes = st.checkbox(
+            "Include page notes",
+            value=False,
+            key="export_include_page_notes",
+            help="Include page gloss in reading formats. Notebook JSON always keeps the field.",
+        )
 
     st.markdown("#### Page tag filters")
     st.caption(
@@ -278,6 +284,7 @@ def _render_notebook_export_tab(
                 ),
                 include_tags=include_tags,
                 exclude_tags=exclude_tags,
+                include_page_notes=include_page_notes,
             ).as_dict()
             acts = loaded.activations
             if acts.export != "default":
@@ -390,6 +397,7 @@ def _render_notebook_export_tab(
             ),
             include_tags=include_tags,
             exclude_tags=exclude_tags,
+            include_page_notes=include_page_notes,
         )
         dest = Path(export_dest) if export_dest.strip() else None
         try:

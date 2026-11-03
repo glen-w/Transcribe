@@ -42,6 +42,7 @@ When you change behaviour for a concept, update the **owning** contract first, t
 | Export / `content_revision` | [contracts/notebook-export.md](../contracts/notebook-export.md) |
 | Workspace settings / profiles | [contracts/workspace-settings.md](../contracts/workspace-settings.md) |
 | Workspace backup | [contracts/workspace-backup.md](../contracts/workspace-backup.md) |
+| Confirmed spellings | [contracts/hand-spellings.md](../contracts/hand-spellings.md) |
 | Public surfaces / support policy | [public_surfaces.md](../public_surfaces.md) |
 | Corpus / import / integrity | [contracts/notebook-corpus.md](../contracts/notebook-corpus.md) · [import-run.md](../contracts/import-run.md) · [corpus-integrity.md](../contracts/corpus-integrity.md) |
 | Analysis / detection | analysis-* and detection-* under [CONTRACT_INDEX](../CONTRACT_INDEX.md) |
@@ -78,6 +79,8 @@ Fix by moving the rule into the contract and replacing the original with a short
 | Analysis / detection | analysis-* · detection-* · notebook-eligibility |
 | Tags / organisation catalog | [tag-catalog.md](../contracts/tag-catalog.md) |
 | Export / backup | notebook-export · workspace-backup · runtime guides |
+| Page role / gloss / skip-OCR | project-on-disk · reading-marks · analysis-document · finetune-export |
+| Confirmed spellings | hand-spellings · workspace-settings (`cleanup_spelling_hint`) |
 | CLI/UI entrypoints | public_surfaces + README links |
 | Ownership / shape | ARCHITECTURE |
 | Vision / roadmap | PRODUCT · ROADMAP (0.9.0 / 1.0) · usability_wave_plan |

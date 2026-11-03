@@ -104,6 +104,7 @@ folder on disk. If a page was scanned out of sequence you can move it without
 touching the files.
 
 - **Review → Other → Page order**: **Move up**, **Move down**, or **Move to position**.
+- **Review → Other** also holds **Bookmark**, **Page note**, **Unsure**, **Kept scan**, **Do not OCR this page**, and **Confirmed spellings**. The page note is one short gloss, not the transcription.
 - **Review → Date → Move to date cluster** appears when a page's date breaks the
   notebook order. It places the page after the pages with the same confirmed
   date, or in date order if there are none.

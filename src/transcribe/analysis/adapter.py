@@ -53,7 +53,7 @@ def build_page_v1_document(
     units: list[AnalysisUnit] = []
     emitted_order = 0
     for page in project.pages:
-        if page.analysis_excluded:
+        if page.analysis_excluded or page.page_role == "scan":
             continue
         result = _page_result(page.page_id, project_service, results)
         text = result.effective_text() if result else None
@@ -112,7 +112,7 @@ def build_paragraph_v1_document(
     units: list[AnalysisUnit] = []
     page_order = 0
     for page in project.pages:
-        if page.analysis_excluded:
+        if page.analysis_excluded or page.page_role == "scan":
             continue
         result = _page_result(page.page_id, project_service, results)
         text = result.effective_text() if result else None

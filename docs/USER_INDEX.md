@@ -53,7 +53,7 @@ First visit: [docs home](index.md) or [User guide](user_guide.md). Developers: [
 | Doc | Purpose |
 |-----|---------|
 | [Public surfaces](public_surfaces.md) | Supported CLI / UI / scripts |
-| [Roadmap](ROADMAP.md) | Product priorities. 1.3.0 shipped restore-one-notebook, scoreboard, and reading marks. Later durable-notebook waves are still open |
+| [Roadmap](ROADMAP.md) | Product priorities. 1.3 correct (cleanup verdict, miss desk, kept scan, spellings) is implemented. 1.4–1.5 remain |
 | [Usability wave](usability_wave_plan.md) | U0–U4 done (Inbox polish may continue) |
 
 ## Not in this index

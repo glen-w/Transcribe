@@ -48,6 +48,8 @@ def _cmd_pages_batch(args: argparse.Namespace, projects: ProjectService) -> int:
         page_ids,
         args.action,
         tag=args.tag or "",
+        role=getattr(args, "role", "") or "",
+        certainty=getattr(args, "certainty", "") or "",
         dry_run=not bool(args.apply),
         runtime=runtime,
     )
@@ -73,7 +75,7 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
             project = projects.reorder_pages(args.page_ids)
         elif args.pages_cmd == "move-to-date-cluster":
             project = projects.move_page_to_date_cluster(args.page_id)
-        elif args.pages_cmd == "batch":
+        elif args.pages_cmd in ("batch", "batch-meta"):
             return _cmd_pages_batch(args, projects)
         else:
             return None

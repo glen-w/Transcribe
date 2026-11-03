@@ -158,15 +158,27 @@ def build_part_from_snapshot(
         if options.exclude_tags and set(options.exclude_tags) & page_tags:
             continue
         result = snapshot.results.get(page.page_id)
-        note = (snapshot.reading_notes.get(page.page_id) or "").strip()
-        if page.ocr_policy == "skip":
-            # Image-only pages must not export OCR text as if it were a transcription.
-            stripped = note
+        sidecar_note = (snapshot.reading_notes.get(page.page_id) or "").strip()
+        gloss = (getattr(page, "page_gloss", "") or "").strip()
+        extras: list[str] = []
+        if options.include_page_notes and gloss:
+            extras.append(gloss)
+        if options.include_reading_notes and sidecar_note:
+            extras.append(sidecar_note)
+        extra = "\n\n".join(extras)
+        if page.ocr_policy == "skip" or page.page_role == "scan":
+            # Image-only / kept-scan pages must not export OCR as a transcription.
+            if extra:
+                stripped = extra
+            elif page.ocr_policy == "skip":
+                stripped = sidecar_note
+            else:
+                stripped = ""
         else:
             text = (result.effective_text() if result else None) or ""
             stripped = text.strip()
-            if options.include_reading_notes and note:
-                stripped = f"{stripped}\n\n{note}".strip() if stripped else note
+            if extra:
+                stripped = f"{stripped}\n\n{extra}".strip() if stripped else extra
         blank = not stripped
         if blank and not options.include_blank_pages:
             continue
@@ -176,6 +188,8 @@ def build_part_from_snapshot(
         label = f"Page {i + 1}"
         if page.ocr_policy == "skip":
             label = f"{label} (image only)"
+        elif page.page_role == "scan":
+            label = f"{label} (kept scan)"
         sections.append(
             ExportSection(
                 page_id=page.page_id,

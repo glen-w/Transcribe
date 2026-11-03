@@ -98,6 +98,8 @@ class FinetuneExportService:
         samples: list[dict[str, Any]] = []
         model_counts: dict[str, int] = {}
         for page in project.pages:
+            if page.page_role == "scan":
+                continue
             result = snapshot.results.get(page.page_id)
             if result is None:
                 continue

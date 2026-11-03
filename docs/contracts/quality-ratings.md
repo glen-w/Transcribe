@@ -17,7 +17,7 @@ the workspace or a backup that includes config.
 | Kind | Verdicts | Source |
 |------|----------|--------|
 | `ocr_sample` | `accept` / `edit` / `reject` | First human correction of an OCR reading in Review (recorded automatically on save), or `transcribe quality rate` |
-| `cleanup` | `accept` / `reject` | Reviewer judgement of second-pass cleanup output (CLI today) |
+| `cleanup` | `accept` / `reject` | Reviewer judgement of second-pass cleanup output (Review **Accept/Reject proposal**, or `transcribe quality rate`) |
 | `analysis` | `up` / `down` | Usefulness rating for an analysis output (CLI today) |
 
 For `ocr_sample`, when OCR text and reviewed text are both recorded, the

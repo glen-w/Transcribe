@@ -43,13 +43,20 @@ Scan on the left; one lane at a time on the right: **Transcription**, **Date**,
 - **Transcription** — edit the text. **OCR evidence** lists each attempt; copy one
   into the editor or make it current. **Source disagreement** steps through
   differing words and lets you take either reading or type a correction.
+  **Accept proposal** / **Reject proposal** / **Edit proposal** appear when a
+  second-pass cleanup exists (Visual **Cleanup** stays declutter). A later OCR
+  reading that is far from a saved correction shows a read-only banner. **Apply**
+  on a confirmed spelling changes one occurrence in the editor; Save is still
+  required.
 - **Date** — approve or set the page date. **Move to date cluster** appears when
   the date breaks notebook order.
 - **OCR → Re-run OCR** — this page, all pages, or pages not marked reviewed
 - **Rank and merge** — build a merged draft from existing readings
 - **Cleanup** — re-apply visual declutter (scanner beds, white gutters, corner
   wedges, dark binding gutters, edge shadows, lid slivers — v5) without re-running OCR
-- **Other** — **Ignore in Reader**, **Page order**, notebook cover, delete page
+- **Other** — **Bookmark**, **Page note**, **Unsure**, **Kept scan**, **Do not OCR
+  this page**, **Confirmed spellings**, **Ignore in Reader**, **Page order**,
+  notebook cover, delete page
 
 Moving to another page with unsaved changes asks you to **Stay** or
 **Discard & leave**.

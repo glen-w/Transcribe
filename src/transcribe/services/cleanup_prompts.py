@@ -51,13 +51,32 @@ CLEANUP_REGISTRY: dict[str, PromptTemplate] = {
 }
 
 
-def render_cleanup_prompt(*, mode: str, ocr_text: str) -> tuple[str, str, str]:
+def spelling_hint_block(pairs: tuple[tuple[str, str], ...] | list[tuple[str, str]]) -> str:
+    """Append-only hint. Empty pairs yield empty string so fingerprints stay stable."""
+    if not pairs:
+        return ""
+    lines = "\n".join(f"- {src} → {dst}" for src, dst in pairs if src and dst)
+    if not lines:
+        return ""
+    return (
+        "\n\nConfirmed spellings for this handwriting (hints only; do not invent):\n"
+        + lines
+    )
+
+
+def render_cleanup_prompt(
+    *,
+    mode: str,
+    ocr_text: str,
+    spelling_pairs: tuple[tuple[str, str], ...] | list[tuple[str, str]] = (),
+) -> tuple[str, str, str]:
     """Return (prompt_id, prompt_version, exact prompt text)."""
     template = CLEANUP_REGISTRY.get(mode)
     if template is None:
         raise KeyError(f"unknown cleanup mode: {mode}")
+    body = template.body.format(ocr_text=ocr_text) + spelling_hint_block(spelling_pairs)
     return (
         template.prompt_id,
         template.version,
-        template.body.format(ocr_text=ocr_text),
+        body,
     )

@@ -18,6 +18,7 @@ ReviewFilter = Literal[
     "needs_date",
     "no_text",
     "failed_ocr",
+    "unsure",
 ]
 
 REVIEW_FILTER_LABELS: dict[ReviewFilter, str] = {
@@ -30,6 +31,7 @@ REVIEW_FILTER_LABELS: dict[ReviewFilter, str] = {
     "needs_date": "Needs date approval",
     "no_text": "No text",
     "failed_ocr": "Failed OCR",
+    "unsure": "Unsure",
 }
 
 REVIEW_FILTER_ORDER: list[ReviewFilter] = [
@@ -39,6 +41,7 @@ REVIEW_FILTER_ORDER: list[ReviewFilter] = [
     "needs_date",
     "no_text",
     "failed_ocr",
+    "unsure",
     "reviewed",
     "skipped",
     "all",
@@ -194,6 +197,8 @@ def build_review_queue_index(
             buckets["no_text"].append(page_id)
         if result is not None and result.status == "failed":
             buckets["failed_ocr"].append(page_id)
+        if page.page_certainty == "unsure":
+            buckets["unsure"].append(page_id)
         if source_disagreement_count(result) >= disagreement_minimum:
             buckets["high_disagreement"].append(page_id)
         if result is not None and len(merge_input_vision_attempts(result)) >= 2:
@@ -227,6 +232,8 @@ def filter_review_page_ids(
         wanted = set(empty_text_page_ids(project, load_page_result))
     elif filter_key == "failed_ocr":
         wanted = set(failed_ocr_page_ids(project, load_page_result))
+    elif filter_key == "unsure":
+        wanted = {p.page_id for p in project.pages if p.page_certainty == "unsure"}
     elif filter_key == "high_disagreement":
         wanted = set(high_disagreement_page_ids(project, load_page_result))
     elif filter_key in {"unreviewed", "needs_attention", "reviewed", "skipped"}:

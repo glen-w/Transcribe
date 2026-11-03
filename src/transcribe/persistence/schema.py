@@ -44,6 +44,8 @@ SUPPORTED: dict[str, int] = {
     "transcribe.quality-ratings": 1,
     # 1.3: per-notebook bookmarks and marginal notes. Absent file is valid.
     "transcribe.reading-marks": 1,
+    # Durable-notebook confirmed spellings (workspace, one hand).
+    "transcribe.hand-spellings": 1,
 }
 
 

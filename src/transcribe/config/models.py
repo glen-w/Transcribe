@@ -388,6 +388,16 @@ class LlmConfig:
         )
 
 
+def _edit_divergence_cer(raw: Any) -> float:
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return 0.15
+    if value < 0:
+        return 0.0
+    return value
+
+
 @dataclass(frozen=True)
 class OcrWorkspaceConfig:
     """Workspace OCR defaults for new projects only (not live project authority)."""
@@ -409,6 +419,8 @@ class OcrWorkspaceConfig:
     finetune_prefer_effective_text: bool = True
     finetune_include_rejected_candidates: bool = False
     finetune_image_mode: str = "copy"  # copy | hardlink
+    edit_divergence_cer: float = 0.15
+    cleanup_spelling_hint: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -429,6 +441,8 @@ class OcrWorkspaceConfig:
             "finetune_prefer_effective_text": self.finetune_prefer_effective_text,
             "finetune_include_rejected_candidates": self.finetune_include_rejected_candidates,
             "finetune_image_mode": self.finetune_image_mode,
+            "edit_divergence_cer": self.edit_divergence_cer,
+            "cleanup_spelling_hint": self.cleanup_spelling_hint,
         }
 
     @classmethod
@@ -464,6 +478,8 @@ class OcrWorkspaceConfig:
                 data.get("finetune_include_rejected_candidates", False)
             ),
             finetune_image_mode=image_mode,
+            edit_divergence_cer=_edit_divergence_cer(data.get("edit_divergence_cer")),
+            cleanup_spelling_hint=bool(data.get("cleanup_spelling_hint", False)),
         )
 
 

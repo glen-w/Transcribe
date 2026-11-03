@@ -49,6 +49,16 @@ COMMON_SETTINGS_SCHEMA: tuple[CommonSettingField, ...] = (
     CommonSettingField("ocr.max_workers", "OCR defaults", "Max OCR workers"),
     CommonSettingField("ocr.cleanup_enabled", "OCR defaults", "Cleanup enabled"),
     CommonSettingField("ocr.cleanup_mode", "OCR defaults", "Cleanup mode"),
+    CommonSettingField(
+        "ocr.edit_divergence_cer",
+        "OCR defaults",
+        "Edit divergence CER threshold",
+    ),
+    CommonSettingField(
+        "ocr.cleanup_spelling_hint",
+        "OCR defaults",
+        "Hint cleanup with confirmed spellings",
+    ),
     CommonSettingField("llm.default_temperature", "LLM", "Default temperature"),
     CommonSettingField("llm.num_predict", "LLM", "Max predict tokens"),
     CommonSettingField("llm.max_unit_tokens", "LLM", "Max unit tokens"),
