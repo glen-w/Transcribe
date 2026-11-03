@@ -43,7 +43,7 @@ Keep entry surfaces concise; detail stays in contracts / runtime / dev. Archive 
 
 README is the user entry, not a release brief. Do not put `Type:` / `Authority:` headers on Markdown pages (they render on hosted docs). Programme history belongs in ROADMAP / `docs/dev/`, not the first screen.
 
-The public landing, README, and Sphinx “Start here” toctree should tell the same story: what it is → what you can do → privacy → first notebook → install.
+The public landing, README, and Sphinx “Start here” toctree should tell the same story: what it is → what you can do → privacy → first notebook → install. Landing footer version must match `pyproject.toml` (Sphinx `release` reads the package; `tests/unit/test_sphinx_docs.py` guards the footer).
 
 Three voices: **user guide** (README, website, Start here, runtime how-tos), **technical reference** (contracts, public surfaces), **maintainer** (ROADMAP, `docs/dev/`, archive, reviews).
 

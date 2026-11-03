@@ -63,8 +63,27 @@ def test_sphinx_kit_files_exist():
     assert "site_chrome.css" in conf
     landing = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
     assert "Transcribe" in landing
-    assert "localhost:8510" in landing
+    assert "127.0.0.1:8510" in landing
     assert "./guide/" in landing
+    assert "Open sample notebook" in landing
+
+
+def test_landing_footer_version_matches_package():
+    """Public landing version stays in lockstep with pyproject (Sphinx reads package)."""
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.M)
+    assert match, "pyproject.toml version missing"
+    package = match.group(1)
+    landing = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
+    footer = re.search(r"Version\s+([0-9]+(?:\.[0-9A-Za-z+-]+)+)", landing)
+    assert footer, "website footer Version missing"
+    assert footer.group(1) == package, (
+        f"website footer {footer.group(1)!r} != pyproject {package!r}"
+    )
+    readme = (ROOT / "website" / "README.md").read_text(encoding="utf-8")
+    assert f"**{package}**" in readme, (
+        f"website/README.md should cite package version {package}"
+    )
 
 
 def test_live_markdown_is_in_hosted_toctree():

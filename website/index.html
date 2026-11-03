@@ -211,12 +211,14 @@
           <h2>From a scan to a readable notebook</h2>
           <ol class="steps">
             <li>
-              Open <strong>Workflow → New notebook</strong> and import JPEG,
-              PNG, or PDF pages.
+              On Home, click <strong>Open sample notebook</strong> (offline
+              text is pre-seeded) <strong>or</strong> open
+              <strong>Workflow → New notebook</strong> and import JPEG, PNG, or
+              PDF pages.
             </li>
             <li>
-              Open <strong>Workflow → Transcribe</strong>, pick an OCR-friendly
-              vision model, and start.
+              For your own scans: open <strong>Workflow → Transcribe</strong>,
+              pick an OCR-friendly vision model, and start.
             </li>
             <li>
               Open <strong>Workflow → Review</strong> and correct the text
@@ -251,7 +253,7 @@ cd Transcribe
 cp .env.example .env          # set HOST_PROJECTS_DIR outside the repo
 docker compose up --build transcribe-web</code></pre>
           <p>
-            Open <a href="http://localhost:8510">http://localhost:8510</a>.
+            Open <a href="http://127.0.0.1:8510/">http://127.0.0.1:8510/</a>.
           </p>
           <p>
             Advanced — native on the host (Python 3.10+):
@@ -276,7 +278,7 @@ docker compose up --build transcribe-web</code></pre>
 
     <footer class="site-footer">
       <div class="wrap footer-inner">
-        <p>© Transcribe contributors. Local-first software. Version 1.0.1.</p>
+        <p>© Transcribe contributors. Local-first software. Version 1.4.0.</p>
         <p>
           <a href="https://github.com/glen-w/Transcribe">GitHub</a>
           ·
