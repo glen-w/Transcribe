@@ -18,8 +18,6 @@ from transcribe.analysis.document import (
     is_whitespace_only,
     validate_analysis_document,
 )
-from collections.abc import Mapping
-
 from transcribe.domain.models import PageIndex, PageResult, Project
 from transcribe.services.project import ProjectService
 

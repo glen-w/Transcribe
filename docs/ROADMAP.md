@@ -41,7 +41,7 @@
 
 ## Status at a glance
 
-**Package:** **1.3.0**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **1.3.0** shipped [durability and OCR truth](dev/expansion_hardening_wave_1_3.md). [Durable notebook](dev/durable_notebook_1_3.md) **1.3 correct** (W1–W8: cleanup verdict, miss desk, kept scan, gloss, spellings) is implemented. Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading. **1.2** folded in the 1.1 deepen waves.
+**Package:** **1.4.0**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **1.3.0** shipped [durability and OCR truth](dev/expansion_hardening_wave_1_3.md). **1.4.0** tags [durable notebook](dev/durable_notebook_1_3.md) **1.3 correct** (W1–W8). It is not the ladder’s **1.4 proof** (hand shelf). Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading. **1.2** folded in the 1.1 deepen waves.
 
 ```text
 0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1 → 1.2.0 → 1.3 → 1.4 → 1.5
@@ -51,7 +51,7 @@
 
 | Horizon | Status | What it means |
 |---------|--------|---------------|
-| **Now** | [~] | **1.3 correct (W1–W8) implemented** on [the durable notebook](dev/durable_notebook_1_3.md). Package **1.3.0** already tagged the durability slice. Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading (restore-one and declutter v6 already shipped) |
+| **Now** | [~] | Package **1.4.0** tagged 1.3 correct (W1–W8) on [the durable notebook](dev/durable_notebook_1_3.md). Open: ladder **1.4** hand shelf / bring-back report, **1.5** continue-reading (restore-one and declutter v6 already shipped) |
 | **1.2.0** | [x] | **Expansion & hardening** ([dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md)): L2 load default, failure/security/scale hardening, search + collections + export expansion, quality loop, declutter v5 |
 | **0.9.0** | [x] | Changelog cut — U2 + I0–I6 |
 | **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch; Track C signed off |
@@ -187,7 +187,7 @@ Each release has one sentence a user could say out loud.
 - Pins and glosses are one page each. They are not Slices.
 - No in-app trainer, no new analysis module, no `completed_partial`, no schema_version bump, no Streamlit replacement.
 
-### 1.3 — Correct — [x] implemented (tag on release request)
+### 1.3 — Correct — [x] tagged **1.4.0**
 
 **Product goal:** The human step after OCR is **correct**. Make that step faster and harder to undo by accident.
 

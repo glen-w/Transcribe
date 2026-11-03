@@ -7,6 +7,9 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import FakeClock, SequentialIds
+from tests.fakes import FakeVisionOCRProvider
+from tests.services.test_archive import _make_notebook, _runtime
 from transcribe.domain.fingerprint import sha256_text
 from transcribe.domain.models import (
     AttemptError,
@@ -39,9 +42,6 @@ from transcribe.services.job import build_coordinator
 from transcribe.services.miss_desk import classify_miss_code, group_failed_ocr, miss_desk_page_ids
 from transcribe.services.project import open_project_paths
 from transcribe.services.quality import QualityRatingStore
-from tests.conftest import FakeClock, SequentialIds
-from tests.fakes import FakeVisionOCRProvider
-from tests.services.test_archive import _make_notebook, _runtime
 
 
 def _attach_cleanup(
@@ -284,7 +284,7 @@ def test_wave6_spellings_apply_cap_and_fingerprint(tmp_path: Path) -> None:
 
 def test_wave7_batch_lock_and_untouched_third_page(tmp_path: Path) -> None:
     runtime = _runtime(tmp_path)
-    root, projects = _make_notebook(
+    _root, projects = _make_notebook(
         runtime, "nb", title="D", page_specs=[{"text": "a"}, {"text": "b"}, {"text": "c"}]
     )
     p0, p1, p2 = [p.page_id for p in projects.load().pages]
@@ -369,7 +369,7 @@ def test_wave5_gloss_is_not_fts_indexed(tmp_path: Path) -> None:
 
 def test_wave6_apply_does_not_write_edited_text(tmp_path: Path) -> None:
     runtime = _runtime(tmp_path)
-    root, projects = _make_notebook(runtime, "nb", title="D", page_specs=[{"text": "teh cat"}])
+    _root, projects = _make_notebook(runtime, "nb", title="D", page_specs=[{"text": "teh cat"}])
     page_id = projects.load().pages[0].page_id
     before = projects.load_page_result(page_id)
     assert before is not None

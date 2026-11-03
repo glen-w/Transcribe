@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-03
+
+1.3 correct waves (cleanup verdict, miss desk, kept scan, gloss, confirmed spellings). This package is not the durable-notebook **1.4 proof** (hand shelf).
+
 ### Added
 
 - **Text-cleanup verdict:** Review Accept / Reject / Edit proposal writes or seeds `edited_text`; existing edits use the keep-or-adopt gate. Visual Cleanup stays declutter.
@@ -19,12 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Roadmap: 1.3 correct waves 1–8 are implemented. **Now** remaining on [the durable notebook](docs/dev/durable_notebook_1_3.md) is 1.4 proof and 1.5 continue-reading. No package tag until an explicit release request.
 - Durable page note is `page_gloss` on the page index. Bookmarks stay in `reading-marks.json`. A leftover sidecar note migrates into gloss on first Save.
 
 ### Fixed
 
 - Page-scan lightbox: `st.iframe` height is `1` (Streamlit rejects `height=0`). Esc / click-to-close is unchanged.
+- Duplicate `Mapping` import in the analysis adapter (scan pages skipped).
 
 ## [1.3.0] - 2026-11-02
 

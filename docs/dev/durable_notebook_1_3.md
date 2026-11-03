@@ -1,12 +1,12 @@
 # The durable notebook — 1.3–1.5
 
-PR-sized waves for package **1.3.0**, then exit gates for **1.4** and **1.5**. Product narrative, risks, and sequencing live in [ROADMAP.md](../ROADMAP.md) (Now — The durable notebook). This file is the acceptance authority for **1.4–1.5**. Waves 1–8 (1.3 correct) are implemented; no package tag until an explicit release request.
+PR-sized waves for package **1.3.0**, then exit gates for **1.4** and **1.5**. Product narrative, risks, and sequencing live in [ROADMAP.md](../ROADMAP.md) (Now — The durable notebook). This file is the acceptance authority for **1.4–1.5**. Waves 1–8 (1.3 correct) are implemented and tagged **1.4.0**.
 
 **Plan origin:** maintainer request to creatively and robustly expand and thicken the roadmap after **1.2.0** landed (2026-11-02).
 
 **Deep-test after wave N treats only that wave’s acceptance table as required.** Later waves stay sequenced, not missing.
 
-Package **1.3.0** shipped a first slice ([expansion_hardening_wave_1_3.md](expansion_hardening_wave_1_3.md)): per-notebook restore, format census, retry-failed, a correction scoreboard, reading-mark notes, `ocr_policy: skip`, batch metadata, and declutter v6. Waves 1–8 below are now implemented (correction practice). They do not add the 1.4 hand shelf. No package tag until an explicit release request.
+Package **1.3.0** shipped a first slice ([expansion_hardening_wave_1_3.md](expansion_hardening_wave_1_3.md)): per-notebook restore, format census, retry-failed, a correction scoreboard, reading-mark notes, `ocr_policy: skip`, batch metadata, and declutter v6. Waves 1–8 below are implemented (correction practice) and tagged **1.4.0**. They do not add the 1.4 hand shelf.
 
 ## Invariants (every wave)
 
@@ -148,7 +148,7 @@ Workspace file, one person’s hand across notebooks. Pairs, not a dictionary pr
 | Docs | User guide, known limitations, CONTRACT_INDEX, public surfaces for the new CLI, CHANGELOG when the release is actually cut |
 | Suites | New tests in the offline default lane. No live Ollama |
 | Honesty | Known limitations name: spellings are suggestions, kept scans are not a photo library, gloss is one note, miss desk does not export garbage as training targets |
-| Tag | Checklist green. Version bump and tag only on an explicit release request |
+| Tag | Checklist green. Tagged **1.4.0** |
 
 **1.3 exit gate:** Waves 1–7 acceptance tables green; a 1.2 notebook loads with default `page_role=text` and no gloss; `edited_text` survival re-OCR test still green; no context directory introduced.
 
