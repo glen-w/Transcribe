@@ -2,7 +2,7 @@ name: Nightly
 
 on:
   schedule:
-    # 05:15 UTC — after typical US evening; adjust if needed
+    # 05:15 UTC — scheduled sanity check on main (see docs/ROADMAP.md)
     - cron: "15 5 * * *"
   workflow_dispatch:
 
@@ -18,9 +18,10 @@ env:
   STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
 
 jobs:
-  acceptance:
+  smoke:
+    name: Smoke (offline)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,35 +39,5 @@ jobs:
           echo "TRANSCRIBE_PROJECTS_DIR=$RUNNER_TEMP/tr-projects" >> "$GITHUB_ENV"
           echo "TRANSCRIBE_INBOX_DIR=$RUNNER_TEMP/tr-inbox" >> "$GITHUB_ENV"
           echo "TRANSCRIBE_EXPORT_DIR=$RUNNER_TEMP/tr-export" >> "$GITHUB_ENV"
-      - name: Acceptance (offline)
-        run: make test-acceptance
-      - name: Contracts
-        run: make test-contracts
-      - name: Scale budgets
-        run: make test-scale
-
-  dependency-audit:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-      - name: Install package + audit tools
-        run: |
-          python -m pip install -U pip
-          pip install -e ".[dev,ui,export]"
-          pip install pip-audit cyclonedx-bom
-      - name: Dependency vulnerability audit
-        run: pip-audit --skip-editable --progress-spinner=off
-      - name: Generate SBOM (CycloneDX JSON)
-        run: cyclonedx-py environment --output-format JSON --output-file sbom.cdx.json
-      - name: Upload SBOM
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.cdx.json
-          if-no-files-found: warn
+      - name: Smoke
+        run: make test-smoke

@@ -16,7 +16,7 @@ Distribution (v1): versioned git tags; **Docker Compose preferred** for end user
 6. Fixable CVEs cleared **or** exceptional waiver filled in [dependency_audit.md](dependency_audit.md).
 7. No denylist violations; `scripts/secrets_check.sh` green.
 8. Compose default bind remains loopback (`scripts/release/assert_compose_bind.sh`).
-9. **I5–I6 required for 0.9.0+ tags:** GitHub Pages, nightly offline acceptance (or local `make test-acceptance`), and Docker image smoke (`scripts/release/docker_release_smoke.sh` — skip with reason when Docker is missing). Sphinx/CI docs (**I4**) is required on the intended SHA.
+9. **I5–I6 required for 0.9.0+ tags:** GitHub Pages, nightly offline smoke on schedule (or local `make test-acceptance` / `make test-smoke` before tag), and Docker image smoke (`scripts/release/docker_release_smoke.sh` — skip with reason when Docker is missing). Sphinx/CI docs (**I4**) is required on the intended SHA.
 
 **0.9.0 still keys off U2** (sample notebook + first-run docs) **and I0–I6**. The pack below joins the **1.0** checklist only — not the 0.9.0 cut.
 

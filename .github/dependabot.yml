@@ -1,5 +1,5 @@
 # Supply-chain hygiene: keep CI actions and Python deps current in small,
-# reviewable PRs. pip-audit + SBOM run in nightly (see workflows/nightly.yml).
+# reviewable PRs. Heavier pip-audit + SBOM were nightly candidates; see docs/ROADMAP.md.
 version: 2
 updates:
   - package-ecosystem: "github-actions"

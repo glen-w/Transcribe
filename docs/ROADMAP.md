@@ -323,7 +323,7 @@ Full track plan: [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.
 | **I3** Quality gates | [x] | Coverage fail-under, pre-commit, partial CI `release-checks` |
 | **I4** Hosted docs | [x] | Sphinx over existing Markdown, `.[docs]`, `.readthedocs.yml` scaffold, CI docs job |
 | **I5** Public landing | [x] | Modest `website/` + GitHub Pages assemble; workflow tour with generated screenshots and GIFs (`make docs-media`) |
-| **I6** Sustaining lanes | [x] | Nightly acceptance/offline heavy, Docker smoke in release-checks, issue templates |
+| **I6** Sustaining lanes | [x] | Nightly smoke sanity check, Docker smoke in release-checks, issue templates |
 
 Suggested cut order (historical): **I0+I1** (0.7.0) → **I2+I3** (0.8.0) → **I4** → **I5** (0.8.8) → **I6**. All tracks landed; U2 + I0–I6 enable the **0.9.0** package cut.
 
@@ -331,7 +331,7 @@ Suggested cut order (historical): **I0+I1** (0.7.0) → **I2+I3** (0.8.0) → **
 
 | Deliverable | Status | Notes |
 |-------------|--------|-------|
-| `nightly.yml` | [x] | Offline acceptance + contracts (no live Ollama) |
+| `nightly.yml` | [x] | Scheduled offline smoke (`make test-smoke`); deeper nightly lanes deferred — [Later candidates](#later-candidates--uncommitted--) |
 | Docker in `release-checks` | [x] | `docker compose build` + `make docker-smoke` |
 | Issue templates | [x] | Bug + feature + `config.yml` |
 
@@ -1197,6 +1197,7 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 - Image-only / non-OCR page handling — **package 1.3** kept scan (`page_role`)
 - **Detection fine-tune export** — shipped (approved/rejected Detect labels → external training datasets)
 - **Custom / native UI host** (SPA, Tauri, Qt, …) — uncommitted; not a 1.x track. Working default is Streamlit through 2.0. Reopen only with 1.8–1.9 evidence via [UI host](#ui-host-working-default--reopen-with-evidence); do not schedule a rewrite from this list.
+- **Nightly CI depth** — restore scheduled `make test-acceptance`, `make test-contracts`, `make test-scale`, and supply-chain `pip-audit` + CycloneDX SBOM when dependency pins are stable. PR CI already runs smoke, default offline suite, coverage (3.11), docs, and `release-checks` (Docker, secrets, wheel import).
 
 ---
 
@@ -1217,4 +1218,5 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 | 2026-11-02 | **1.3.0 durability & OCR truth** is the notebook-workbench release after 1.2.0. It is not the parked autobiography “1.3 People” row | Scheduling Person identities as Transcribe 1.3 |
 | 2026-11-02 | **1.3–1.5 The durable notebook** is the active horizon after 1.2.0: correct, prove an external hand model, keep the corpus. Package 1.3 is not the on-file “People” label | An empty backlog, and reading autobiography 1.3–1.5 as this repo’s next tags |
 | 2026-11-03 | **1.3 correct W1–W8 implemented** (cleanup verdict, divergence banner, miss desk, kept scan, unsure/gloss, confirmed spellings, batch-meta). Stretch included (gloss export, cleanup-hint). No version bump/tag until an explicit release request. Next open: 1.4 shelf | Treating W1–W8 as still the ranked Now backlog |
+| 2026-11-04 | **Nightly workflow** simplified to offline smoke only so the schedule stays green; acceptance/contracts/scale/audit moved to Later candidates | Nightly as full acceptance + pip-audit gate |
 

@@ -67,9 +67,9 @@ def test_docker_release_smoke_skips_without_daemon():
     assert "compose up" not in smoke
 
 
-def test_nightly_workflow_is_offline_acceptance():
+def test_nightly_workflow_is_offline_smoke():
     text = (ROOT / ".github" / "workflows" / "nightly.yml").read_text(encoding="utf-8")
-    assert "make test-acceptance" in text
+    assert "make test-smoke" in text
     assert "cron:" in text
     assert "11434" not in text
     assert "8501" not in text
