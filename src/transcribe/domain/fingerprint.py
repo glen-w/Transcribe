@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from typing import Any
 
 from transcribe.domain.models import DEFAULT_VISION_NUM_PREDICT
+
+# Recipe / sampler overlays — not structural skip identity (like default num_predict).
+SKIP_OMIT_GENERATION_KEYS = frozenset({"repeat_penalty", "stop"})
 
 
 def canonical_json_bytes(obj: dict[str, Any]) -> bytes:
@@ -21,8 +25,13 @@ def fingerprint_generation_options(opts: dict[str, Any] | None) -> dict[str, Any
     Default vision ``num_predict`` is a transport safety cap, not a quality
     input — omit it so existing attempts without the key still skip-match.
     Non-default ``num_predict`` is included and changes the fingerprint.
+
+    ``repeat_penalty`` and ``stop`` are anti-loop recipe overlays merged at
+    JobPlan freeze — omit them so recipe tuning does not bust skip.
     """
     out = dict(opts or {})
+    for key in SKIP_OMIT_GENERATION_KEYS:
+        out.pop(key, None)
     raw = out.get("num_predict")
     if raw is None:
         return out
@@ -32,6 +41,33 @@ def fingerprint_generation_options(opts: dict[str, Any] | None) -> dict[str, Any
     except (TypeError, ValueError):
         out.pop("num_predict", None)
     return out
+
+
+def digest_from_fingerprint_payload(payload: dict[str, Any]) -> str:
+    """Re-hash a persisted fingerprint_payload with current canonical rules."""
+    body = copy.deepcopy(payload)
+    opts = body.get("generation_options")
+    if not isinstance(opts, dict):
+        opts = {}
+    body["generation_options"] = fingerprint_generation_options(opts)
+    return hashlib.sha256(canonical_json_bytes(body)).hexdigest()
+
+
+def fingerprints_compatible_for_skip(
+    current_digest: str,
+    *,
+    stored_digest: str,
+    fingerprint_payload: dict[str, Any] | None,
+) -> bool:
+    """True if a stored attempt should skip against ``current_digest``."""
+    if current_digest and stored_digest and current_digest == stored_digest:
+        return True
+    if not fingerprint_payload or not isinstance(fingerprint_payload, dict):
+        return False
+    try:
+        return current_digest == digest_from_fingerprint_payload(fingerprint_payload)
+    except (TypeError, ValueError, OverflowError):
+        return False
 
 
 def compute_input_fingerprint(

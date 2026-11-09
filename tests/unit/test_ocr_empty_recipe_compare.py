@@ -244,11 +244,13 @@ def test_glm_recipe_job_seals_options_not_recipe_id(tmp_path: Path) -> None:
     attempt = projects.load_page_result(page_id).active_attempt()
     assert attempt is not None
     payload = attempt.fingerprint_payload or {}
-    assert payload.get("generation_options", {}).get("repeat_penalty") == 1.2
-    assert payload.get("generation_options", {}).get("stop") == ["```\n```"]
+    assert payload.get("generation_options", {}).get("repeat_penalty") is None
+    assert payload.get("generation_options", {}).get("stop") is None
     assert "recipe_id" not in payload
     assert attempt.provenance is not None
     assert attempt.provenance.recipe_id == "glm_ocr"
+    assert attempt.provenance.generation_options.get("repeat_penalty") == 1.2
+    assert attempt.provenance.generation_options.get("stop") == ["```\n```"]
     progress2 = coord.run_blocking()
     assert progress2.skipped == 1
     assert provider.calls == 1

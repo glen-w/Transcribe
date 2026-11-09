@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- OCR skip fingerprints omit recipe `repeat_penalty` and `stop`; stored attempts still rehash compatibly so deploy and recipe tuning do not mass re-OCR successes. Non-`force` jobs defer pages after three fingerprint-compatible `token_repeat` failures for the same model (Review **Retry these** still forces retries).
+
 ## [1.4.0] - 2026-11-03
 
 1.3 correct waves (cleanup verdict, miss desk, kept scan, gloss, confirmed spellings). This package is not the durable-notebook **1.4 proof** (hand shelf).

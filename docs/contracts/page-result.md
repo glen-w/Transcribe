@@ -70,7 +70,9 @@ Optional `comparison` on the page (last successful multipass rank):
 
 Successful attempts store `input_fingerprint` and a canonical `fingerprint_payload` including provider, model name, model digest, **model identity verification flag**, input image hash (after preprocess), prompt hash, preprocess profile/version, and generation options.
 
-Vision generate always sends a `num_predict` cap (default 4096). The **default** cap is omitted from hashed `generation_options` so skip/resume stays compatible with attempts that only stored `temperature`. A non-default `num_predict` is included and changes the fingerprint. Extra recipe keys such as `repeat_penalty` are included and change the fingerprint.
+Vision generate always sends a `num_predict` cap (default 4096). The **default** cap is omitted from hashed `generation_options` so skip/resume stays compatible with attempts that only stored `temperature`. A non-default `num_predict` is included and changes the fingerprint. Recipe sampler overlays `repeat_penalty` and `stop` are **omitted** from the skip hash (they still appear in attempt provenance for audit). Skip matching compares the recomputed digest to the stored `input_fingerprint`, or re-hashes the stored `fingerprint_payload` under current canonical rules so deploy and recipe tuning do not re-OCR succeeded pages.
+
+Non-`force` OCR jobs skip scheduling when a page already has at least three **fingerprint-compatible** `token_repeat` vision failures for the same model (`force=True`, including Review **Retry these**, still runs).
 
 Ollama generate abort `token repeat limit reached` is persisted as attempt `error.code=token_repeat` (`retriable=false`). Hitting `num_predict` with repeated text (Review repetition regex) is the same code and also fails the page.
 

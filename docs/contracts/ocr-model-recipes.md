@@ -62,9 +62,9 @@ matches, including when a custom prompt won the text.
 
 `JobPlan.recipe_id` and `AttemptProvenance.recipe_id` record the matched id
 (empty when none). They are **not** in the skip fingerprint. Fingerprint uses
-prompt SHA and generation options (including extra keys such as
-`repeat_penalty`). Changing overlay options therefore re-runs succeeded pages
-once.
+prompt SHA and canonical generation options (temperature; non-default
+`num_predict`; not `repeat_penalty` or `stop`). Changing overlay sampler keys
+therefore does **not** re-run succeeded pages.
 
 ## Matching
 

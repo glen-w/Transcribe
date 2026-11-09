@@ -28,8 +28,9 @@ Recipe **generation options** still overlay whenever a recipe matches
 (including after a custom prompt). Choice is frozen into `JobPlan` (prompt
 text / SHA / options). Mid-job Settings changes apply to the **next** job only.
 
-Changing `repeat_penalty`, `stop`, `num_predict`, or a frozen prompt changes
-the skip fingerprint, so succeeded pages for that model re-run once.
+Changing a frozen prompt or non-default `num_predict` changes the skip
+fingerprint, so succeeded pages for that model re-run once. Recipe sampler
+overlays `repeat_penalty` and `stop` do **not** change the skip fingerprint.
 
 ## Shipped lane: DeepSeek-OCR
 
