@@ -90,7 +90,7 @@ Job execution freezes plan fields at start; see [ARCHITECTURE.md](../ARCHITECTUR
 
 ## Provenance
 
-Successful attempts carry provenance suitable for audit/export: model identity, prompt text/ids/hashes, optional `recipe_id`, preprocess, application version, Ollama host, render id, request id, and allowlisted provider timing/token metadata. Missing `recipe_id` on older results is empty. PaddleOCR sidecar attempts may store `provider_metadata.path` as a short token (`pipeline` or `mlx_chat`); filesystem paths and sidecar exception text are not persisted. Path is an execution outcome, not part of the skip fingerprint.
+Successful attempts carry provenance suitable for audit/export: model identity, prompt text/ids/hashes, optional `recipe_id`, preprocess, application version, Ollama host, render id, request id, and allowlisted provider timing/token metadata. Missing `recipe_id` on older results is empty. PaddleOCR sidecar attempts may store `provider_metadata.path` as a short token (`pipeline` or `mlx_chat`); filesystem paths and sidecar exception text are not persisted. Path is an execution outcome, not part of the skip fingerprint. Paddle `raw_text` is recognized page text (joined layout-block contents), not the pipeline’s label/bbox dump.
 
 ## Optional cleanup record
 

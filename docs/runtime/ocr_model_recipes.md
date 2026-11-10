@@ -60,7 +60,7 @@ A custom notebook prompt still wins. Recipe options still apply.
 |--|--|
 | Match | `paddleocr` in the tag |
 | Prompt | Frozen `paddle_ocr` — body `OCR:` |
-| Why | PaddleOCR-VL is a task-prompt model. Long `faithful_*` instructions are ignored. The vision backend is the **local MLX sidecar**, not Ollama. |
+| Why | PaddleOCR-VL is a task-prompt model. Long `faithful_*` instructions are ignored. The vision backend is the **local MLX sidecar**, not Ollama. Stored text is **recognized page text only** (layout labels, bboxes, and Result dumps are stripped). |
 
 CLI: `transcribe bulk-run notebooks … --provider paddleocr --base-url http://127.0.0.1:8112 --model PaddleOCR-VL-1.6`. Default `--provider` remains `ollama`. Nightshift overnight does **not** set this as `MODEL_B`.
 

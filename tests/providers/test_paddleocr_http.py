@@ -7,7 +7,7 @@ import pytest
 
 from transcribe.errors import ProviderError
 from transcribe.providers.factory import build_vision_provider, normalize_provider_id
-from transcribe.providers.paddleocr import PaddleocrVisionProvider
+from transcribe.providers.paddleocr import PaddleocrVisionProvider, plain_ocr_text
 
 
 class _Resp:
@@ -23,6 +23,64 @@ class _Resp:
 
     def __exit__(self, *a):
         return False
+
+
+def test_plain_ocr_text_strips_layout_dump() -> None:
+    dump = (
+        "#################\n"
+        "label:\ttext\n"
+        "bbox:\t[1, 202, 1499, 796]\n"
+        "content:\tflooding into the perceived vacuum when\n"
+        "really I could do with a week to settle.\n"
+        "#################\n\n"
+        "#################\n"
+        "label:\theader\n"
+        "bbox:\t[0, 190, 824, 289]\n"
+        "content:\t251106 1729 Aux Ours\n"
+        "#################\n"
+    )
+    assert plain_ocr_text(dump) == (
+        "flooding into the perceived vacuum when\n"
+        "really I could do with a week to settle.\n\n"
+        "251106 1729 Aux Ours"
+    )
+
+
+def test_plain_ocr_text_keeps_faithful_page() -> None:
+    page = "Monday went well — coffee at Aut Day."
+    assert plain_ocr_text(page) == page
+
+
+def test_plain_ocr_text_drops_result_repr() -> None:
+    dump = (
+        "[{'input_path': '/tmp/paddleocr-abc.png', 'page_index': None, "
+        "'doc_preprocessor_res': {'output_img': array([[[4, 0, 0]]])}}]"
+    )
+    assert plain_ocr_text(dump) == ""
+
+
+def test_ocr_strips_layout_dump_from_sidecar() -> None:
+    dump = (
+        "#################\nlabel:\ttext\nbbox:\t[0, 1, 2, 3]\n"
+        "content:\thello page\n#################\n"
+    )
+
+    def fake_urlopen(req, timeout=None):
+        if req.full_url.endswith("/health"):
+            return _Resp({"ok": True, "model": "PaddleOCR-VL-1.6", "digest": "d"})
+        if req.full_url.endswith("/ocr"):
+            return _Resp({"text": dump, "path": "pipeline", "digest": "d"})
+        raise AssertionError(req.full_url)
+
+    provider = PaddleocrVisionProvider("http://127.0.0.1:8112")
+    with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        out = provider.transcribe_image(
+            model="PaddleOCR-VL-1.6",
+            prompt="OCR:",
+            image_bytes=b"\x89PNG",
+            options={},
+        )
+    assert out.text == "hello page"
 
 
 def test_normalize_provider_aliases() -> None:
@@ -190,6 +248,63 @@ def test_fingerprint_provider_separates_paddle_from_ollama() -> None:
 
 def test_abort_generate_is_noop() -> None:
     PaddleocrVisionProvider("http://127.0.0.1:8112").abort_generate("PaddleOCR-VL-1.6")
+
+
+def test_run_blocking_empty_layout_dump_is_empty_output(tmp_path) -> None:
+    from tests.conftest import FakeClock, SequentialIds
+    from tests.ingest.test_ingest import _png_bytes
+    from transcribe.ingest import IngestService
+    from transcribe.services.job import JobCoordinator
+    from transcribe.services.project import ProjectService, open_project_paths
+
+    dump = (
+        "[{'input_path': '/tmp/paddleocr-abc.png', 'page_index': None, "
+        "'doc_preprocessor_res': {'output_img': 'array(...)'}}]"
+    )
+
+    def fake_urlopen(req, timeout=None):
+        if req.full_url.endswith("/health"):
+            return _Resp(
+                {
+                    "ok": True,
+                    "model": "PaddleOCR-VL-1.6",
+                    "digest": "paddle-digest",
+                    "models": [
+                        {
+                            "name": "PaddleOCR-VL-1.6",
+                            "digest": "paddle-digest",
+                            "capabilities": ["vision"],
+                        }
+                    ],
+                }
+            )
+        if req.full_url.endswith("/ocr"):
+            return _Resp({"text": dump, "path": "pipeline", "digest": "paddle-digest"})
+        raise AssertionError(req.full_url)
+
+    paths = open_project_paths(tmp_path / "proj")
+    clock, ids = FakeClock(), SequentialIds("pade")
+    projects = ProjectService(paths, clock=clock, ids=ids)
+    projects.create("pade")
+    IngestService(paths, clock=clock, ids=ids).import_bytes("page.png", _png_bytes())
+    project = projects.load()
+    settings = project.settings
+    settings.model_name = "PaddleOCR-VL-1.6"
+    settings.base_url = "http://127.0.0.1:8112"
+    projects.save_settings(project, settings)
+    provider = PaddleocrVisionProvider("http://127.0.0.1:8112")
+    coord = JobCoordinator(paths, projects, provider, clock=clock, ids=ids)
+    with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        progress = coord.run_blocking(force=True)
+    assert progress.status == "completed"
+    assert progress.failed == 1
+    result = projects.load_page_result(projects.load().pages[0].page_id)
+    assert result is not None
+    attempt = result.attempts[-1]
+    assert attempt.status == "failed"
+    assert attempt.error is not None
+    assert attempt.error.code == "empty_output"
+    assert (attempt.raw_text or "") == ""
 
 
 def test_ocr_sidecar_error_payload() -> None:

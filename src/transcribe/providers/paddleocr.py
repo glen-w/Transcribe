@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
 from typing import Any
@@ -17,6 +18,29 @@ from transcribe.providers.ollama import (
 )
 
 DEFAULT_PADDLEOCR_MODEL = "PaddleOCR-VL-1.6"
+
+_BLOCK_CONTENT_RE = re.compile(
+    r"^content:\s*(.*?)(?=^#{5,}|\Z)",
+    re.MULTILINE | re.DOTALL,
+)
+
+
+def plain_ocr_text(text: str) -> str:
+    """Keep recognized page text; drop Paddle layout dumps and Result reprs."""
+    raw = (text or "").strip()
+    if not raw:
+        return ""
+    if "#################" in raw and "content:" in raw:
+        parts = [match.group(1).strip() for match in _BLOCK_CONTENT_RE.finditer(raw)]
+        parts = [part for part in parts if part]
+        if parts:
+            return "\n\n".join(parts)
+    if "doc_preprocessor_res" in raw and "output_img" in raw:
+        return ""
+    stripped = raw.lstrip()
+    if stripped.startswith("[{'input_path'") or stripped.startswith('[{"input_path"'):
+        return ""
+    return raw
 
 
 class PaddleocrVisionProvider:
@@ -144,6 +168,7 @@ class PaddleocrVisionProvider:
                     "PaddleOCR sidecar response missing text field",
                     code="bad_response",
                 )
+            payload["text"] = plain_ocr_text(text)
             return payload
 
         payload, attempt = call_with_retries(once, max_retries=self.max_retries)
