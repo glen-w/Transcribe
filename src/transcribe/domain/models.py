@@ -22,8 +22,18 @@ PROVIDER_METADATA_ALLOWLIST = frozenset(
         "prompt_eval_duration",
         "eval_duration",
         "truncated",
+        "path",
     }
 )
+
+
+def _is_provider_path_token(value: Any) -> bool:
+    """Keep sidecar path enums (pipeline / mlx_chat), drop filesystem paths."""
+    if not isinstance(value, str) or not value or len(value) > 32:
+        return False
+    if not value[0].islower():
+        return False
+    return all(ch.islower() or ch.isdigit() or ch == "_" for ch in value)
 
 
 def filter_provider_metadata(raw: dict[str, Any] | None) -> dict[str, Any]:
@@ -32,6 +42,10 @@ def filter_provider_metadata(raw: dict[str, Any] | None) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for key, value in raw.items():
         if key not in PROVIDER_METADATA_ALLOWLIST:
+            continue
+        if key == "path":
+            if _is_provider_path_token(value):
+                out[key] = value
             continue
         if isinstance(value, (str, int, float, bool)) or value is None:
             if isinstance(value, float) and value != value:  # NaN

@@ -29,6 +29,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("project", type=Path)
     p_run.add_argument("--model", required=True)
     p_run.add_argument("--base-url", default=None)
+    p_run.add_argument(
+        "--provider",
+        choices=["ollama", "paddleocr"],
+        default="ollama",
+        help="Vision backend (default ollama). paddleocr is the local MLX sidecar.",
+    )
     p_run.add_argument("--force", action="store_true")
     p_run.add_argument(
         "--retry-failed",
@@ -496,6 +502,12 @@ def build_parser() -> argparse.ArgumentParser:
             help=("Vision model (repeat for multipass compare; " "one value = single-model batch)"),
         )
         parser.add_argument("--base-url", default=None)
+        parser.add_argument(
+            "--provider",
+            choices=["ollama", "paddleocr"],
+            default="ollama",
+            help="Vision backend (default ollama). paddleocr is the local MLX sidecar.",
+        )
         parser.add_argument("--force", action="store_true")
         parser.add_argument("--workers", type=int, default=1)
         parser.add_argument("--allow-remote-ollama", action="store_true")

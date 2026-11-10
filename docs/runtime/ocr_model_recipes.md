@@ -54,6 +54,16 @@ empty attempts.
 
 A custom notebook prompt still wins. Recipe options still apply.
 
+## Shipped lane: PaddleOCR-VL (`feat/paddleocr-mlx`)
+
+| | |
+|--|--|
+| Match | `paddleocr` in the tag |
+| Prompt | Frozen `paddle_ocr` — body `OCR:` |
+| Why | PaddleOCR-VL is a task-prompt model. Long `faithful_*` instructions are ignored. The vision backend is the **local MLX sidecar**, not Ollama. |
+
+CLI: `transcribe bulk-run notebooks … --provider paddleocr --base-url http://127.0.0.1:8112 --model PaddleOCR-VL-1.6`. Default `--provider` remains `ollama`. Nightshift overnight does **not** set this as `MODEL_B`.
+
 ## Shipped lane: Granite vision
 
 | | |
@@ -74,7 +84,8 @@ hashes without evidence they need it.
 | **Thinking** tags (`gemma4`, `qwen3-vl`, `gpt-oss`, `deepseek-r1`) empty OCR | Hidden reasoning burns `num_predict`; picker exclusion + advice, not a prompt patch |
 | **llama3.2-vision** `mllama` load fail | Architecture; picker hide + `model_load` circuit |
 | Timeouts on general VLMs (`llava`, …) | Use an OCR-oriented first pass |
-| Chatty wrappers (`devstral`, …) / `got-ocr` / `paddleocr` / `nougat` / `olmocr` / `minicpm-v` | Advice-only until a measured fail mode exists |
+| Chatty wrappers (`devstral`, …) / `got-ocr` / `nougat` / `olmocr` / `minicpm-v` | Advice-only until a measured fail mode exists |
+| **`paddleocr` without the sidecar** | Recipe freezes `OCR:` on `feat/paddleocr-mlx`; Ollama default still cannot load the official MLX weights |
 
 Add a custom overlay only when you have evidence (token-repeat rate, empty
 `eval_count=1`, a required short prompt).

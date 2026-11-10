@@ -8,7 +8,7 @@ These notes compare Transcribe (this repo) with the sibling product TranscriptX.
 |-----|--------|
 | Transcribe | package **0.8.8**, latest tag `v0.8.8`, branch `main` at survey time |
 | TranscriptX | package **1.0.1**, tags `v1.0.0` / `v1.0.1`, HEAD about 13 commits ahead of `v1.0.1` |
-| Root `assessments/` | gitignored local run logs in both repos — **not** this folder |
+| Root `assessments/` | Tracked OCR/model run reports ([`/assessments/`](../../assessments/README.md)) — **not** this folder |
 
 ## How to read
 

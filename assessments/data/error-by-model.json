@@ -1,0 +1,526 @@
+{
+  "collected_at": "2026-11-10T10:37:38.771521+00:00",
+  "notes": "Per-attempt counts (not unique pages). Latest-fail miss codes on pages with no succeeded vision attempt are in notebooks_detail.active_miss_codes.",
+  "by_model": {
+    "qwen2.5vl:3b": {
+      "attempts": 3575,
+      "succeeded": 3575,
+      "failed": 0,
+      "interrupted": 0,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 0,
+        "token_repeat": 0,
+        "model_load": 0,
+        "timeout": 0,
+        "circuit_open": 0,
+        "http_error": 0,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 41,
+      "truncated_repetition_successes": 33,
+      "example_failures": [],
+      "median_eval_count": 127.0,
+      "median_elapsed_s": 9.21,
+      "success_rate_finished": 1.0
+    },
+    "deepseek-ocr": {
+      "attempts": 5787,
+      "succeeded": 5783,
+      "failed": 4,
+      "interrupted": 0,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 4,
+        "token_repeat": 0,
+        "model_load": 0,
+        "timeout": 0,
+        "circuit_open": 0,
+        "http_error": 0,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 89,
+      "truncated_repetition_successes": 25,
+      "example_failures": [
+        {
+          "notebook": "black",
+          "page_id": "408b22ad9942499095a1257acc24609e",
+          "attempt_id": "85878a0f0dc8428f86fb550e7bd1fe03",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-14T00:47:13.387Z"
+        },
+        {
+          "notebook": "brown 2",
+          "page_id": "72f35c26d9f0432395b582c4e8ae228e",
+          "attempt_id": "b078e4ec141c46c28a3af4ba85757d72",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-14T05:59:11.647Z"
+        },
+        {
+          "notebook": "mushroom",
+          "page_id": "fe7db7b1a0c54232a65e779916db40a4",
+          "attempt_id": "e6c18c1b35834da280f2cbe8eae5f891",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-13T05:09:59.006Z"
+        },
+        {
+          "notebook": "mushroom",
+          "page_id": "aa283b08eb39408d822aab9bfce55af6",
+          "attempt_id": "4751e186de9941baaef5adb26fab0a46",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-13T05:16:25.082Z"
+        }
+      ],
+      "median_eval_count": 110.0,
+      "median_elapsed_s": 2.55,
+      "success_rate_finished": 0.9993
+    },
+    "llama3.2-vision:11b": {
+      "attempts": 530,
+      "succeeded": 0,
+      "failed": 530,
+      "interrupted": 0,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 0,
+        "token_repeat": 0,
+        "model_load": 13,
+        "timeout": 0,
+        "circuit_open": 0,
+        "http_error": 517,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 0,
+      "truncated_repetition_successes": 0,
+      "example_failures": [
+        {
+          "notebook": "black",
+          "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+          "attempt_id": "e3bda8fb62b64fc9b3d63ce8cf80f90e",
+          "code": "model_load",
+          "message": "Ollama cannot load this vision model (architecture unsupported). Try another vision model, or upgrade/re-pull the model for this Ollama build.",
+          "completed_at": "2026-08-23T14:22:49.207Z"
+        },
+        {
+          "notebook": "breakdown",
+          "page_id": "c3646441b88646cab4608a28f4191c8e",
+          "attempt_id": "0ab406feeecd47fcbea09887319cda13",
+          "code": "model_load",
+          "message": "Ollama cannot load this vision model (architecture unsupported). Try another vision model, or upgrade/re-pull the model for this Ollama build.",
+          "completed_at": "2026-08-23T14:23:40.937Z"
+        },
+        {
+          "notebook": "brown",
+          "page_id": "5d91d630f49942c8aa69e47a3cadfb08",
+          "attempt_id": "d0ac58492bfe487caafcc80f7efd724a",
+          "code": "model_load",
+          "message": "Ollama cannot load this vision model (architecture unsupported). Try another vision model, or upgrade/re-pull the model for this Ollama build.",
+          "completed_at": "2026-08-23T14:23:25.896Z"
+        },
+        {
+          "notebook": "brown 2",
+          "page_id": "b1a5fc648f7746aaa635a21806566fa5",
+          "attempt_id": "6ff19bfc61dc4d1ea4c6b7519ca724d7",
+          "code": "model_load",
+          "message": "Ollama cannot load this vision model (architecture unsupported). Try another vision model, or upgrade/re-pull the model for this Ollama build.",
+          "completed_at": "2026-08-23T14:23:31.095Z"
+        },
+        {
+          "notebook": "brown 3",
+          "page_id": "087940a4ee424ccebb0b3e783c9b1353",
+          "attempt_id": "aaeebf2d88e6424a9ba1220e165530ee",
+          "code": "model_load",
+          "message": "Ollama cannot load this vision model (architecture unsupported). Try another vision model, or upgrade/re-pull the model for this Ollama build.",
+          "completed_at": "2026-08-23T14:23:34.979Z"
+        }
+      ],
+      "median_eval_count": null,
+      "median_elapsed_s": 2.9,
+      "success_rate_finished": 0.0
+    },
+    "qwen2.5vl:7b": {
+      "attempts": 1696,
+      "succeeded": 1627,
+      "failed": 63,
+      "interrupted": 6,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 0,
+        "token_repeat": 59,
+        "model_load": 0,
+        "timeout": 0,
+        "circuit_open": 0,
+        "http_error": 4,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 4,
+      "truncated_repetition_successes": 3,
+      "example_failures": [
+        {
+          "notebook": "black",
+          "page_id": "3a9b383a574645adb557c9ff3bc8f9d1",
+          "attempt_id": "6ae83c2f615b48cea5c5abed3553b300",
+          "code": "http_error",
+          "message": "{\"error\":\"prediction aborted, token repeat limit reached\"}",
+          "completed_at": "2026-10-23T23:18:05.734Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "3a9b383a574645adb557c9ff3bc8f9d1",
+          "attempt_id": "edd49311e70340c393ed75b88e77c5f4",
+          "code": "http_error",
+          "message": "{\"error\":\"prediction aborted, token repeat limit reached\"}",
+          "completed_at": "2026-10-24T00:30:56.355Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "3a9b383a574645adb557c9ff3bc8f9d1",
+          "attempt_id": "23f53f189539433e92ade9fda0ca389a",
+          "code": "http_error",
+          "message": "{\"error\":\"prediction aborted, token repeat limit reached\"}",
+          "completed_at": "2026-10-25T00:32:59.006Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "3a9b383a574645adb557c9ff3bc8f9d1",
+          "attempt_id": "8db17f4fb4c84bf9aa41bd7b17b4ff39",
+          "code": "http_error",
+          "message": "{\"error\":\"prediction aborted, token repeat limit reached\"}",
+          "completed_at": "2026-10-25T11:30:24.355Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "3a9b383a574645adb557c9ff3bc8f9d1",
+          "attempt_id": "73a2249befe542b784a2166d9a332ad9",
+          "code": "token_repeat",
+          "message": "Ollama aborted this generate (token repeat limit): {\"error\":\"prediction aborted, token repeat limit reached\"}",
+          "completed_at": "2026-10-25T11:45:21.924Z"
+        }
+      ],
+      "median_eval_count": 151.0,
+      "median_elapsed_s": 11.9,
+      "success_rate_finished": 0.9627
+    },
+    "glm-ocr": {
+      "attempts": 2654,
+      "succeeded": 1490,
+      "failed": 1145,
+      "interrupted": 19,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 3,
+        "token_repeat": 721,
+        "model_load": 0,
+        "timeout": 4,
+        "circuit_open": 0,
+        "http_error": 417,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 754,
+      "truncated_repetition_successes": 63,
+      "example_failures": [
+        {
+          "notebook": "black",
+          "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+          "attempt_id": "cdc88631586e4ff2a75171c934efb4ce",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-22T18:35:23.821Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+          "attempt_id": "d694265770c4484794b5b8685b456453",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-23T00:27:50.504Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+          "attempt_id": "4fba2c4d22f74647aa3c37bab0c86fbc",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-23T23:19:53.559Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+          "attempt_id": "afbb1484d83648199eb6722251b0ff78",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-24T00:31:34.766Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+          "attempt_id": "36618d89dc0542c68374010e7659b54b",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-25T00:34:35.137Z"
+        }
+      ],
+      "median_eval_count": 4096.0,
+      "median_elapsed_s": 31.87,
+      "success_rate_finished": 0.5655
+    },
+    "granite3.2-vision": {
+      "attempts": 1775,
+      "succeeded": 1514,
+      "failed": 257,
+      "interrupted": 3,
+      "running": 1,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 0,
+        "token_repeat": 251,
+        "model_load": 0,
+        "timeout": 0,
+        "circuit_open": 0,
+        "http_error": 6,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 303,
+      "truncated_repetition_successes": 70,
+      "example_failures": [
+        {
+          "notebook": "black",
+          "page_id": "be9ae66386c54f7f88481e6faba963cf",
+          "attempt_id": "e047b0b649e44b7785f9a909fcba883d",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-22T19:51:33.977Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "be9ae66386c54f7f88481e6faba963cf",
+          "attempt_id": "9d72855ffd484706a2803184eb2e4a3f",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-24T02:18:51.252Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "25191dac9838499da53d65f53a39c01d",
+          "attempt_id": "93fbef29f35a4c55aac539a854d8689b",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-22T19:52:20.122Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "25191dac9838499da53d65f53a39c01d",
+          "attempt_id": "28b2d1d571a74ab997ff4b4636f99028",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-24T02:19:38.145Z"
+        },
+        {
+          "notebook": "black",
+          "page_id": "be76651a09f04571b20dd660eb6875c0",
+          "attempt_id": "38dbdfd42c5e41269496bdf6feecb077",
+          "code": "token_repeat",
+          "message": "Model output hit num_predict with repeated text",
+          "completed_at": "2026-10-22T19:53:23.209Z"
+        }
+      ],
+      "median_eval_count": 121.0,
+      "median_elapsed_s": 6.11,
+      "success_rate_finished": 0.8549
+    },
+    "gemma4:26b": {
+      "attempts": 170,
+      "succeeded": 44,
+      "failed": 125,
+      "interrupted": 1,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 125,
+        "token_repeat": 0,
+        "model_load": 0,
+        "timeout": 0,
+        "circuit_open": 0,
+        "http_error": 0,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 5,
+      "truncated_repetition_successes": 0,
+      "example_failures": [
+        {
+          "notebook": "green",
+          "page_id": "6430b6a03f3e4e0692e8b297c585773f",
+          "attempt_id": "bfca5c62f9eb41b895d682621c4e3210",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-23T15:30:04.949Z"
+        },
+        {
+          "notebook": "green",
+          "page_id": "a4c66ab118bb49458b2913bd98087283",
+          "attempt_id": "fac55910c3e84476a00515c1ad111123",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-23T15:33:48.067Z"
+        },
+        {
+          "notebook": "green",
+          "page_id": "ee9f57d60ebd489a88f3df7e06987db1",
+          "attempt_id": "af4bbe33b10c4d34b651388dec199b05",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-23T15:35:16.692Z"
+        },
+        {
+          "notebook": "green",
+          "page_id": "d3807a8a3c3d453292cdcd0cd7befaca",
+          "attempt_id": "11cd10b9e0a74ddab4df0288801e891a",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-23T15:37:59.456Z"
+        },
+        {
+          "notebook": "green",
+          "page_id": "0775ee94cc5447c2b6289cb4100b2a53",
+          "attempt_id": "62976acfe53841b6bcc4c8e98b165e2f",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-23T15:39:35.203Z"
+        }
+      ],
+      "median_eval_count": 4096.0,
+      "median_elapsed_s": 66.22,
+      "success_rate_finished": 0.2604
+    },
+    "qwen3.6:27b": {
+      "attempts": 24,
+      "succeeded": 15,
+      "failed": 8,
+      "interrupted": 0,
+      "running": 1,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 0,
+        "token_repeat": 0,
+        "model_load": 0,
+        "timeout": 8,
+        "circuit_open": 0,
+        "http_error": 0,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 0,
+      "truncated_repetition_successes": 0,
+      "example_failures": [
+        {
+          "notebook": "vince",
+          "page_id": "dbe0b87cb4f94959b6cfcbc021ba67d4",
+          "attempt_id": "2fc2f947e3d347af966e983b0e626297",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T13:35:05.603Z"
+        },
+        {
+          "notebook": "vince",
+          "page_id": "d95d6cb0ad294876a7b969b358490d1f",
+          "attempt_id": "b8a616baf64341eea5d0861de9559b56",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T13:44:13.926Z"
+        },
+        {
+          "notebook": "vince",
+          "page_id": "7c3d0dbb81b44074aa51982ca87c160d",
+          "attempt_id": "e3f8b8fcb74c44acb14f89294c6d6eee",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T13:51:15.097Z"
+        },
+        {
+          "notebook": "vince",
+          "page_id": "2eaf8f1c86fc401caf9e3792127cf6c2",
+          "attempt_id": "f658d18afa204b48926d77fe911bcd06",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T13:56:15.523Z"
+        },
+        {
+          "notebook": "vince",
+          "page_id": "b7e9fdf8933147039c7c3cc8f2141684",
+          "attempt_id": "fe5d6a71de98493fa9e58fdadbbcd121",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T14:16:45.864Z"
+        }
+      ],
+      "median_eval_count": 1031.0,
+      "median_elapsed_s": 226.63,
+      "success_rate_finished": 0.6522
+    },
+    "qwen3-vl:8b": {
+      "attempts": 9,
+      "succeeded": 4,
+      "failed": 3,
+      "interrupted": 2,
+      "running": 0,
+      "other_status": 0,
+      "error_codes": {
+        "empty_output": 1,
+        "token_repeat": 0,
+        "model_load": 0,
+        "timeout": 2,
+        "circuit_open": 0,
+        "http_error": 0,
+        "interrupted": 0,
+        "other": 0
+      },
+      "truncated_successes": 1,
+      "truncated_repetition_successes": 0,
+      "example_failures": [
+        {
+          "notebook": "xmas narwhal",
+          "page_id": "089fc559d49741ef9ba6675c0249ea32",
+          "attempt_id": "4c6b055455404142bcbe506f735274ee",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T13:58:19.135Z"
+        },
+        {
+          "notebook": "xmas narwhal",
+          "page_id": "7a020a9101ba4461867076613fc2fdcf",
+          "attempt_id": "6803c7462ffd44428076a3508399acb8",
+          "code": "empty_output",
+          "message": "model returned no text",
+          "completed_at": "2026-08-23T14:10:01.960Z"
+        },
+        {
+          "notebook": "xmas narwhal",
+          "page_id": "443e86d40c034d88ba14104de91dc407",
+          "attempt_id": "815a2c2bf3fe491dad71e0c4b163dd5d",
+          "code": "timeout",
+          "message": "Ollama request timed out",
+          "completed_at": "2026-08-23T14:18:19.836Z"
+        }
+      ],
+      "median_eval_count": 4045.0,
+      "median_elapsed_s": 254.93,
+      "success_rate_finished": 0.5714
+    }
+  }
+}

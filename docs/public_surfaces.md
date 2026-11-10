@@ -19,8 +19,8 @@ entrypoints.
 | `init <project>` | Create a new project directory |
 | `import <project> <source>` | Import JPEG/PNG/PDF (`--dpi` for PDFs) |
 | `models` | List vision-capable Ollama models (`--base-url`, `--all`, `--refresh`, `--prefs`) |
-| `run <project> --model …` | Run OCR (`--force`, `--retry-failed`, `--workers 1|2`, `--base-url`, `--allow-remote-ollama`) |
-| `bulk-run pending\|import-run\|notebooks` | Batch OCR across notebooks (repeat `--model` for multipass; `--force`, `--workers`, `--text-model`, `--no-auto-composite`, `--cleanup`) |
+| `run <project> --model …` | Run OCR (`--force`, `--retry-failed`, `--workers 1|2`, `--base-url`, `--provider ollama\|paddleocr`, `--allow-remote-ollama`) |
+| `bulk-run pending\|import-run\|notebooks` | Batch OCR across notebooks (repeat `--model` for multipass; `--provider ollama\|paddleocr`, `--force`, `--workers`, `--text-model`, `--no-auto-composite`, `--cleanup`) |
 | `bulk-run status\|resume <ocr_run_id>` | Inspect or resume an OcrBatchRun |
 | `bulk-analyse pending\|import-run\|notebooks` | Batch Analyse across notebooks (`--preset`, optional `--module` / `--question` / `--text-model`) |
 | `bulk-analyse status\|resume <analysis_batch_id>` | Inspect or resume an AnalysisBatchRun |

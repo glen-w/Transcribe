@@ -622,11 +622,12 @@ class JobCoordinator:
         current_url = getattr(start_provider, "base_url", None)
         if current_url == plan.base_url:
             return start_provider
-        from transcribe.providers.ollama import OllamaVisionProvider
+        from transcribe.providers.factory import build_vision_provider
 
-        if plan.provider_id == "ollama" or isinstance(start_provider, OllamaVisionProvider):
-            return OllamaVisionProvider(plan.base_url)
-        return start_provider
+        try:
+            return build_vision_provider(plan.provider_id, plan.base_url)
+        except Exception:
+            return start_provider
 
     def _run_job(
         self,
@@ -1214,7 +1215,7 @@ def build_coordinator(
 ) -> tuple[ProjectPaths, ProjectService, JobCoordinator, IngestService]:
     from pathlib import Path
 
-    from transcribe.providers.ollama import OllamaVisionProvider
+    from transcribe.providers.factory import build_vision_provider
     from transcribe.services.project import open_project_paths
 
     paths = open_project_paths(Path(root))
@@ -1229,7 +1230,7 @@ def build_coordinator(
             base_url = project.settings.base_url
         except Exception:
             pass
-    prov = provider or OllamaVisionProvider(base_url)
+    prov = provider or build_vision_provider("ollama", base_url)
     declutter = True
     dpi = 200
     try:

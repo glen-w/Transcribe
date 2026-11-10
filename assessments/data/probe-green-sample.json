@@ -1,0 +1,139 @@
+{
+  "collected_at": "2026-11-10T10:43:35Z",
+  "notebook": "green",
+  "note": "4 pages that already have glm token_repeat on disk. Not persisted to page-results.",
+  "results": [
+    {
+      "page_id": "5b075877033a4e419b1aa32eab533a82",
+      "model": "qwen2.5vl:7b",
+      "image": "pages/eeb63d36ca314b58ac9939e4ff418545/0000/1b56739ca3fd422895cb63ec08b0f20d.png",
+      "bytes": 20200668,
+      "ocr_status": "ok",
+      "text_len": 1007,
+      "text_preview": "# 220706 11h46 Oceans as Archives Time for a new NB ($pen). Old one overburdened w/ dudgy. Want to turn the page, start another chapter, and",
+      "eval_count": 315,
+      "truncated": null,
+      "elapsed_s": 17.1
+    },
+    {
+      "page_id": "5b075877033a4e419b1aa32eab533a82",
+      "model": "glm-ocr:latest",
+      "image": "pages/eeb63d36ca314b58ac9939e4ff418545/0000/1b56739ca3fd422895cb63ec08b0f20d.png",
+      "bytes": 20200668,
+      "ocr_status": "error",
+      "error": "Ollama aborted this generate (token repeat limit): {\"error\":\"prediction aborted, token repeat limit reached\"}",
+      "elapsed_s": 13.0
+    },
+    {
+      "page_id": "5b075877033a4e419b1aa32eab533a82",
+      "model": "deepseek-ocr:latest",
+      "image": "pages/eeb63d36ca314b58ac9939e4ff418545/0000/1b56739ca3fd422895cb63ec08b0f20d.png",
+      "bytes": 20200668,
+      "ocr_status": "ok",
+      "text_len": 1001,
+      "text_preview": "20706 1146 Oceans as Archives  Time for a new NB (open). Old one consolidated in a duddy. Want to turn the page. Start another chapter, and ",
+      "eval_count": 263,
+      "truncated": null,
+      "elapsed_s": 7.5
+    },
+    {
+      "page_id": "ee9f57d60ebd489a88f3df7e06987db1",
+      "model": "qwen2.5vl:7b",
+      "image": "pages/1318409996af4b2c933ce18d5b1d7d03/0000/f959f7e62a0a4943bbdeecb782945359.png",
+      "bytes": 27152142,
+      "ocr_status": "ok",
+      "text_len": 1550,
+      "text_preview": "# Post-Covid Arctic Tourism Boom - \"expedition\" We don't often explicitly say that we are anti-capitalist Transhistorical narrator  ## Anna ",
+      "eval_count": 397,
+      "truncated": null,
+      "elapsed_s": 15.5
+    },
+    {
+      "page_id": "ee9f57d60ebd489a88f3df7e06987db1",
+      "model": "glm-ocr:latest",
+      "image": "pages/1318409996af4b2c933ce18d5b1d7d03/0000/f959f7e62a0a4943bbdeecb782945359.png",
+      "bytes": 27152142,
+      "ocr_status": "error",
+      "error": "Ollama aborted this generate (token repeat limit): {\"error\":\"prediction aborted, token repeat limit reached\"}",
+      "elapsed_s": 12.7
+    },
+    {
+      "page_id": "ee9f57d60ebd489a88f3df7e06987db1",
+      "model": "deepseek-ocr:latest",
+      "image": "pages/1318409996af4b2c933ce18d5b1d7d03/0000/f959f7e62a0a4943bbdeecb782945359.png",
+      "bytes": 27152142,
+      "ocr_status": "ok",
+      "text_len": 1713,
+      "text_preview": "Pog-Cond Arctic Tourism Boom - \"Expansion\"  We don't often explicitly say that we are anti-capitalist   Transhistorical narrator    **Angus ",
+      "eval_count": 444,
+      "truncated": null,
+      "elapsed_s": 5.3
+    },
+    {
+      "page_id": "d3807a8a3c3d453292cdcd0cd7befaca",
+      "model": "qwen2.5vl:7b",
+      "image": "pages/d7f969a114fb4036827666cc1efaed60/0000/cadb9f16d47a466aa7c7b14a8fd97f9d.png",
+      "bytes": 18612044,
+      "ocr_status": "ok",
+      "text_len": 458,
+      "text_preview": "# Matisse stuff / priorities - Jump up why greeting / generally - Readiness to talk horses in tone - Sleeping in own den - Home alone - Feel",
+      "eval_count": 166,
+      "truncated": null,
+      "elapsed_s": 12.4
+    },
+    {
+      "page_id": "d3807a8a3c3d453292cdcd0cd7befaca",
+      "model": "glm-ocr:latest",
+      "image": "pages/d7f969a114fb4036827666cc1efaed60/0000/cadb9f16d47a466aa7c7b14a8fd97f9d.png",
+      "bytes": 18612044,
+      "ocr_status": "error",
+      "error": "Ollama aborted this generate (token repeat limit): {\"error\":\"prediction aborted, token repeat limit reached\"}",
+      "elapsed_s": 11.5
+    },
+    {
+      "page_id": "d3807a8a3c3d453292cdcd0cd7befaca",
+      "model": "deepseek-ocr:latest",
+      "image": "pages/d7f969a114fb4036827666cc1efaed60/0000/cadb9f16d47a466aa7c7b14a8fd97f9d.png",
+      "bytes": 18612044,
+      "ocr_status": "ok",
+      "text_len": 529,
+      "text_preview": "# Matisse Stug / Priorities  - Jumping up when greeting, generally - Reacting to all kinds of tone - Sleeping at one's own desk - Honed alon",
+      "eval_count": 194,
+      "truncated": null,
+      "elapsed_s": 3.4
+    },
+    {
+      "page_id": "0775ee94cc5447c2b6289cb4100b2a53",
+      "model": "qwen2.5vl:7b",
+      "image": "pages/e5374d95436f4128a91e510f220e7f52/0000/9baf5d2213bc4946849c79258e89a4eb.png",
+      "bytes": 45348600,
+      "ocr_status": "ok",
+      "text_len": 2024,
+      "text_preview": "# Good to talk to Chloe yesterday - realised that mental state has improved since last session (April). Less overwhelming, agitation & secon",
+      "eval_count": 515,
+      "truncated": null,
+      "elapsed_s": 20.1
+    },
+    {
+      "page_id": "0775ee94cc5447c2b6289cb4100b2a53",
+      "model": "glm-ocr:latest",
+      "image": "pages/e5374d95436f4128a91e510f220e7f52/0000/9baf5d2213bc4946849c79258e89a4eb.png",
+      "bytes": 45348600,
+      "ocr_status": "error",
+      "error": "Ollama aborted this generate (token repeat limit): {\"error\":\"prediction aborted, token repeat limit reached\"}",
+      "elapsed_s": 18.1
+    },
+    {
+      "page_id": "0775ee94cc5447c2b6289cb4100b2a53",
+      "model": "deepseek-ocr:latest",
+      "image": "pages/e5374d95436f4128a91e510f220e7f52/0000/9baf5d2213bc4946849c79258e89a4eb.png",
+      "bytes": 45348600,
+      "ocr_status": "ok",
+      "text_len": 2136,
+      "text_preview": "Good to talk to Chloe yesterday - realised   that mental state has improved since   last session. (A point). Less overthinking   agitation. ",
+      "eval_count": 585,
+      "truncated": null,
+      "elapsed_s": 6.4
+    }
+  ]
+}

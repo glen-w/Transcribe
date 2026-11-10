@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from transcribe.domain.models import (
     DEFAULT_VISION_NUM_PREDICT,
+    AttemptProvenance,
+    ComparisonEntry,
+    ComparisonRecord,
     OCRAttempt,
     OCRSettings,
     PageResult,
     filter_provider_metadata,
+    prune_attempts,
 )
 
 
@@ -107,6 +111,8 @@ def test_filter_provider_metadata_allowlist_and_nan() -> None:
             "nested": {"x": 1},
             "bad_float": float("nan"),
             "load_duration": 0.5,
+            "path": "pipeline",
+            "pipeline_error": "RuntimeError: boom",
         }
     )
     assert cleaned == {
@@ -115,7 +121,11 @@ def test_filter_provider_metadata_allowlist_and_nan() -> None:
         "eval_count": 3,
         "truncated": True,
         "load_duration": 0.5,
+        "path": "pipeline",
     }
+    assert filter_provider_metadata({"path": "mlx_chat"}) == {"path": "mlx_chat"}
+    assert filter_provider_metadata({"path": "/tmp/paddleocr-abc.png"}) == {}
+    assert filter_provider_metadata({"path": "PIPELINE"}) == {}
 
 
 def test_ocr_attempt_as_dict_filters_provider_metadata() -> None:
@@ -160,3 +170,108 @@ def test_page_result_round_trip_preserves_schema_and_edit() -> None:
     assert loaded.effective_text() == "keep"
     assert loaded.effective_text_origin == "human_corrected"
     assert loaded.as_dict()["status"] == "succeeded"
+
+
+def test_page_result_round_trip_preserves_comparison_and_review_fields() -> None:
+    comparison = ComparisonRecord(
+        pass_id="pass-1",
+        ranked_attempt_ids=["a2", "a1"],
+        created_at="t0",
+        entries=[
+            ComparisonEntry(attempt_id="a2", score=0.9, rationale="clearer"),
+            ComparisonEntry(attempt_id="a1", score=0.4, rationale=None),
+        ],
+        ranker_model_name="ranker",
+        ranker_prompt_id="rank_v1",
+        note="manual note",
+    )
+    original = PageResult(
+        page_id="p1",
+        active_attempt_id="a2",
+        preferred_attempt_id="a2",
+        edited_text=None,
+        attempts=[_attempt("a1", raw="one"), _attempt("a2", raw="two")],
+        comparison=comparison,
+        schema_version=1,
+        reviewed_text_fingerprint="text-fp",
+        reviewed_evidence_fingerprint="ev-fp",
+        source_disagreement_count=2,
+        agreement_ratio=0.5,
+    )
+    loaded = PageResult.from_dict(original.as_dict())
+    assert loaded.comparison is not None
+    assert loaded.comparison.pass_id == "pass-1"
+    assert loaded.comparison.ranked_attempt_ids == ["a2", "a1"]
+    assert loaded.comparison.entries[0].score == 0.9
+    assert loaded.comparison.ranker_model_name == "ranker"
+    assert loaded.reviewed_text_fingerprint == "text-fp"
+    assert loaded.reviewed_evidence_fingerprint == "ev-fp"
+    assert loaded.source_disagreement_count == 2
+    assert loaded.agreement_ratio == 0.5
+    assert ComparisonRecord.from_dict(None) is None
+
+
+def test_active_attempt_none_when_id_missing_from_list() -> None:
+    result = PageResult(
+        page_id="p1",
+        active_attempt_id="ghost",
+        attempts=[_attempt("a1")],
+    )
+    assert result.active_attempt() is None
+    assert result.status == "pending"
+
+
+def test_ocr_attempt_unknown_kind_falls_back_to_vision() -> None:
+    payload = _attempt("a1").as_dict()
+    payload["attempt_kind"] = "not-a-kind"
+    loaded = OCRAttempt.from_dict(payload)
+    assert loaded.attempt_kind == "vision"
+
+
+def test_prune_attempts_when_protected_exceeds_max_retained() -> None:
+    """Protected active/preferred/latest-per-model can exceed max_retained."""
+
+    def _prov(model: str) -> AttemptProvenance:
+        return AttemptProvenance(
+            model_name=model,
+            model_digest="d" * 64,
+            model_identity_verified=True,
+            prompt_id="faithful_markdown",
+            prompt_version="1",
+            prompt_sha256="a" * 64,
+            prompt_text="p",
+            input_sha256="b" * 64,
+            preprocess_profile="none",
+            preprocess_version=1,
+            generation_options={},
+            application_version="0",
+            ollama_host="http://localhost:11434",
+            request_id=model,
+            render_id="r1",
+        )
+
+    attempts = [
+        OCRAttempt(
+            attempt_id=f"a{i}",
+            status="succeeded",
+            input_fingerprint=f"fp{i}",
+            fingerprint_payload={},
+            raw_text=f"t{i}",
+            provenance=_prov(f"m{i}"),
+            provider_metadata={},
+            started_at=f"2020-01-{i + 1:02d}T00:00:00+00:00",
+            completed_at=f"2020-01-{i + 1:02d}T00:00:00+00:00",
+        )
+        for i in range(6)
+    ]
+    kept = prune_attempts(
+        attempts,
+        active_attempt_id="a0",
+        preferred_attempt_id="a1",
+        max_retained=3,
+    )
+    ids = {a.attempt_id for a in kept}
+    assert "a0" in ids
+    assert "a1" in ids
+    assert len(kept) == 3
+    assert [a.started_at for a in kept] == sorted(a.started_at for a in kept)

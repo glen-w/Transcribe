@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from transcribe.providers.factory import build_vision_provider, normalize_provider_id
 from transcribe.providers.ollama import (
     OllamaVisionProvider,
     is_local_machine_host,
@@ -167,11 +168,22 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
         project = projects.load()
         settings = project.settings
         settings.model_name = args.model
+        provider_id = normalize_provider_id(getattr(args, "provider", None))
         if args.base_url:
             settings.base_url = normalize_base_url(args.base_url)
+        elif provider_id == "paddleocr":
+            settings.base_url = normalize_base_url("http://127.0.0.1:8112")
         settings.max_workers = max(1, min(2, args.workers))
         url = normalize_base_url(settings.base_url)
-        if not is_local_machine_host(url) and not args.allow_remote_ollama:
+        if provider_id == "paddleocr":
+            if not is_local_machine_host(url):
+                print(
+                    "Refusing non-local paddleocr sidecar "
+                    "(page images would leave this machine).",
+                    file=sys.stderr,
+                )
+                return 2
+        elif not is_local_machine_host(url) and not args.allow_remote_ollama:
             print(
                 "Refusing non-local Ollama host without --allow-remote-ollama "
                 "(page images would leave this machine).",
@@ -192,7 +204,7 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
             )
             return 2
         project = projects.save_settings(project, settings)
-        coord.provider = OllamaVisionProvider(settings.base_url)
+        coord.provider = build_vision_provider(provider_id, settings.base_url)
 
         if args.retry_failed:
             from transcribe.services.job_outcome import retry_failed_page_ids

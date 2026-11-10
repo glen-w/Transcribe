@@ -31,7 +31,7 @@ First visit: [docs home](index.md) or [User guide](user_guide.md). Developers: [
 | Doc | Purpose |
 |-----|---------|
 | [OCR and transcription](runtime/ocr.md) | This notebook, multipass, batch, review |
-| [OCR model recipes](runtime/ocr_model_recipes.md) | Per-tag prompt / options lanes (Settings → Models) |
+| [OCR model recipes](runtime/ocr_model_recipes.md) | Per-tag prompt / options lanes (Settings → Models). Optional `--provider paddleocr` is a local MLX sidecar, not the Ollama picker |
 | [OCR model matrix](runtime/ocr_model_matrix.md) | Local probe results and first-OCR picks |
 
 ## Analyse and detect

@@ -62,6 +62,22 @@ def test_recipe_matches_glm_ocr() -> None:
     assert any("repeat_penalty" in w for w in advice.warnings)
 
 
+def test_recipe_matches_paddleocr_vl() -> None:
+    recipe = recipe_for_model("PaddleOCR-VL-1.6", recipes=RECIPES)
+    assert recipe is not None
+    assert recipe.recipe_id == "paddleocr_vl"
+    assert recipe.prompt_id == "paddle_ocr"
+    assert recipe.freeze_prompt is True
+    assert recipe_for_model("paddleocr-vl-1.6", recipes=RECIPES) is not None
+    advice = advise_model("PaddleOCR-VL-1.6")
+    assert advice.kind == "ocr_oriented"
+    assert "recipe" in advice.title.lower()
+    from transcribe.services.ocr_model_recipes import recipe_prompt
+
+    _, _, body = recipe_prompt(recipe)
+    assert body == "OCR:"
+
+
 def test_recipe_matches_granite_vision() -> None:
     recipe = recipe_for_model("granite3.2-vision:latest", recipes=RECIPES)
     assert recipe is not None
@@ -166,6 +182,56 @@ def test_build_plan_uses_deepseek_recipe(tmp_path: Path) -> None:
     assert plan.prompt_id == "free_ocr"
     assert plan.prompt_text.strip() == "Free OCR."
     assert plan.recipe_id == "deepseek_ocr"
+
+
+def test_build_plan_uses_paddleocr_recipe(tmp_path: Path) -> None:
+    paths = open_project_paths(tmp_path / "proj")
+    clock, ids = FakeClock(), SequentialIds()
+    projects = ProjectService(paths, clock=clock, ids=ids)
+    projects.create("t")
+    ingest = IngestService(paths, clock=clock, ids=ids)
+    ingest.import_bytes("p.png", _png_bytes())
+    from transcribe.providers.base import ModelInfo
+    from transcribe.providers.paddleocr import PaddleocrVisionProvider
+
+    class _Stub(PaddleocrVisionProvider):
+        def __init__(self) -> None:
+            super().__init__("http://127.0.0.1:8112")
+
+        def list_models(self, *, refresh: bool = False):
+            from transcribe.providers.base import DiscoveryResult
+
+            return DiscoveryResult(
+                models=[
+                    ModelInfo(
+                        name="PaddleOCR-VL-1.6",
+                        digest="paddle-digest",
+                        capabilities=["vision"],
+                        capability_known=True,
+                    )
+                ],
+                error=None,
+            )
+
+        def resolve_model_identity(self, model_name: str):
+            return "paddle-digest", True
+
+    provider = _Stub()
+    coord = JobCoordinator(
+        paths, projects, provider, clock=clock, ids=ids, archive_runtime=_runtime(tmp_path)
+    )
+    project = projects.load()
+    settings = project.settings
+    settings.model_name = "PaddleOCR-VL-1.6"
+    settings.prompt_id = "faithful_markdown"
+    projects.save_settings(project, settings)
+    plan = coord._build_plan(
+        projects.load(), job_id="j1", page_ids=None, force=True, provider=provider
+    )
+    assert plan.provider_id == "paddleocr"
+    assert plan.prompt_id == "paddle_ocr"
+    assert plan.prompt_text.strip() == "OCR:"
+    assert plan.recipe_id == "paddleocr_vl"
 
 
 def test_build_plan_uses_glm_ocr_repeat_penalty(tmp_path: Path) -> None:

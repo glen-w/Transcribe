@@ -1,0 +1,294 @@
+{
+  "collected_at": "2026-11-10T16:51:30.670161+00:00",
+  "notebook": "/Users/89298/Documents/transcribe-projects/black",
+  "title": "black",
+  "pages": 184,
+  "paddle_present": true,
+  "models": {
+    "deepseek-ocr": {
+      "attempts": 184,
+      "succeeded": 183,
+      "failed": 1,
+      "interrupted": 0,
+      "empty_success": 0,
+      "median_s": 2.03,
+      "paths": {},
+      "errors": {
+        "empty_output": 1
+      }
+    },
+    "glm-ocr": {
+      "attempts": 1203,
+      "succeeded": 591,
+      "failed": 600,
+      "interrupted": 12,
+      "empty_success": 0,
+      "median_s": 33.47,
+      "paths": {},
+      "errors": {
+        "token_repeat": 254,
+        "empty_output": 2,
+        "http_error": 343,
+        "timeout": 1
+      }
+    },
+    "granite3.2-vision": {
+      "attempts": 933,
+      "succeeded": 746,
+      "failed": 186,
+      "interrupted": 1,
+      "empty_success": 0,
+      "median_s": 5.07,
+      "paths": {},
+      "errors": {
+        "token_repeat": 182,
+        "http_error": 4
+      }
+    },
+    "llama3.2-vision:11b": {
+      "attempts": 1,
+      "succeeded": 0,
+      "failed": 1,
+      "interrupted": 0,
+      "empty_success": 0,
+      "median_s": 68.17,
+      "paths": {},
+      "errors": {
+        "model_load": 1
+      }
+    },
+    "paddleocr-vl-1.6": {
+      "attempts": 184,
+      "succeeded": 184,
+      "failed": 0,
+      "interrupted": 0,
+      "empty_success": 0,
+      "median_s": 4.84,
+      "paths": {
+        "pipeline": 179,
+        "mlx_chat": 5
+      },
+      "errors": {}
+    },
+    "qwen2.5vl:3b": {
+      "attempts": 184,
+      "succeeded": 184,
+      "failed": 0,
+      "interrupted": 0,
+      "empty_success": 0,
+      "median_s": 8.8,
+      "paths": {},
+      "errors": {}
+    },
+    "qwen2.5vl:7b": {
+      "attempts": 207,
+      "succeeded": 183,
+      "failed": 22,
+      "interrupted": 2,
+      "empty_success": 0,
+      "median_s": 9.33,
+      "paths": {},
+      "errors": {
+        "http_error": 3,
+        "token_repeat": 19
+      }
+    }
+  },
+  "pairwise_vs_7b_count": 183,
+  "median_cer_vs_7b": 0.8283,
+  "pairwise_sample": [
+    {
+      "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+      "cer_vs_7b": 32.870588235294115,
+      "qwen_len": 85,
+      "paddle_len": 2867
+    },
+    {
+      "page_id": "46c54058f594411d9e000278c831dcb8",
+      "cer_vs_7b": 2.9906976744186045,
+      "qwen_len": 430,
+      "paddle_len": 1708
+    },
+    {
+      "page_id": "be9ae66386c54f7f88481e6faba963cf",
+      "cer_vs_7b": 3.5193370165745854,
+      "qwen_len": 362,
+      "paddle_len": 1625,
+      "cer_vs_edited": 3.4919786096256686
+    },
+    {
+      "page_id": "25191dac9838499da53d65f53a39c01d",
+      "cer_vs_7b": 0.4277227722772277,
+      "qwen_len": 505,
+      "paddle_len": 663
+    },
+    {
+      "page_id": "c1666307639f46c2969afd34bfdb7144",
+      "cer_vs_7b": 3.3,
+      "qwen_len": 390,
+      "paddle_len": 1659
+    },
+    {
+      "page_id": "be1051882b5540b1a646a8589769c3a0",
+      "cer_vs_7b": 3.1744186046511627,
+      "qwen_len": 430,
+      "paddle_len": 1780
+    },
+    {
+      "page_id": "59e2c8083b864dbf874a3f161d544169",
+      "cer_vs_7b": 3.7708978328173375,
+      "qwen_len": 323,
+      "paddle_len": 1509
+    },
+    {
+      "page_id": "59016e64dc5e496b874004cc96e4e7b2",
+      "cer_vs_7b": 2.8568232662192394,
+      "qwen_len": 447,
+      "paddle_len": 1709
+    },
+    {
+      "page_id": "be76651a09f04571b20dd660eb6875c0",
+      "cer_vs_7b": 3.390501319261214,
+      "qwen_len": 379,
+      "paddle_len": 1643
+    },
+    {
+      "page_id": "2beed56070fd432286a6e804517db7dc",
+      "cer_vs_7b": 4.4491228070175435,
+      "qwen_len": 285,
+      "paddle_len": 1540
+    },
+    {
+      "page_id": "a6560934b564483eb0ba71a5bb7069a0",
+      "cer_vs_7b": 3.7927927927927927,
+      "qwen_len": 222,
+      "paddle_len": 1061
+    },
+    {
+      "page_id": "e47c20401a894391a48c3ec0109d83ac",
+      "cer_vs_7b": 0.4750593824228028,
+      "qwen_len": 421,
+      "paddle_len": 577
+    },
+    {
+      "page_id": "86c365008fca4584ba0f4ae173419e79",
+      "cer_vs_7b": 1.365904365904366,
+      "qwen_len": 481,
+      "paddle_len": 911
+    },
+    {
+      "page_id": "47ea15c186ca42149928915d1b16eab8",
+      "cer_vs_7b": 1.6815742397137745,
+      "qwen_len": 559,
+      "paddle_len": 1358
+    },
+    {
+      "page_id": "771536bc29674cf6a18a51ccc5994ad8",
+      "cer_vs_7b": 1.7674050632911393,
+      "qwen_len": 632,
+      "paddle_len": 1728
+    },
+    {
+      "page_id": "a0258299cd414b6c8abcd625154f1811",
+      "cer_vs_7b": 0.38322813345356177,
+      "qwen_len": 1109,
+      "paddle_len": 1439
+    },
+    {
+      "page_id": "b9f50082192b4a8b9db6b0c9b428c400",
+      "cer_vs_7b": 3.3876923076923076,
+      "qwen_len": 325,
+      "paddle_len": 1412
+    },
+    {
+      "page_id": "ee22b810c8e84f61b092e645524ec91a",
+      "cer_vs_7b": 2.1621004566210047,
+      "qwen_len": 438,
+      "paddle_len": 1374
+    },
+    {
+      "page_id": "3c43eabefa9646fa8d121ce6ce0e9e4d",
+      "cer_vs_7b": 0.2655109489051095,
+      "qwen_len": 1096,
+      "paddle_len": 1343
+    },
+    {
+      "page_id": "3cb37033a1344582824f80705244e82f",
+      "cer_vs_7b": 3.7300275482093666,
+      "qwen_len": 363,
+      "paddle_len": 1702
+    }
+  ],
+  "previews": [
+    {
+      "page_id": "a0258299cd414b6c8abcd625154f1811",
+      "qwen2.5vl:7b": "flooding into the perceived vacuum, when really i could do with a week to settle, regalate, exist with fewer expectations. Then a week away with Ana. Then i'll have to get another attestation. [Switched to the non-Lamy pen to see if it agrees better. Also a medium nib, though ridged at the back. Feels smoother.]\n\ni wonder if i could stretch it to 6 weeks, so i have the rest of the year 088?! not j",
+      "granite3.2-vision": "# Flooding into the Perceived Vacuum When I Could Do a Little More to Settle After Expectations Then a Feeling of Being Another Attestation Get another Attempt To See if It Is in Medium Rib Though Right Smooth.",
+      "deepseek-ocr": "- **If you need to make changes**, do so in the original notebook page and then copy/paste into this document",
+      "paddle": "#################\nlabel:\ttext\nbbox:\t[1, 202, 1499, 796]\ncontent:\tflooding into the perceived vacuum when\nreally I could do with a week to settle,\nregulate exist with fewer expectations. Then a\nweek away with Ana - Then I'll have to\nget another attestation. I switched to the non-\nlamy pen to see if it agrees better. Also a\nmedian rib, though ridged at the back. Feels\nsmoother].\n#################\n\n#"
+    },
+    {
+      "page_id": "448ecdf781fa45d0af55ef452080ef84",
+      "qwen2.5vl:7b": "260112 1907 Gush! Bitter (in my glass; surprisingly calm in my heart). (Chill Monday went well - got up, ate, took a nap. Coffee at Autours, a few nagging admin tasks. the Comm/Community meeting - I'd forgotten about this one, but it will comfortably tick a couple of boxes. Spoke to Mom for over an hour. Was nice, she sounds great - so nice to hear. The alcohol doesn't seem to have read its ugly h",
+      "granite3.2-vision": "# 26012.907 Chill Surprisingly Calm in My Head? # Chill Warday Stunt Well - Got Up Late , Took a Few Minutes to Sit Down and Think About This One Day I'm Gonna Try Again Next Week . It's Just the Need for Some Time Out. Team Coaching Was Not So Good Consultant Thoughts Are Quiet Still Got My Best Ideas at Hand Drawing Don't Want To Find Immediately The Memory Did Enjoy The Rest Process Doing Acts ",
+      "deepseek-ocr": "- **If you need to use a different font, size, color, etc., please do so in the notes section of your assignment**\n- Do not change the original formatting (bold, italics, underline) unless instructed by instructor\n\n---\n\n260112 1907 Fush! Better (in my glass)\nSupposingly calm in my head). Chill\nnowday went well - got up, ate, took a nap. Coffee at dusk was a few napping\nadmiring tasks. The comm/com",
+      "paddle": "#################\nlabel:\ttext\nbbox:\t[0, 110, 1471, 1103]\ncontent:\t260112 1907 Cash! Bitter (in my glass;  Surprisingly, calm in my heart). Christ  Monday went well-got up, late, too. a nap. coffee at Aut Day, a few nagging admin tasks. the comm/community meeting - it forgotten about this one, but it will comfortably tick a couple of boxes. Spoke to Mom for over an hour. Was nice, she sounds great "
+    },
+    {
+      "page_id": "3c43eabefa9646fa8d121ce6ce0e9e4d",
+      "qwen2.5vl:7b": "# 25/11/06 17:29 Aux Ours\n\nNot sure how last few days flew past so fast, with little noise, no \"productivity\" and the irritating irritation. All with a couple of beers, of course. Attestation not quite as comprehensive as hoped - a little more admin to do, but still should get time I need off. Perhaps inevitable that a crash happens once you tick the box that says it's allowed. Missing Ana, warmly",
+      "granite3.2-vision": "25106 1729 Aur Ours Not Sure how last few days felt so much more active than usual. Still should get time to read that a crush on the boy who says he's very nice and venturesome, but I'm not sure if it was just because of me or through the cases i did in the past. Yet i know that is through the cases i did in the past. The feeling of being so close to someone doesn't make a couple of days seem lik",
+      "deepseek-ocr": "- **If you need to make changes**, use the \"Edit\" menu in the top right corner of each page",
+      "paddle": "#################\nlabel:\theader\nbbox:\t[0, 190, 824, 289]\ncontent:\t251106 1729 Aux Ours\n#################\n\n#################\nlabel:\ttext\nbbox:\t[0, 342, 1491, 1162]\ncontent:\tNot sure how last few days flew past so fast, with little noise, no \"productivity\" and the irritating irritation. All with a couple of beers, of course. Attestations not quite as comprehensive as hoped - a little more admin to d"
+    },
+    {
+      "page_id": "e00df36afd284cbe8de718f31265398b",
+      "qwen2.5vl:7b": "# incredible how quick the outlook changes, with the weather the time, with what you choose to leave behind. No need to insist everything changes at once, but settle into a gentle uncertainty. the calm of a caravan, the gaze and touch of someone you love, make some space, make some peace with yourself. Be present, choose where your attention rests - this is quite literally your life.\n12:56\n15:38 S",
+      "granite3.2-vision": "# 1356\n## 15:38 Sally Coffee - Papigan\n\nPrelimsist looking that while it was a little late to why not make the Bill Simmons podcast on time for lunch by dreaming in and containing but creating content to write entire columns to date. The craft of writing from scratch is dominated so much if dividing, he used as hard people often need for writing from the start that it didn't matter how many words ",
+      "deepseek-ocr": "- **If you have questions about the output**, ask in the comments\n\n---\n\n### Incredible now quick the outcome changes with the weather - the time, with what you chose to leave behind. No need to insist everything changes as once, but settle into a gentle uncertainty - the calm of a caravan, the gaze and touch of someone you love, make some space, make some peace With yourself. Be present, choose wh",
+      "paddle": "#################\nlabel:\ttext\nbbox:\t[10, 204, 1500, 876]\ncontent:\tincredible how quick the outlook changes, with the weather the time with what you choose to leave behind. No need to insist everything changes at once, but settle into a gentle uncertainty, the calm of a caravan, the gaze and touch of someone you love, make some space, make some peace with yourself. Be present, choose where your att"
+    },
+    {
+      "page_id": "58574bf45ae34c5b8a25ca93138fb40b",
+      "qwen2.5vl:7b": "# Departures\n\nStill carrying some baggage from the last\nstretch, against my intentions, stashed in\nthe bottom of the bag. A missed connection\nwith Carolyn - both the remains of the bigger\npicture and our unintentional falling out\nof touch - grieving Madison still hits hard.\nThoughts of work, the quiet battle I'll have\nto return to - planning my approach\nprematurely - now is time to let go, rest.\nS",
+      "granite3.2-vision": "# Departures\nStill carrying some baggage from the last trip. Again my sorrows are settled in the bottom of the bag as I sit down to write this letter and our conversation has gone over again. The thoughts of work the following week have been weighing me heavily - not just about what is going on at Carolyn's but also about how social events are going, and so on. It seems like a challenging time for",
+      "deepseek-ocr": "- **If you have questions about the output**, ask in the comments section below\n\n---\n\n### Departs\n\nStill carrying some baggage from the last stretch, against my intentions, stashed in the bottom of the day. A mixed connection with Carolyn - both the remains of the bigger picture and our unintentional falling out of touch - growing Madise still hot hand. Thoughts of how she got to battle i'll have ",
+      "paddle": "#################\nlabel:\tparagraph_title\nbbox:\t[0, 210, 314, 304]\ncontent:\tDepartures\n#################\n\n#################\nlabel:\ttext\nbbox:\t[0, 340, 1455, 1388]\ncontent:\tStill carrying some baggage from the last stretch, against my intentions, stashed in the bottom of the bag. A missed connection with Carolyn - both the remains of the bigger picture and our unmentioned falling out of touch - givi"
+    },
+    {
+      "page_id": "ff5a9f5dd1e946ff87ec1eee35d99b7b",
+      "qwen2.5vl:7b": "- Coren - Spotify - loVorgn\n- Only Nabilah / Jamie reacted to J message",
+      "granite3.2-vision": "Coren - Spitty - LaVergie Only Nasib / Jamie raced to T magazine",
+      "deepseek-ocr": ".\n- **If you need to make assumptions about the meaning of a word, look it up in a dictionary.**\n- Do not use abbreviations (e.g., \"lol\", \"brb\") unless they are common and widely understood.\n- Use proper punctuation and grammar.\n- If there's text that is unclear or ambiguous, please ask me for clarification.\n\n**Cover - Spotify - lol/argu**\n\nOnly Nablal/Jame watch it I may",
+      "paddle": "#################\nlabel:\ttext\nbbox:\t[0, 198, 1494, 474]\ncontent:\tCoren - specify - low/argh\nOnly Naisilds/Jamie reacted to T nersay\n#################"
+    },
+    {
+      "page_id": "1ae80de2a33045faa9cdd8bce2e69f27",
+      "qwen2.5vl:7b": "There is no text content on this page. It appears to be a blank page from a notebook.",
+      "granite3.2-vision": "#",
+      "deepseek-ocr": ".\n- Use proper punctuation and spacing.",
+      "paddle": "[{'input_path': '/var/folders/sy/pjg7ypqj2vz2xf0v12m1l2k9_22rhc/T/paddleocr-afikitf6.png', 'page_index': None, 'page_count': None, 'width': 1484, 'height': 2496, 'doc_preprocessor_res': {'output_img': array([[[  4,   0,   0],\n        [  9,   3,   4],\n        [  4,   0,   0],\n        ...,\n        [173, 169, 164],\n        [177, 171, 166],\n        [174, 170, 165]],\n\n       [[  4,   0,   0],\n        ["
+    },
+    {
+      "page_id": "02c43de3aa4241278b29433edcf0e4b6",
+      "qwen2.5vl:7b": "```\ntaken some Solar in notion that he'd be\nfine. And he is. but I believe Carolyn,\nbc of course I do.\n```",
+      "granite3.2-vision": "Faren and Jokee in motion that he 'd be here; but we 're just believing Candy. BC as course I do.",
+      "deepseek-ocr": ".\n- **If you need to make assumptions about the meaning of a word, use square brackets [ ] and provide an explanation in parentheses ( )**\n- Do not change the order of words or sentences.",
+      "paddle": "#################\nlabel:\ttext\nbbox:\t[0, 214, 1443, 457]\ncontent:\ttale an some solace in notion that he'd se\nfine. And he is, but I believe Carolyn,\nbe of course I do.\n#################"
+    },
+    {
+      "page_id": "896fb6918c334f2cb198c9751172e4e7",
+      "qwen2.5vl:7b": "```markdown\nque t'envolten.\n\nPer\u00f2 ho canviar\u00e9 tot.\n\nEn doblegarem, i aix\u00ed no ens trencarem\ni junts...\n\n[together!]\n\nquan crucigramem!\n```",
+      "granite3.2-vision": "que t'envolten. Pero ho canviare tut: i doblegarem; ai? no ans trancarmi! guan cracigramen!",
+      "deepseek-ocr": ".\n- **If you don't know the answer, leave it blank**\n- Do not use abbreviations or symbols that aren't in the original list\n\n---\n\n**que t'envoitent.**\n\nPer\u00f2 ho canviar\u00e9 tot.\n\nEn doblegarem, i aix\u00ed no ens trencarem\ni junt s...\n\n[ **togetiner!** ]\n\nquan cru\u00efgramem!",
+      "paddle": "#################\nlabel:\ttext\nbbox:\t[0, 214, 525, 308]\ncontent:\tque + 'en Volten.\n#################\n\n#################\nlabel:\ttext\nbbox:\t[0, 340, 905, 443]\ncontent:\tPer\u00f2 no canviar\u00e9 tot.\n#################\n\n#################\nlabel:\ttext\nbbox:\t[0, 481, 1493, 724]\ncontent:\tEn doblegarem, i aix\u00ed no ens trencarem i junt's...\n#################\n\n#################\nlabel:\ttext\nbbox:\t[2, 770, 486, 879]\ncont"
+    },
+    {
+      "page_id": "7d15a895a70e4dd1975f905c77a9bf7b",
+      "qwen2.5vl:7b": "251217 1455 OSPAR\n\nChairs - OSPAR\n- Bonn\n- Radio Sabs C (RSC)\n\nHead FR -\nSusana - ES\nLaura - Dep Sec\n\nExample\n\n1 tel role\n2 qual rol\n3 Succas",
+      "granite3.2-vision": "251217 465 OSPAR Head Fr - Susana - ES Laura - Dept Sec Example Lfc/ role 2 qiel rd 2 Succos",
+      "deepseek-ocr": ".\n- **If you have questions about the output**, ask them here.",
+      "paddle": "#################\nlabel:\tdisplay_formula\nbbox:\t[0, 112, 768, 223]\ncontent:\t251217 1455 OSPAR\n#################\n\n#################\nlabel:\tdisplay_formula\nbbox:\t[9, 269, 784, 509]\ncontent:\t $$ \\begin{array}{l} \\text{Chairs}-\\text{OSPAR}\\\\-\\text{Bonn} \\quad -\\text{Radioass C(RSC)}\\end{array} $$ \n#################\n\n#################\nlabel:\tdisplay_formula\nbbox:\t[10, 494, 366, 578]\ncontent:\t $$ 410\\tim"
+    }
+  ]
+}

@@ -139,8 +139,8 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
     from transcribe.corpus.ocr_run import OcrBatchRunStore
     from transcribe.corpus.paths import CorpusPaths
     from transcribe.domain.models import OCRSettings
+    from transcribe.providers.factory import build_vision_provider, normalize_provider_id
     from transcribe.providers.ollama import (
-        OllamaVisionProvider,
         is_local_machine_host,
         normalize_base_url,
     )
@@ -190,7 +190,18 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
         return 0 if run.status in {"completed", "partial"} else 1
 
     url = normalize_base_url(args.base_url or default_ollama_base_url())
-    if not is_local_machine_host(url) and not args.allow_remote_ollama:
+    provider_id = normalize_provider_id(getattr(args, "provider", None))
+    if provider_id == "paddleocr":
+        if not is_local_machine_host(url):
+            print(
+                "Refusing non-local paddleocr sidecar "
+                "(page images would leave this machine).",
+                file=sys.stderr,
+            )
+            return 2
+        if not args.base_url:
+            url = normalize_base_url("http://127.0.0.1:8112")
+    elif not is_local_machine_host(url) and not args.allow_remote_ollama:
         print(
             "Refusing non-local Ollama host without --allow-remote-ollama "
             "(page images would leave this machine).",
@@ -222,7 +233,7 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
         text_model_name=text_model or cleanup_model,
         auto_activate_composite=not bool(getattr(args, "no_auto_composite", False)),
     )
-    coord.provider = OllamaVisionProvider(url)
+    coord.provider = build_vision_provider(provider_id, url)
     candidates = list_candidates(corpus, clock=clock, ids=ids)
     import_run_id = None
     if args.bulk_run_cmd == "pending":

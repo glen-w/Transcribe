@@ -123,7 +123,9 @@ def test_run_three_modules_and_cache_hit(tmp_path: Path):
             "A third page keeps the notebook corpus non-trivial for readability.",
         ],
     )
-    first = runner.run_batch()
+    # Explicit light modules only — full registry pulls BERTopic/spaCy and can
+    # exceed the default 60s timeout under suite import contention.
+    first = runner.run_batch(["stats", "lexical_diversity", "understandability"])
     assert {"stats", "lexical_diversity", "understandability"}.issubset(set(first))
     for mid in ("stats", "lexical_diversity", "understandability"):
         env = first[mid]
@@ -312,7 +314,7 @@ def test_eligibility_lib_but_ungated_modules_still_run(tmp_path: Path):
     elig = evaluate_notebook_eligibility_v1(doc.units)
     assert elig["eligible_unit_ids"] == []
     # Modules must not call eligibility — still run (may be insufficient_data for lex/understand)
-    results = runner.run_batch()
+    results = runner.run_batch(["stats", "lexical_diversity", "understandability"])
     assert "stats" in results
     assert results["stats"]["outcome"] == "success"
     # Prove modules don't import eligibility in their module files

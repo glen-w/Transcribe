@@ -83,7 +83,7 @@ Prompt rewrite for glm-ocr is **v2** only if options-only still aborts >30% on a
 ## E. Follow-ups (not this cut)
 
 - Historical repair of truncated+repetition `succeeded` granite/glm attempts (same pattern as empty-success repair).
-- Drop glm-ocr from Nightshift’s compare set if the recipe still aborts >30% on a real night.
+- ~~Drop glm-ocr from Nightshift’s compare set if the recipe still aborts >30% on a real night.~~ **Done 2026-11-10** — see [nightshift_vision_models.md](nightshift_vision_models.md).
 - Yield the **current** notebook when transcriptx-night starts (Nightshift), only if timeouts cluster under overlap after D1–D5.
 - If Review finds glm-ocr `truncated` tails are padding rather than leftover page text, lower recipe `num_predict` (that key is already fingerprint-significant).
 

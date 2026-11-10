@@ -1,0 +1,505 @@
+{
+  "collected_at": "2026-11-10T10:37:38.771521+00:00",
+  "snapshots": [
+    {
+      "night_date": "2026-11-10",
+      "recorded_at": "2026-11-10T10:02:19.519201+00:00",
+      "runs_done": 3266,
+      "runs_total": 17931,
+      "runs_remaining": 14665
+    }
+  ],
+  "snapshot_deltas": [],
+  "forecast": {
+    "runs_remaining": 14665,
+    "runs_per_shift": 82.0,
+    "shifts_until_completion_status_quo": 179,
+    "source": "last_night_job_log"
+  },
+  "nights_summary": {
+    "nights_with_transcribe_block": 20,
+    "nights_from_2023_and_rest_skipped_interrupted": 3,
+    "nights_from_2023_ran": 10,
+    "nights_rest_ran": 5,
+    "nights_ingest_skipped": 16,
+    "nights_recent_stopped_at_window": 15
+  },
+  "nights": [
+    {
+      "night_date": "2026-10-22",
+      "status": "ok · exit `0`",
+      "when": "01:16:34 → 01:16:34 (0s) (UTC `2026-10-21T23:16:34Z` → `2026-10-21T23:16:34Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "- **Phases:**",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+        "recent": "",
+        "from_2023": "",
+        "rest": "",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "",
+      "from_2023": "",
+      "rest": "",
+      "ingest": "",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-23",
+      "status": "ok · exit `0`",
+      "when": "02:26:45 → 03:56:49 (1h 30m) (UTC `2026-10-23T00:26:45Z` → `2026-10-23T01:56:49Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: skipped (transcriptx-night running) · rest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "skipped (transcriptx-night running)",
+        "rest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "skipped (transcriptx-night running)",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-24",
+      "status": "partial · exit `130`",
+      "when": "02:30:28 → 12:20:59 (9h 50m) (UTC `2026-10-24T00:30:28Z` → `2026-10-24T10:20:59Z`)",
+      "headline": "`black` finished; `smiley` stopped mid rank/composite",
+      "detail": "recent: interrupted (SIGINT/SIGTERM on worker) · ok=1 failed=1 · black, smiley · from_2023: skipped (run interrupted) · rest: skipped (run interrupted)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+        "recent": "interrupted (SIGINT/SIGTERM on worker) · ok=1 failed=1 · black, smiley",
+        "from_2023": "skipped (run interrupted)",
+        "rest": "skipped (run interrupted)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "interrupted (SIGINT/SIGTERM on worker) · ok=1 failed=1 · black, smiley",
+      "from_2023": "skipped (run interrupted)",
+      "rest": "skipped (run interrupted)",
+      "ingest": "",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-25",
+      "status": "ok · exit `0`",
+      "when": "02:30:48 → 03:01:00 (1h 30m) (UTC `2026-10-25T00:30:48Z` → `2026-10-25T02:01:00Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: skipped (transcriptx-night running) · rest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "skipped (transcriptx-night running)",
+        "rest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "skipped (transcriptx-night running)",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-26",
+      "status": "ok · exit `0`",
+      "when": "01:16:33 → 04:17:01 (3h) (UTC `2026-10-26T00:16:33Z` → `2026-10-26T03:17:01Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: skipped (transcriptx-night running) · ingest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "skipped (transcriptx-night running)",
+        "ingest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "skipped (transcriptx-night running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-27",
+      "status": "ok · exit `0`",
+      "when": "01:50:15 → 03:55:13 (2h 4m) (UTC `2026-10-27T00:50:15Z` → `2026-10-27T02:55:13Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · smiley · from_2023: skipped (transcriptx-night running) · rest: skipped (transcriptx-night running) · ingest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · smiley",
+        "from_2023": "skipped (transcriptx-night running)",
+        "rest": "skipped (transcriptx-night running)",
+        "ingest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · smiley",
+      "from_2023": "skipped (transcriptx-night running)",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "skipped (transcriptx-night running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-28",
+      "status": "ok · exit `0`",
+      "when": "00:16:34 → 00:16:34 (0s) (UTC `2026-10-27T23:16:34Z` → `2026-10-27T23:16:34Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: skipped (paperful-critique running) · from_2023: skipped (paperful-critique running) · rest: skipped (paperful-critique running) · ingest: skipped (paperful-critique running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "skipped (paperful-critique running)",
+        "from_2023": "skipped (paperful-critique running)",
+        "rest": "skipped (paperful-critique running)",
+        "ingest": "skipped (paperful-critique running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "skipped (paperful-critique running)",
+      "from_2023": "skipped (paperful-critique running)",
+      "rest": "skipped (paperful-critique running)",
+      "ingest": "skipped (paperful-critique running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-29",
+      "status": "ok · exit `0`",
+      "when": "00:16:32 → 03:16:46 (3h) (UTC `2026-10-28T23:16:32Z` → `2026-10-29T02:16:46Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · smiley · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: skipped (transcriptx-night running) · ingest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · smiley",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "skipped (transcriptx-night running)",
+        "ingest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · smiley",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "skipped (transcriptx-night running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-30",
+      "status": "ok · exit `0`",
+      "when": "00:16:34 → 03:16:53 (3h) (UTC `2026-10-29T23:16:34Z` → `2026-10-30T02:16:53Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: skipped (transcriptx-night running) · ingest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "skipped (transcriptx-night running)",
+        "ingest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "skipped (transcriptx-night running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-10-31",
+      "status": "ok · exit `0`",
+      "when": "00:16:32 → 03:16:50 (3h) (UTC `2026-10-30T23:16:32Z` → `2026-10-31T02:16:50Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: skipped (transcriptx-night running) · ingest: skipped (transcriptx-night running)",
+      "phases": {
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "skipped (transcriptx-night running)",
+        "ingest": "skipped (transcriptx-night running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "skipped (transcriptx-night running)",
+      "ingest": "skipped (transcriptx-night running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": ""
+    },
+    {
+      "night_date": "2026-11-01",
+      "status": "ok · exit `0`",
+      "when": "00:16:33 → 04:47:05 (4h 30m) (UTC `2026-10-31T23:16:33Z` → `2026-11-01T03:47:05Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: stopped at 90m tier cap · ok=0 failed=0 · stoat · ingest: skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298…",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+        "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+      "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-02",
+      "status": "ok · exit `0`",
+      "when": "00:16:36 → 00:16:36 (0s) (UTC `2026-11-01T23:16:36Z` → `2026-11-01T23:16:36Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: skipped (paperful-critique running) · from_2023: skipped (paperful-critique running) · rest: skipped (paperful-critique running) · ingest: skipped (paperful-critique running)",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "skipped (paperful-critique running)",
+        "from_2023": "skipped (paperful-critique running)",
+        "rest": "skipped (paperful-critique running)",
+        "ingest": "skipped (paperful-critique running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "skipped (paperful-critique running)",
+      "from_2023": "skipped (paperful-critique running)",
+      "rest": "skipped (paperful-critique running)",
+      "ingest": "skipped (paperful-critique running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-03",
+      "status": "ok · exit `0`",
+      "when": "00:16:34 → 04:47:04 (4h 30m) (UTC `2026-11-02T23:16:34Z` → `2026-11-03T03:47:04Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: stopped at 90m tier cap · ok=0 failed=0 · stoat · ingest: skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298…",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+        "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+      "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-04",
+      "status": "ok · exit `0`",
+      "when": "00:16:35 → 04:47:02 (4h 30m) (UTC `2026-11-03T23:16:35Z` → `2026-11-04T03:47:02Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: stopped at 90m tier cap · ok=0 failed=0 · stoat · ingest: skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298…",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+        "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+      "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-05",
+      "status": "ok · exit `0`",
+      "when": "00:26:50 → 04:57:09 (4h 30m) (UTC `2026-11-04T23:26:50Z` → `2026-11-05T03:57:09Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: stopped at 90m tier cap · ok=0 failed=0 · stoat · ingest: skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298…",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+        "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+      "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-06",
+      "status": "ok · exit `0`",
+      "when": "00:59:54 → 06:42:07 (5h 42m) (UTC `2026-11-05T23:59:54Z` → `2026-11-06T05:42:07Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: stopped at 90m tier cap · ok=0 failed=0 · brown 3 · rest: stopped at 90m tier cap · ok=0 failed=0 · stoat · ingest: skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298…",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+        "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+        "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "stopped at 90m tier cap · ok=0 failed=0 · brown 3",
+      "rest": "stopped at 90m tier cap · ok=0 failed=0 · stoat",
+      "ingest": "skipped (transcribe[rag] extra missing; pip install -e '.[rag]' in /Users/89298/Documents/transcribe)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-07",
+      "status": "ok · exit `0`",
+      "when": "00:50:40 → 00:50:41 (1s) (UTC `2026-11-06T23:50:40Z` → `2026-11-06T23:50:41Z`)",
+      "headline": "Transcribe OCR",
+      "detail": "recent: skipped (paperful-critique running) · from_2023: skipped (paperful-critique running) · rest: skipped (paperful-critique running) · ingest: skipped (paperful-critique running)",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "skipped (paperful-critique running)",
+        "from_2023": "skipped (paperful-critique running)",
+        "rest": "skipped (paperful-critique running)",
+        "ingest": "skipped (paperful-critique running)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "skipped (paperful-critique running)",
+      "from_2023": "skipped (paperful-critique running)",
+      "rest": "skipped (paperful-critique running)",
+      "ingest": "skipped (paperful-critique running)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-08",
+      "status": "failed · exit `130`",
+      "when": "01:22:46 → 04:10:48 (2h 48m) (UTC `2026-11-08T00:22:46Z` → `2026-11-08T03:10:48Z`)",
+      "headline": "0 notebooks OCR; 2 failed",
+      "detail": "recent: stopped at 90m tier cap · ok=0 failed=0 · black · from_2023: interrupted (SIGINT/SIGTERM on worker) · ok=0 failed=2 · brown 3, sezanne · rest: skipped (run interrupted) · ingest: skipped (run interrupted)",
+      "phases": {
+        "outcome": "failed",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+        "from_2023": "interrupted (SIGINT/SIGTERM on worker) · ok=0 failed=2 · brown 3, sezanne",
+        "rest": "skipped (run interrupted)",
+        "ingest": "skipped (run interrupted)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 90m tier cap · ok=0 failed=0 · black",
+      "from_2023": "interrupted (SIGINT/SIGTERM on worker) · ok=0 failed=2 · brown 3, sezanne",
+      "rest": "skipped (run interrupted)",
+      "ingest": "skipped (run interrupted)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "failed"
+    },
+    {
+      "night_date": "2026-11-09",
+      "status": "ok · exit `0`",
+      "when": "23:46:35 → 07:30:13 (7h 43m) (UTC `2026-11-08T22:46:35Z` → `2026-11-09T06:30:13Z`)",
+      "headline": "1 notebooks OCR",
+      "detail": "recent: stopped at 07:30 · ok=1 failed=0 · black, sand blue · from_2023: skipped (run interrupted) · rest: skipped (run interrupted) · ingest: skipped (SKIP_INGEST=1)",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 07:30 · ok=1 failed=0 · black, sand blue",
+        "from_2023": "skipped (run interrupted)",
+        "rest": "skipped (run interrupted)",
+        "ingest": "skipped (SKIP_INGEST=1)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 07:30 · ok=1 failed=0 · black, sand blue",
+      "from_2023": "skipped (run interrupted)",
+      "rest": "skipped (run interrupted)",
+      "ingest": "skipped (SKIP_INGEST=1)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    },
+    {
+      "night_date": "2026-11-10",
+      "status": "ok · exit `0`",
+      "when": "23:46:35 → 07:30:07 (7h 43m) (UTC `2026-11-09T22:46:35Z` → `2026-11-10T06:30:07Z`)",
+      "headline": "2 notebooks OCR",
+      "detail": "recent: stopped at 07:30 · ok=2 failed=0 · black, sand blue, green · from_2023: skipped (run interrupted) · rest: skipped (run interrupted) · ingest: skipped (SKIP_INGEST=1)",
+      "phases": {
+        "outcome": "ok",
+        "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+        "recent": "stopped at 07:30 · ok=2 failed=0 · black, sand blue, green",
+        "from_2023": "skipped (run interrupted)",
+        "rest": "skipped (run interrupted)",
+        "ingest": "skipped (SKIP_INGEST=1)",
+        "artifact": "/Users/89298/Documents/transcribe-projects · log: /Users/89298/Library/Logs/nightshift-transcribe-night.log",
+        "visibility": "on_failure"
+      },
+      "recent": "stopped at 07:30 · ok=2 failed=0 · black, sand blue, green",
+      "from_2023": "skipped (run interrupted)",
+      "rest": "skipped (run interrupted)",
+      "ingest": "skipped (SKIP_INGEST=1)",
+      "models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision · rank qwen3:8b · embed nomic-embed-text",
+      "outcome": "ok"
+    }
+  ],
+  "job_log": {
+    "path": "/Users/89298/Library/Logs/nightshift-transcribe-night.log",
+    "present": true,
+    "nights_started": 29,
+    "models_seen": {
+      "qwen2.5vl:7b + glm-ocr + granite3.2-vision": 29
+    },
+    "page_outcomes": {
+      "failed": 1101,
+      "succeeded": 3183,
+      "skipped": 19
+    },
+    "fail_reasons": {
+      "token_repeat": 724,
+      "truncated_repetition": 374,
+      "empty_output": 3
+    },
+    "last_night_start": "=== 2026-11-09T22:46:35Z nightshift transcribe-night (window 23:30–07:30)",
+    "last_night_models": "qwen2.5vl:7b + glm-ocr + granite3.2-vision",
+    "last_night_outcomes": {
+      "failed": 75,
+      "succeeded": 82,
+      "skipped": 1
+    },
+    "last_night_fail_reasons": {
+      "token_repeat": 42,
+      "truncated_repetition": 33
+    },
+    "bytes": 2292520
+  }
+}

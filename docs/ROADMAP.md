@@ -143,6 +143,8 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 
 **Next, not open:** 1.4 shelf and bring-back report · 1.5 continue-reading and remaining keep work (restore-one and declutter v6 already shipped in 1.3.0). Do not crop shelf pages mid-1.4.
 
+**Later, not the 1.4 shelf:** [selective remote OCR](#later--selective-remote-ocr-feature-branch) (`feat/selective-remote-ocr`) and an optional local third vision tag (PaddleOCR-VL) after a recipe. Corpus throughput stays a **Nightshift** job, not a Transcribe provider.
+
 **Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling · 1.1 deepen W1–W9 ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md): Cover Open, dirty leave, auto-tag suppression, Detect cancel, Inbox polish, declutter v4, reorder, hand-model docs) · **1.2 expansion & hardening (H1–H4, E1–E5)** · **1.3 correct (W1–W8)**.
 
 ---
@@ -270,6 +272,20 @@ Worth keeping next to this programme so they are not reinvented as scope. They a
 | Page-level merge from a ZIP | Conflicts with user edits. Replace-the-notebook-or-refuse is the 1.5 rule |
 | Related pages by date window | Computed notebook dates, on file as autobiography’s old 1.1. Not this ladder |
 | Read-aloud | New speech dependency. Not one of the four jobs |
+
+### Later — selective remote OCR (feature branch)
+
+Not a 1.4/1.5 wave. Not bulk cloud of the library. Evidence: [`assessments/2026-11-10-model-assessment.md`](../assessments/2026-11-10-model-assessment.md).
+
+**Local first (ops).** Nightshift already dropped `glm-ocr` from the scheduled set. The 5-year backlog (`recent` + `from_2023`) is `qwen2.5vl:7b` + `granite3.2-vision`; `rest` is skipped because every page already has DeepSeek and/or `qwen2.5vl:3b` text. That work lives in Nightshift `focus-ocr.env` / `DAYSHIFT_FOCUS=fiveyear`, not in Transcribe `main`.
+
+**Product, later branch `feat/selective-remote-ocr`.** A `VisionOCRProvider` beside Ollama (LiteLLM or OpenRouter OpenAI-compat vision) for a **named page list** only (miss-desk `token_repeat` / prompt-echo / empty after local retries). Same severity ack as `--allow-remote-ollama`: page images leave the machine. Fingerprints include provider + remote model so local successes still skip. API keys stay in gitignored `.env`. Nightshift overnight stays Ollama-only unless a separate **paused-by-default** job is added later.
+
+Cheap remote order-of-magnitude (research, not a quote): Document AI / Mistral OCR / Gemini Flash-Lite class is dollars per hundred hard pages, not a reason to delay local nights. Merge bar: local-first default unchanged; privacy copy reviewed; overnight Nightshift still loopback Ollama.
+
+**Optional local `MODEL_B`.** Do not put `glm-ocr` back on the night job. Official Apple Silicon PaddleOCR-VL is **not** the Ollama GGUF tag: it is `feat/paddleocr-mlx` (`--provider paddleocr` → loopback sidecar wrapping `PaddleOCRVL` + resident `mlx_vlm.server`). Ollama stays the product default. A Nightshift one-shot (`jobs/paddle-probe`, paused by default) probes one notebook after the 5-year ASAP job; promotion to overnight `MODEL_B` waits on that write-up.
+
+**Optional local `MODEL_B` (Ollama GGUF).** Community `paddleocr-vl-1.6` remains a fallback compare candidate only. The measured path on this Mac is MLX.
 
 ### Cross-cutting tests
 
@@ -1198,6 +1214,7 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 - **Detection fine-tune export** — shipped (approved/rejected Detect labels → external training datasets)
 - **Custom / native UI host** (SPA, Tauri, Qt, …) — uncommitted; not a 1.x track. Working default is Streamlit through 2.0. Reopen only with 1.8–1.9 evidence via [UI host](#ui-host-working-default--reopen-with-evidence); do not schedule a rewrite from this list.
 - **Nightly CI depth** — restore scheduled `make test-acceptance`, `make test-contracts`, `make test-scale`, and supply-chain `pip-audit` + CycloneDX SBOM when dependency pins are stable. PR CI already runs smoke, default offline suite, coverage (3.11), docs, and `release-checks` (Docker, secrets, wheel import).
+- **Selective remote OCR** (`feat/selective-remote-ocr`) — LiteLLM/OpenRouter vision for a named miss-desk page list only; optional local `paddleocr-vl-1.6` as `MODEL_B` after a recipe. See [Later — selective remote OCR](#later--selective-remote-ocr-feature-branch). Not 1.4/1.5.
 
 ---
 
@@ -1219,4 +1236,5 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 | 2026-11-02 | **1.3–1.5 The durable notebook** is the active horizon after 1.2.0: correct, prove an external hand model, keep the corpus. Package 1.3 is not the on-file “People” label | An empty backlog, and reading autobiography 1.3–1.5 as this repo’s next tags |
 | 2026-11-03 | **1.3 correct W1–W8 implemented** (cleanup verdict, divergence banner, miss desk, kept scan, unsure/gloss, confirmed spellings, batch-meta). Stretch included (gloss export, cleanup-hint). No version bump/tag until an explicit release request. Next open: 1.4 shelf | Treating W1–W8 as still the ranked Now backlog |
 | 2026-11-04 | **Nightly workflow** simplified to offline smoke only so the schedule stays green; acceptance/contracts/scale/audit moved to Later candidates | Nightly as full acceptance + pip-audit gate |
+| 2026-11-10 | **Selective remote OCR** and PaddleOCR-VL `MODEL_B` recorded as later (`feat/selective-remote-ocr`), not the 1.4 shelf. 5-year ASAP backlog is Nightshift ops (`SKIP_REST=1`, qwen7b + granite) | Landing LiteLLM vision on `main`, or bulk-cloud of the library |
 

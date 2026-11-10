@@ -1,0 +1,1096 @@
+{
+  "collected_at": "2026-11-10T10:37:38.771521+00:00",
+  "projects_dir": "/Users/89298/Documents/transcribe-projects",
+  "target_models": [
+    "qwen2.5vl:7b",
+    "glm-ocr",
+    "granite3.2-vision"
+  ],
+  "notebooks": 54,
+  "pages": 5977,
+  "pages_any_succeeded_vision": 5977,
+  "pages_with_composite": 3633,
+  "pages_with_edited_text": 14,
+  "target_runs_done": 3266,
+  "target_runs_total": 17931,
+  "target_runs_remaining": 14665,
+  "target_completion_pct": 18.21,
+  "notebooks_at_pct": {
+    "100": 0,
+    "95": 1,
+    "90": 4,
+    "80": 5
+  },
+  "by_tier": {
+    "recent": {
+      "notebooks": 12,
+      "pages": 1714,
+      "pages_any_success": 1714,
+      "target_runs_done": 2072,
+      "target_runs_total": 5142
+    },
+    "from_2023": {
+      "notebooks": 6,
+      "pages": 670,
+      "pages_any_success": 670,
+      "target_runs_done": 471,
+      "target_runs_total": 2010
+    },
+    "rest": {
+      "notebooks": 36,
+      "pages": 3593,
+      "pages_any_success": 3593,
+      "target_runs_done": 723,
+      "target_runs_total": 10779
+    }
+  },
+  "by_model_target_done": {
+    "granite3.2-vision": 823,
+    "qwen2.5vl:7b": 1627,
+    "glm-ocr": 816
+  },
+  "night_window_successes_by_model": {
+    "qwen2.5vl:3b": 2396,
+    "deepseek-ocr": 2583,
+    "granite3.2-vision": 689,
+    "glm-ocr": 855,
+    "qwen2.5vl:7b": 673
+  },
+  "dayshift_window_successes_by_model": {
+    "qwen2.5vl:7b": 9,
+    "granite3.2-vision": 577,
+    "glm-ocr": 353,
+    "qwen2.5vl:3b": 99,
+    "deepseek-ocr": 1694,
+    "qwen3.6:27b": 10,
+    "qwen3-vl:8b": 1
+  },
+  "notebooks_detail": [
+    {
+      "dir": "green",
+      "title": "green",
+      "tier": "recent",
+      "max_date": "2026-05-21",
+      "pages": 267,
+      "pages_any_success": 267,
+      "pages_with_composite": 257,
+      "pages_edited": 0,
+      "target_runs_done": 349,
+      "target_runs_total": 801,
+      "completion_pct": 43.6,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 267,
+        "glm-ocr": 82
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "mushroom",
+      "title": "mushroom",
+      "tier": "recent",
+      "max_date": "2025-08-19",
+      "pages": 250,
+      "pages_any_success": 250,
+      "pages_with_composite": 243,
+      "pages_edited": 1,
+      "target_runs_done": 250,
+      "target_runs_total": 750,
+      "completion_pct": 33.3,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 250,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "turquoise",
+      "title": "turquoise",
+      "tier": "recent",
+      "max_date": "2025-09-10",
+      "pages": 233,
+      "pages_any_success": 233,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 75,
+      "target_runs_total": 699,
+      "completion_pct": 10.7,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 75,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "adventure time",
+      "title": "adventure time",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 195,
+      "pages_any_success": 195,
+      "pages_with_composite": 191,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 585,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "microbe",
+      "title": "microbe",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 194,
+      "pages_any_success": 194,
+      "pages_with_composite": 190,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 582,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "xmas narwhal",
+      "title": "xmas narwhal",
+      "tier": "from_2023",
+      "max_date": "2023-08-27",
+      "pages": 193,
+      "pages_any_success": 193,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 579,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "brown",
+      "title": "brown",
+      "tier": "rest",
+      "max_date": "2020-02-18",
+      "pages": 190,
+      "pages_any_success": 190,
+      "pages_with_composite": 187,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 570,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "virus",
+      "title": "virus",
+      "tier": "from_2023",
+      "max_date": "2023-05-02",
+      "pages": 190,
+      "pages_any_success": 190,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 570,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "brown 2",
+      "title": "brown 2",
+      "tier": "rest",
+      "max_date": "2019-06-05",
+      "pages": 189,
+      "pages_any_success": 189,
+      "pages_with_composite": 182,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 567,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "turquoise narwhal",
+      "title": "turquoise narwhal",
+      "tier": "rest",
+      "max_date": "2019-06-21",
+      "pages": 186,
+      "pages_any_success": 186,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 558,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "Jake",
+      "title": "Jake",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 185,
+      "pages_any_success": 185,
+      "pages_with_composite": 178,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 555,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "black",
+      "title": "black",
+      "tier": "recent",
+      "max_date": "2026-12-08",
+      "pages": 184,
+      "pages_any_success": 184,
+      "pages_with_composite": 183,
+      "pages_edited": 1,
+      "target_runs_done": 536,
+      "target_runs_total": 552,
+      "completion_pct": 97.1,
+      "by_model_done": {
+        "granite3.2-vision": 182,
+        "qwen2.5vl:7b": 183,
+        "glm-ocr": 171
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "rainicorn",
+      "title": "rainicorn",
+      "tier": "rest",
+      "max_date": "2019-12-02",
+      "pages": 182,
+      "pages_any_success": 182,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 546,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "Hamragardar",
+      "title": "Hamragardar",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 178,
+      "pages_any_success": 178,
+      "pages_with_composite": 165,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 534,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "BMO",
+      "title": "BMO",
+      "tier": "rest",
+      "max_date": "2017-11-24",
+      "pages": 176,
+      "pages_any_success": 176,
+      "pages_with_composite": 0,
+      "pages_edited": 1,
+      "target_runs_done": 0,
+      "target_runs_total": 528,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "sand blue",
+      "title": "sand blue",
+      "tier": "recent",
+      "max_date": "2026-07-28",
+      "pages": 172,
+      "pages_any_success": 172,
+      "pages_with_composite": 83,
+      "pages_edited": 10,
+      "target_runs_done": 475,
+      "target_runs_total": 516,
+      "completion_pct": 92.1,
+      "by_model_done": {
+        "granite3.2-vision": 161,
+        "qwen2.5vl:7b": 172,
+        "glm-ocr": 142
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "md",
+      "title": "md",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 165,
+      "pages_any_success": 165,
+      "pages_with_composite": 156,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 495,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "narwhal",
+      "title": "narwhal",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 165,
+      "pages_any_success": 165,
+      "pages_with_composite": 153,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 495,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "vince",
+      "title": "vince",
+      "tier": "recent",
+      "max_date": "2026-04-23",
+      "pages": 156,
+      "pages_any_success": 156,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 468,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "brown 3",
+      "title": "brown 3",
+      "tier": "from_2023",
+      "max_date": "2024-09-29",
+      "pages": 152,
+      "pages_any_success": 152,
+      "pages_with_composite": 151,
+      "pages_edited": 0,
+      "target_runs_done": 427,
+      "target_runs_total": 456,
+      "completion_pct": 93.6,
+      "by_model_done": {
+        "granite3.2-vision": 148,
+        "qwen2.5vl:7b": 151,
+        "glm-ocr": 128
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "enviro",
+      "title": "enviro",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 146,
+      "pages_any_success": 146,
+      "pages_with_composite": 132,
+      "pages_edited": 0,
+      "target_runs_done": 146,
+      "target_runs_total": 438,
+      "completion_pct": 33.3,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 146,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "blue textile",
+      "title": "blue textile",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 143,
+      "pages_any_success": 143,
+      "pages_with_composite": 137,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 429,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "paris",
+      "title": "paris",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 143,
+      "pages_any_success": 143,
+      "pages_with_composite": 126,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 429,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "smiley",
+      "title": "smiley",
+      "tier": "recent",
+      "max_date": "2026-01-31",
+      "pages": 137,
+      "pages_any_success": 137,
+      "pages_with_composite": 7,
+      "pages_edited": 0,
+      "target_runs_done": 387,
+      "target_runs_total": 411,
+      "completion_pct": 94.2,
+      "by_model_done": {
+        "granite3.2-vision": 135,
+        "qwen2.5vl:7b": 137,
+        "glm-ocr": 115
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "purple",
+      "title": "purple",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 135,
+      "pages_any_success": 135,
+      "pages_with_composite": 120,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 405,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "monk",
+      "title": "monk",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 112,
+      "pages_any_success": 112,
+      "pages_with_composite": 92,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 336,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "smile",
+      "title": "smile",
+      "tier": "recent",
+      "max_date": "2025-05-05",
+      "pages": 106,
+      "pages_any_success": 106,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 318,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "supermalt",
+      "title": "supermalt",
+      "tier": "rest",
+      "max_date": "2020-01-15",
+      "pages": 105,
+      "pages_any_success": 105,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 315,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "nausicaa",
+      "title": "nausicaa",
+      "tier": "rest",
+      "max_date": "2019-07-15",
+      "pages": 104,
+      "pages_any_success": 104,
+      "pages_with_composite": 93,
+      "pages_edited": 1,
+      "target_runs_done": 0,
+      "target_runs_total": 312,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "stoat",
+      "title": "stoat",
+      "tier": "rest",
+      "max_date": "2020-09-08",
+      "pages": 103,
+      "pages_any_success": 103,
+      "pages_with_composite": 6,
+      "pages_edited": 0,
+      "target_runs_done": 274,
+      "target_runs_total": 309,
+      "completion_pct": 88.7,
+      "by_model_done": {
+        "granite3.2-vision": 98,
+        "qwen2.5vl:7b": 97,
+        "glm-ocr": 79
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "harden",
+      "title": "harden",
+      "tier": "recent",
+      "max_date": "2026-02-09",
+      "pages": 87,
+      "pages_any_success": 87,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 261,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "flowers",
+      "title": "flowers",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 72,
+      "pages_any_success": 72,
+      "pages_with_composite": 64,
+      "pages_edited": 0,
+      "target_runs_done": 72,
+      "target_runs_total": 216,
+      "completion_pct": 33.3,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 72,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "sezanne",
+      "title": "sezanne",
+      "tier": "from_2023",
+      "max_date": "2024-01-11",
+      "pages": 69,
+      "pages_any_success": 69,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 7,
+      "target_runs_total": 207,
+      "completion_pct": 3.4,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 7,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "yellow",
+      "title": "yellow",
+      "tier": "recent",
+      "max_date": "2025-08-12",
+      "pages": 61,
+      "pages_any_success": 61,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 183,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little black 2",
+      "title": "little black 2",
+      "tier": "rest",
+      "max_date": "2016-11-21",
+      "pages": 50,
+      "pages_any_success": 50,
+      "pages_with_composite": 50,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 150,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "grey",
+      "title": "grey",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 48,
+      "pages_any_success": 48,
+      "pages_with_composite": 44,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 144,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little notes",
+      "title": "little notes",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 48,
+      "pages_any_success": 48,
+      "pages_with_composite": 47,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 144,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little black 1",
+      "title": "little black 1",
+      "tier": "rest",
+      "max_date": "2017-12-31",
+      "pages": 45,
+      "pages_any_success": 45,
+      "pages_with_composite": 43,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 135,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little black 3",
+      "title": "little black 3",
+      "tier": "rest",
+      "max_date": "2016-09-13",
+      "pages": 45,
+      "pages_any_success": 45,
+      "pages_with_composite": 44,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 135,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little notes 3",
+      "title": "little notes 3",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 38,
+      "pages_any_success": 38,
+      "pages_with_composite": 35,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 114,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "green 2",
+      "title": "green 2",
+      "tier": "from_2023",
+      "max_date": "2023-02-16",
+      "pages": 37,
+      "pages_any_success": 37,
+      "pages_with_composite": 33,
+      "pages_edited": 0,
+      "target_runs_done": 37,
+      "target_runs_total": 111,
+      "completion_pct": 33.3,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 37,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little black 4",
+      "title": "little black 4",
+      "tier": "rest",
+      "max_date": "2017-03-09",
+      "pages": 35,
+      "pages_any_success": 35,
+      "pages_with_composite": 27,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 105,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "little notes 2",
+      "title": "little notes 2",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 34,
+      "pages_any_success": 34,
+      "pages_with_composite": 33,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 102,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "seabirds",
+      "title": "seabirds",
+      "tier": "recent",
+      "max_date": "2025-06-10",
+      "pages": 34,
+      "pages_any_success": 34,
+      "pages_with_composite": 0,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 102,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "drawings",
+      "title": "drawings",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 33,
+      "pages_any_success": 33,
+      "pages_with_composite": 31,
+      "pages_edited": 0,
+      "target_runs_done": 33,
+      "target_runs_total": 99,
+      "completion_pct": 33.3,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 33,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "green 3",
+      "title": "green 3",
+      "tier": "from_2023",
+      "max_date": "2023-05-02",
+      "pages": 29,
+      "pages_any_success": 29,
+      "pages_with_composite": 27,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 87,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "green 4",
+      "title": "green 4",
+      "tier": "recent",
+      "max_date": "2025-01-15",
+      "pages": 27,
+      "pages_any_success": 27,
+      "pages_with_composite": 26,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 81,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "misc scans",
+      "title": "misc scans",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 25,
+      "pages_any_success": 25,
+      "pages_with_composite": 19,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 75,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "mushrooms",
+      "title": "mushrooms",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 25,
+      "pages_any_success": 25,
+      "pages_with_composite": 24,
+      "pages_edited": 0,
+      "target_runs_done": 0,
+      "target_runs_total": 75,
+      "completion_pct": 0.0,
+      "by_model_done": {
+        "granite3.2-vision": 0,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 0
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "breakdown",
+      "title": "breakdown",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 23,
+      "pages_any_success": 23,
+      "pages_with_composite": 10,
+      "pages_edited": 0,
+      "target_runs_done": 46,
+      "target_runs_total": 69,
+      "completion_pct": 66.7,
+      "by_model_done": {
+        "granite3.2-vision": 23,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 23
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "science",
+      "title": "science",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 22,
+      "pages_any_success": 22,
+      "pages_with_composite": 7,
+      "pages_edited": 0,
+      "target_runs_done": 44,
+      "target_runs_total": 66,
+      "completion_pct": 66.7,
+      "by_model_done": {
+        "granite3.2-vision": 22,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 22
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "drawing",
+      "title": "drawing",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 20,
+      "pages_any_success": 20,
+      "pages_with_composite": 14,
+      "pages_edited": 0,
+      "target_runs_done": 40,
+      "target_runs_total": 60,
+      "completion_pct": 66.7,
+      "by_model_done": {
+        "granite3.2-vision": 20,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 20
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "reticent",
+      "title": "reticent",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 19,
+      "pages_any_success": 19,
+      "pages_with_composite": 13,
+      "pages_edited": 0,
+      "target_runs_done": 38,
+      "target_runs_total": 57,
+      "completion_pct": 66.7,
+      "by_model_done": {
+        "granite3.2-vision": 19,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 19
+      },
+      "active_miss_codes": {}
+    },
+    {
+      "dir": "misc",
+      "title": "misc",
+      "tier": "rest",
+      "max_date": null,
+      "pages": 15,
+      "pages_any_success": 15,
+      "pages_with_composite": 10,
+      "pages_edited": 0,
+      "target_runs_done": 30,
+      "target_runs_total": 45,
+      "completion_pct": 66.7,
+      "by_model_done": {
+        "granite3.2-vision": 15,
+        "qwen2.5vl:7b": 0,
+        "glm-ocr": 15
+      },
+      "active_miss_codes": {}
+    }
+  ]
+}

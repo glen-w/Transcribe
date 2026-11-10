@@ -143,10 +143,29 @@ GRANITE_VISION_RECIPE = OcrModelRecipe(
     generation_options={"repeat_penalty": 1.2, "stop": list(_FENCE_LOOP_STOP)},
 )
 
+# Frozen short task prompt. PaddleOCR-VL ignores long faithful_* instructions
+# and expects ``OCR:``. Lives on feat/paddleocr-mlx; sidecar is not Ollama.
+PADDLEOCR_VL_RECIPE = OcrModelRecipe(
+    recipe_id="paddleocr_vl",
+    title="PaddleOCR-VL",
+    match_tokens=("paddleocr",),
+    prompt_id="paddle_ocr",
+    freeze_prompt=True,
+    advice_kind="ocr_oriented",
+    warnings=(
+        (
+            "Uses the Paddle task prompt (OCR:). Long faithful instructions "
+            "are ignored. Requires the local paddleocr sidecar, not Ollama."
+        ),
+        "A custom prompt override still wins over this recipe.",
+    ),
+)
+
 RECIPES: tuple[OcrModelRecipe, ...] = (
     DEEPSEEK_OCR_RECIPE,
     GLM_OCR_RECIPE,
     GRANITE_VISION_RECIPE,
+    PADDLEOCR_VL_RECIPE,
 )
 
 

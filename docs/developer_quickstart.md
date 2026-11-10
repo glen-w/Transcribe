@@ -63,6 +63,7 @@ Offline multi-component detector tests belong under `tests/services/` (or `tests
 | Validation | `transcribe.domain.validation` |
 | Doctor | `transcribe.services.doctor` |
 | Ollama provider | `transcribe.providers.ollama` |
+| Vision provider factory | `transcribe.providers.factory` (`ollama` default; `paddleocr` sidecar) |
 
 ## Extension points
 

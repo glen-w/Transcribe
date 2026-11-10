@@ -1,0 +1,169 @@
+{
+  "collected_at": "2026-11-10T10:40:43Z",
+  "fixture": "/Users/89298/Documents/transcribe/tests/fixtures/mini_page.png",
+  "hardware": "Apple M5 Pro 64GB",
+  "note": "Focused subset; not every installed vision tag. llama3.2-vision / gemma4 skipped (known fail).",
+  "results": [
+    {
+      "model": "glm-ocr:latest",
+      "advice_kind": "ocr_oriented",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "glm_ocr",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512,
+        "repeat_penalty": 1.2,
+        "stop": [
+          "```\n```"
+        ]
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 75,
+      "text_preview": "```markdown  Deep test mini page hello notebook weather metro notes day one",
+      "eval_count": 26,
+      "truncated": null,
+      "elapsed_s": 8.0
+    },
+    {
+      "model": "granite3.2-vision:latest",
+      "advice_kind": "recommended_vlm",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "granite_vision",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512,
+        "repeat_penalty": 1.2,
+        "stop": [
+          "```\n```"
+        ]
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 73,
+      "text_preview": "# Deep test mini page  ## hello notebook weather  ### metro notes day one",
+      "eval_count": 21,
+      "truncated": null,
+      "elapsed_s": 34.5
+    },
+    {
+      "model": "qwen2.5vl:7b",
+      "advice_kind": "recommended_vlm",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 68,
+      "text_preview": "- Deep test mini page - hello notebook weather - metro notes day one",
+      "eval_count": 17,
+      "truncated": null,
+      "elapsed_s": 13.0
+    },
+    {
+      "model": "qwen2.5vl:3b",
+      "advice_kind": "recommended_vlm",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 68,
+      "text_preview": "- Deep test mini page - hello notebook weather - metro notes day one",
+      "eval_count": 17,
+      "truncated": null,
+      "elapsed_s": 8.6
+    },
+    {
+      "model": "deepseek-ocr:latest",
+      "advice_kind": "ocr_oriented",
+      "prompt_id": "free_ocr",
+      "recipe_id": "deepseek_ocr",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 66,
+      "text_preview": "Deep test mini page   hello notebook weather   metro notes day one",
+      "eval_count": 14,
+      "truncated": null,
+      "elapsed_s": 6.8
+    },
+    {
+      "model": "minicpm-v:8b",
+      "advice_kind": "recommended_vlm",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 70,
+      "text_preview": "``` Deep test mini page hello notebook weather metro notes day one ```",
+      "eval_count": 18,
+      "truncated": null,
+      "elapsed_s": 4.9
+    },
+    {
+      "model": "gemma3:4b",
+      "advice_kind": "unknown",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 68,
+      "text_preview": "- Deep test mini page - hello notebook weather - metro notes day one",
+      "eval_count": 17,
+      "truncated": null,
+      "elapsed_s": 4.8
+    },
+    {
+      "model": "llava:7b",
+      "advice_kind": "general_vlm",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "ok",
+      "text_len": 73,
+      "text_preview": "``` # Deep test mini page  - Hello book weather - Metro notes day one ```",
+      "eval_count": 24,
+      "truncated": null,
+      "elapsed_s": 3.5
+    },
+    {
+      "model": "qwen3-vl:4b",
+      "advice_kind": "thinking_risk",
+      "prompt_id": "faithful_markdown",
+      "recipe_id": "",
+      "options": {
+        "temperature": 0.0,
+        "num_predict": 512
+      },
+      "load_probe": "ok",
+      "ocr_status": "empty",
+      "text_len": 0,
+      "text_preview": "",
+      "eval_count": 512,
+      "truncated": true,
+      "elapsed_s": 15.6
+    }
+  ]
+}

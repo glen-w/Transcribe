@@ -55,7 +55,7 @@ Product and module reviews (critique and follow-ups — not contracts): [reviews
 | [dev/streamlit_efficiency_audit.md](dev/streamlit_efficiency_audit.md) | Streamlit every-rerun / Review / View cost audit and PR1 fluidity fixes |
 | [dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md) | Staged decoupling waves (layering, CLI, batch picker, Review/View split, ProjectService) |
 | [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place wave acceptance tables |
-| [runtime/ocr_model_recipes.md](runtime/ocr_model_recipes.md) | Per-model OCR recipes (builtins + workspace overlay) |
+| [runtime/ocr_model_recipes.md](runtime/ocr_model_recipes.md) | Per-model OCR recipes (builtins + workspace overlay). PaddleOCR-VL `OCR:` lane is `feat/paddleocr-mlx` (`--provider paddleocr`) |
 | [contracts/ocr-model-recipes.md](contracts/ocr-model-recipes.md) | Recipe overlay schema, merge, fingerprint |
 
 ## Archive

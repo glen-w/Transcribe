@@ -51,8 +51,11 @@ docker-compose.override.yml
 # Cursor slash commands (local filled copies; templates live in cursor_commands)
 .cursor/commands/
 
-# Local watch / assessment run logs (repo root only — docs/assessments/ is tracked)
-/assessments/
+# Root assessments/ is tracked (model reports + JSON). Unanchored `data/`
+# would still ignore assessments/data/ — keep those files public.
+!assessments/data/
+!assessments/data/**
 
 # Generated sample PNGs (manifest/README stay tracked)
 samples/**/pages/
+docs/reviews/nightshift_vision_models.md

@@ -60,6 +60,56 @@ def test_dispatch_notebook_returns_none_for_export_family() -> None:
     assert dispatch_notebook(args, clock=FakeClock(), ids=SequentialIds()) is None
 
 
+def test_run_paddleocr_refuses_remote_host(tmp_path) -> None:
+    from transcribe.__main__ import main
+    from transcribe.services.project import ProjectService, open_project_paths
+
+    paths = open_project_paths(tmp_path / "nb")
+    ProjectService(paths, clock=FakeClock(), ids=SequentialIds()).create("nb")
+    rc = main(
+        [
+            "run",
+            str(tmp_path / "nb"),
+            "--model",
+            "PaddleOCR-VL-1.6",
+            "--provider",
+            "paddleocr",
+            "--base-url",
+            "http://example.com:8112",
+        ]
+    )
+    assert rc == 2
+
+
+def test_bulk_run_paddleocr_refuses_remote_host() -> None:
+    from transcribe.__main__ import main
+
+    rc = main(
+        [
+            "bulk-run",
+            "notebooks",
+            "proj",
+            "--model",
+            "PaddleOCR-VL-1.6",
+            "--provider",
+            "paddleocr",
+            "--base-url",
+            "http://example.com:8112",
+        ]
+    )
+    assert rc == 2
+
+
+def test_parser_provider_flag_defaults_ollama() -> None:
+    parser = build_parser()
+    run_args = parser.parse_args(["run", "proj", "--model", "qwen2.5vl:7b"])
+    assert run_args.provider == "ollama"
+    bulk = parser.parse_args(
+        ["bulk-run", "notebooks", "proj", "--model", "PaddleOCR-VL-1.6", "--provider", "paddleocr"]
+    )
+    assert bulk.provider == "paddleocr"
+
+
 def test_dispatch_init_and_status(tmp_path: Path, capsys) -> None:
     parser = build_parser()
     root = tmp_path / "nb"

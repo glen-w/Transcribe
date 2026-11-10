@@ -38,7 +38,7 @@ Spot checks on green pages (same `faithful_markdown` prompt):
 
 | Model | Load | OCR on fixture | Notes |
 |-------|------|----------------|-------|
-| **glm-ocr:latest** | ok | ok | OCR-oriented; recipe sends `repeat_penalty=1.2`. May still loop — token-repeat aborts are failed, not retried |
+| **glm-ocr:latest** | ok | ok | OCR-oriented; recipe sends `repeat_penalty=1.2`. May still loop — token-repeat aborts are failed, not retried. **Not** in Nightshift `transcribe-night` defaults from 2026-11-10 ([nightshift_vision_models.md](../reviews/nightshift_vision_models.md)) |
 | **deepseek-ocr:latest** | ok | ok | Uses `free_ocr` recipe — do not override with long faithful prompts |
 | **granite3.2-vision:latest** | ok | ok | Recommended VLM; recipe sends `repeat_penalty=1.2` (prompt not frozen) |
 | **qwen2.5vl:3b** / **7b** | ok | ok | Good size/quality trade-off |

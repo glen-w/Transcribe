@@ -54,7 +54,7 @@ PROMOTE = ":material/upgrade:"
 USE_VARIANT = (
     ":material/looks_one:",
     ":material/looks_two:",
-    ":material/looks_three:",
+    ":material/looks_3:",
 )
 
 # Image viewer

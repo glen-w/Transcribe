@@ -1,0 +1,48 @@
+{
+  "by_tier_succeeded": {
+    "rest": {
+      "pages": 3593,
+      "qwen2.5vl:7b": 348,
+      "granite3.2-vision": 197,
+      "glm-ocr": 178,
+      "deepseek-ocr": 3285,
+      "qwen2.5vl:3b": 2862
+    },
+    "recent": {
+      "pages": 1714,
+      "qwen2.5vl:7b": 1084,
+      "granite3.2-vision": 478,
+      "glm-ocr": 510,
+      "deepseek-ocr": 1391,
+      "qwen2.5vl:3b": 531
+    },
+    "from_2023": {
+      "pages": 670,
+      "qwen2.5vl:7b": 195,
+      "granite3.2-vision": 148,
+      "glm-ocr": 128,
+      "deepseek-ocr": 669,
+      "qwen2.5vl:3b": 181
+    }
+  },
+  "missing_7b_granite": {
+    "rest": {
+      "pages": 3593,
+      "missing_qwen2.5vl_7b": 3245,
+      "missing_granite": 3396,
+      "missing_either_pair": 6641
+    },
+    "recent": {
+      "pages": 1714,
+      "missing_qwen2.5vl_7b": 630,
+      "missing_granite": 1236,
+      "missing_either_pair": 1866
+    },
+    "from_2023": {
+      "pages": 670,
+      "missing_qwen2.5vl_7b": 475,
+      "missing_granite": 522,
+      "missing_either_pair": 997
+    }
+  }
+}

@@ -153,10 +153,22 @@ def test_cli_bulk_analyse_pending_offline(tmp_path: Path, monkeypatch) -> None:
 
     main_mod, live = _patch_paths(monkeypatch, corpus)
     try:
-        rc = main(["bulk-analyse", "pending", "--preset", "quick"])
+        # custom+stats keeps this offline path free of spaCy/transformers cold
+        # imports that can exceed the default suite's 60s timeout.
+        rc = main(
+            [
+                "bulk-analyse",
+                "pending",
+                "--preset",
+                "custom",
+                "--module",
+                "stats",
+            ]
+        )
         assert rc == 0
         runs = AnalysisBatchRunStore(corpus).list_runs()
         assert runs
+        assert runs[0].module_ids == ["stats"]
         assert main(["bulk-analyse", "status", runs[0].analysis_batch_id]) == 0
         assert main(["bulk-analyse", "resume", runs[0].analysis_batch_id]) == 0
     finally:
@@ -171,7 +183,15 @@ def test_cli_bulk_analyse_notebooks_path(tmp_path: Path, monkeypatch) -> None:
     main_mod, live = _patch_paths(monkeypatch, corpus)
     try:
         rc = main(
-            ["bulk-analyse", "notebooks", str(root), "--preset", "quick"]
+            [
+                "bulk-analyse",
+                "notebooks",
+                str(root),
+                "--preset",
+                "custom",
+                "--module",
+                "stats",
+            ]
         )
         assert rc == 0
         runs = AnalysisBatchRunStore(corpus).list_runs()
@@ -208,7 +228,15 @@ def test_cli_bulk_analyse_import_run(tmp_path: Path, monkeypatch) -> None:
     main_mod, live = _patch_paths(monkeypatch, corpus)
     try:
         rc = main(
-            ["bulk-analyse", "import-run", "cli-imp", "--preset", "quick"]
+            [
+                "bulk-analyse",
+                "import-run",
+                "cli-imp",
+                "--preset",
+                "custom",
+                "--module",
+                "stats",
+            ]
         )
         assert rc == 0
         runs = AnalysisBatchRunStore(corpus).list_runs()
