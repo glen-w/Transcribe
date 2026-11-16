@@ -201,7 +201,7 @@ No telemetric onboarding — local session / workspace only.
 
 ### U2.2 — Sample / demo notebook — [x] done
 
-- Fixture: [`src/transcribe/samples/demo-notebook/`](../src/transcribe/samples/demo-notebook/) (pointer: [`samples/README.md`](../samples/README.md)). Three synthetic placeholder pages plus sidecar text.
+- Fixture: [`src/transcribe/samples/demo-notebook/`](../src/transcribe/samples/demo-notebook/) (package data; pointer: [`samples/README.md`](../samples/README.md)). Three synthetic placeholder pages plus sidecar text.
 - **Workflow → New notebook → Open sample** copies into `TRANSCRIBE_PROJECTS_DIR` via `ProjectService.create` + `IngestService.import_path`, then seeds `edited_text`. Empty Home stays Create + Import only.
 - Analyse Quick runs offline on the seeded text (no LLM, OCR optional).
 

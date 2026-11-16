@@ -53,7 +53,7 @@ class PaddleocrVisionProvider:
 
     def __init__(
         self,
-        base_url: str = "http://127.0.0.1:8112",
+        base_url: str = "http://127.0.0.1:8112",  # factory.DEFAULT_PADDLEOCR_BASE_URL
         *,
         request_timeout: float = 300.0,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -227,7 +227,8 @@ class PaddleocrVisionProvider:
                     code="timeout",
                 ) from exc
             raise ProviderError(
-                f"Cannot reach PaddleOCR sidecar at {self.base_url}: {exc.reason}",
+                f"Cannot reach PaddleOCR sidecar at {self.base_url}: {exc.reason}. "
+                "Start the sidecar, or pass --base-url if it listens elsewhere.",
                 retriable=True,
                 code="connection",
             ) from exc
@@ -239,7 +240,7 @@ class PaddleocrVisionProvider:
             ) from exc
         try:
             return json.loads(raw.decode("utf-8"))
-        except json.JSONDecodeError as exc:
+        except ValueError as exc:  # bad JSON or non-UTF-8 bytes
             raise ProviderError(
                 "PaddleOCR sidecar returned non-JSON response",
                 code="bad_response",

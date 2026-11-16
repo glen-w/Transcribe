@@ -54,7 +54,7 @@ empty attempts.
 
 A custom notebook prompt still wins. Recipe options still apply.
 
-## Shipped lane: PaddleOCR-VL (`feat/paddleocr-mlx`)
+## Shipped lane: PaddleOCR-VL (since 1.4.1)
 
 | | |
 |--|--|
@@ -85,7 +85,7 @@ hashes without evidence they need it.
 | **llama3.2-vision** `mllama` load fail | Architecture; picker hide + `model_load` circuit |
 | Timeouts on general VLMs (`llava`, …) | Use an OCR-oriented first pass |
 | Chatty wrappers (`devstral`, …) / `got-ocr` / `nougat` / `olmocr` / `minicpm-v` | Advice-only until a measured fail mode exists |
-| **`paddleocr` without the sidecar** | Recipe freezes `OCR:` on `feat/paddleocr-mlx`; Ollama default still cannot load the official MLX weights |
+| **`paddleocr` without the sidecar** | Recipe freezes `OCR:` for the `paddleocr` provider; Ollama default still cannot load the official MLX weights |
 
 Add a custom overlay only when you have evidence (token-repeat rate, empty
 `eval_count=1`, a required short prompt).

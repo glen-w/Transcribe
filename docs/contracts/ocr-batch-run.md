@@ -27,6 +27,7 @@ Bulk import never auto-starts OCR. After an ImportRun commits, the UI may offer 
 | `multipass_cleanup_enabled` | Vision-phase cleanup during multipass (default `false`) |
 | `settings` | Frozen `OCRSettings.as_dict()` applied to each notebook at item start. For multipass, `model_name` is the first vision model (compatibility). Text/cleanup models, prefer mode, and `auto_activate_composite` come from settings. |
 | `settings_fingerprint` | SHA-256 of canonical `{settings, force, mode, vision_model_names, multipass_cleanup_enabled}` |
+| `provider_id` | Vision backend that started the run: `ollama` \| `paddleocr`. Written only when it is not `ollama`; absent means `ollama` (every run before this field). `resume` rebuilds this backend. Any other value fails validation. A `paddleocr` run with a non-local `settings.base_url` is refused on resume |
 | `import_run_id` | Optional; set when the batch was seeded from an ImportRun |
 | `items` | Ordered notebooks; unique `notebook_id` |
 

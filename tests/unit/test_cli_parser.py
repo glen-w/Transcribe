@@ -124,3 +124,87 @@ def test_dispatch_init_and_status(tmp_path: Path, capsys) -> None:
     assert project.title == "CLI notebook"
     status = parser.parse_args(["status", str(root)])
     assert dispatch_notebook(status, clock=clock, ids=ids) == 0
+
+
+def test_bulk_run_paddleocr_ignores_remote_ollama_default(monkeypatch, capsys) -> None:
+    """The sidecar default is local even when the Ollama default is remote (M3).
+
+    Reaching the health pre-flight proves the locality check passed.
+    """
+    from transcribe.__main__ import main
+    from transcribe.errors import ProviderError
+    from transcribe.providers.paddleocr import PaddleocrVisionProvider
+
+    seen: list[str] = []
+
+    def down(self) -> None:
+        seen.append(self.base_url)
+        raise ProviderError("sidecar down", code="connection")
+
+    monkeypatch.setattr(PaddleocrVisionProvider, "healthcheck", down)
+    monkeypatch.setenv("TRANSCRIBE_OLLAMA_BASE_URL", "http://203.0.113.9:11434")
+    rc = main(["bulk-run", "pending", "--model", "PaddleOCR-VL-1.6", "--provider", "paddleocr"])
+    err = capsys.readouterr().err
+    assert "Refusing" not in err
+    assert seen == ["http://127.0.0.1:8112"]
+    assert rc == 1 and "sidecar down" in err
+
+
+def test_run_paddleocr_fails_fast_when_sidecar_is_down(tmp_path, monkeypatch, capsys) -> None:
+    from transcribe.__main__ import main
+    from transcribe.errors import ProviderError
+    from transcribe.providers.paddleocr import PaddleocrVisionProvider
+    from transcribe.services.project import ProjectService, open_project_paths
+
+    def down(self) -> None:
+        raise ProviderError("Cannot reach PaddleOCR sidecar", code="connection")
+
+    monkeypatch.setattr(PaddleocrVisionProvider, "healthcheck", down)
+    paths = open_project_paths(tmp_path / "nb")
+    ProjectService(paths, clock=FakeClock(), ids=SequentialIds()).create("nb")
+    rc = main(["run", str(tmp_path / "nb"), "--model", "PaddleOCR-VL-1.6", "--provider", "paddleocr"])
+    assert rc == 1
+    assert "Cannot reach PaddleOCR sidecar" in capsys.readouterr().err
+
+
+def test_paddleocr_rejects_allow_remote_flag(tmp_path, capsys) -> None:
+    from transcribe.__main__ import main
+    from transcribe.services.project import ProjectService, open_project_paths
+
+    paths = open_project_paths(tmp_path / "nb")
+    ProjectService(paths, clock=FakeClock(), ids=SequentialIds()).create("nb")
+    common = ["--model", "PaddleOCR-VL-1.6", "--provider", "paddleocr", "--allow-remote-ollama"]
+    assert main(["run", str(tmp_path / "nb"), *common]) == 2
+    assert "does not apply" in capsys.readouterr().err
+    assert main(["bulk-run", "notebooks", "proj", *common]) == 2
+    assert "does not apply" in capsys.readouterr().err
+
+
+def test_run_paddleocr_restores_notebook_settings(tmp_path, monkeypatch) -> None:
+    """`run --provider paddleocr` must not leave the sidecar URL in notebook settings."""
+    from tests.fakes import FakeVisionOCRProvider
+    from tests.ingest.test_ingest import _png_bytes
+    from transcribe.__main__ import main
+    from transcribe.ingest import IngestService
+    from transcribe.services.project import ProjectService, open_project_paths
+
+    paths = open_project_paths(tmp_path / "nb")
+    projects = ProjectService(paths, clock=FakeClock(), ids=SequentialIds())
+    project = projects.create("nb")
+    IngestService(paths, clock=FakeClock(), ids=SequentialIds("i")).import_bytes(
+        "p.png", _png_bytes(color=(1, 20, 30))
+    )
+    settings = project.settings
+    settings.model_name = "my-ollama-vision"
+    projects.save_settings(projects.load(), settings)
+    ollama_url = projects.load().settings.base_url
+
+    fake = FakeVisionOCRProvider(provider_id="paddleocr")
+    fake.base_url = "http://127.0.0.1:8112"  # matches the plan, so the job keeps this fake
+    monkeypatch.setattr(
+        "transcribe.cli.notebook.build_vision_provider", lambda _pid, _url, **_kw: fake
+    )
+    rc = main(["run", str(tmp_path / "nb"), "--model", "PaddleOCR-VL-1.6", "--provider", "paddleocr"])
+    assert rc == 0 and fake.calls == 1
+    after = projects.load().settings
+    assert (after.base_url, after.model_name) == (ollama_url, "my-ollama-vision")

@@ -10,6 +10,7 @@ from transcribe.errors import CorpusError, ValidationError
 from transcribe.persistence.atomic import read_json, write_json_atomic
 from transcribe.persistence.locks import mutation_lock
 from transcribe.persistence.schema import require_format
+from transcribe.providers.factory import KNOWN_PROVIDERS
 
 TERMINAL_STATUSES = frozenset({"completed", "partial", "failed", "cancelled"})
 ITEM_STATES = frozenset({"pending", "running", "completed", "skipped", "failed", "cancelled"})
@@ -78,6 +79,7 @@ class OcrBatchRun:
     mode: str = "single"
     vision_model_names: list[str] = field(default_factory=list)
     multipass_cleanup_enabled: bool = False
+    provider_id: str = "ollama"
     format: str = "transcribe.ocr-batch-run"
     schema_version: int = 1
 
@@ -99,6 +101,8 @@ class OcrBatchRun:
             payload["vision_model_names"] = list(self.vision_model_names)
         if self.multipass_cleanup_enabled:
             payload["multipass_cleanup_enabled"] = True
+        if self.provider_id != "ollama":
+            payload["provider_id"] = self.provider_id
         if self.import_run_id is not None:
             payload["import_run_id"] = self.import_run_id
         return payload
@@ -122,6 +126,7 @@ class OcrBatchRun:
             mode=mode,
             vision_model_names=models,
             multipass_cleanup_enabled=bool(data.get("multipass_cleanup_enabled", False)),
+            provider_id=str(data.get("provider_id") or "ollama").strip().lower() or "ollama",
             format=str(data.get("format", "transcribe.ocr-batch-run")),
             schema_version=int(data.get("schema_version", 1)),
         )
@@ -134,6 +139,8 @@ def validate_ocr_batch_run(run: OcrBatchRun) -> None:
         raise ValidationError("ocr_run_id must be non-empty")
     if run.mode not in OCR_BATCH_MODES:
         raise ValidationError(f"invalid ocr-batch-run mode: {run.mode!r}")
+    if run.provider_id not in KNOWN_PROVIDERS:
+        raise ValidationError(f"invalid ocr-batch-run provider_id: {run.provider_id!r}")
     if run.mode == "multipass" and len(run.vision_model_names) < 2:
         raise ValidationError("multipass ocr-batch-run requires at least two vision_model_names")
     seen: set[str] = set()

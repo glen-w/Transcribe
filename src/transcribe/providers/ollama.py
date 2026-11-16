@@ -576,7 +576,7 @@ class OllamaVisionProvider:
             ) from exc
         try:
             return json.loads(raw.decode("utf-8"))
-        except json.JSONDecodeError as exc:
+        except ValueError as exc:  # bad JSON or non-UTF-8 bytes
             raise ProviderError(
                 "Ollama returned non-JSON response",
                 code="bad_response",

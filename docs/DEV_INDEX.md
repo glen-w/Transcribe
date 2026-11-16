@@ -17,7 +17,7 @@ Active developer and maintainer docs. Historical material is listed only via [AR
 
 | Doc | Purpose |
 |-----|---------|
-| [ROADMAP.md](ROADMAP.md) | Product roadmap. **1.4.0** tags 1.3 correct waves. Ladder **1.4** shelf and **1.5** continue-reading remain. Autobiography write-up is on file, not this repo’s backlog |
+| [ROADMAP.md](ROADMAP.md) | Product roadmap. **1.4.0** tags 1.3 correct waves; **1.4.1** is a fix release with the opt-in PaddleOCR sidecar. Ladder **1.4** shelf and **1.5** continue-reading remain. Autobiography write-up is on file, not this repo’s backlog |
 | [dev/expansion_hardening_wave_1_3.md](dev/expansion_hardening_wave_1_3.md) | 1.3.0 durability and OCR truth (restore one notebook, scoreboard, reading marks, skip-OCR, declutter v6) |
 | [dev/durable_notebook_1_3.md](dev/durable_notebook_1_3.md) | 1.3 correct W1–W8 implemented. Remaining: 1.4 hand shelf, 1.5 continue-reading |
 | [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place waves (Inbox, declutter v4, reorder, hand-model bring-back, leftover architecture) — folded into 1.2 |
@@ -55,7 +55,7 @@ Product and module reviews (critique and follow-ups — not contracts): [reviews
 | [dev/streamlit_efficiency_audit.md](dev/streamlit_efficiency_audit.md) | Streamlit every-rerun / Review / View cost audit and PR1 fluidity fixes |
 | [dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md) | Staged decoupling waves (layering, CLI, batch picker, Review/View split, ProjectService) |
 | [dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md) | 1.1 deepen-in-place wave acceptance tables |
-| [runtime/ocr_model_recipes.md](runtime/ocr_model_recipes.md) | Per-model OCR recipes (builtins + workspace overlay). PaddleOCR-VL `OCR:` lane is `feat/paddleocr-mlx` (`--provider paddleocr`) |
+| [runtime/ocr_model_recipes.md](runtime/ocr_model_recipes.md) | Per-model OCR recipes (builtins + workspace overlay). PaddleOCR-VL `OCR:` lane is `--provider paddleocr` (since 1.4.1) |
 | [contracts/ocr-model-recipes.md](contracts/ocr-model-recipes.md) | Recipe overlay schema, merge, fingerprint |
 
 ## Archive

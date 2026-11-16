@@ -357,3 +357,27 @@ def test_connection_error() -> None:
             provider.healthcheck()
         assert exc.value.code == "connection"
         assert exc.value.retriable is True
+
+
+def test_factory_refuses_remote_paddleocr_sidecar() -> None:
+    import pytest
+
+    from transcribe.errors import ProviderError
+
+    with pytest.raises(ProviderError) as excinfo:
+        build_vision_provider("paddleocr", "http://203.0.113.9:8112")
+    assert excinfo.value.code == "provider_remote_refused"
+    # Ollama keeps its own explicit-acknowledgement path; the factory does not block it.
+    assert build_vision_provider("ollama", "http://203.0.113.9:11434").provider_id == "ollama"
+
+
+def test_non_utf8_sidecar_response_is_bad_response() -> None:
+    class _Raw(_Resp):
+        def read(self) -> bytes:
+            return b"\xff\xfe not json"
+
+    provider = PaddleocrVisionProvider("http://127.0.0.1:8112", max_retries=1)
+    with patch("urllib.request.urlopen", return_value=_Raw({})):
+        with pytest.raises(ProviderError) as exc:
+            provider.healthcheck()
+    assert exc.value.code == "bad_response"

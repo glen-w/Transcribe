@@ -251,6 +251,7 @@ class BatchOcrCoordinator:
             mode=mode_norm,
             vision_model_names=models,
             multipass_cleanup_enabled=bool(multipass_cleanup_enabled),
+            provider_id=self._recorded_provider_id(),
         )
         self.store.save(run)
         return run
@@ -315,19 +316,27 @@ class BatchOcrCoordinator:
             return self.run_blocking(ocr_run_id)
         return self.start(ocr_run_id)
 
-    def _provider_for(self, base_url: str) -> VisionOCRProvider:
+    def _recorded_provider_id(self) -> str:
+        """Backend id to persist so ``resume`` rebuilds it. Unknown ids mean Ollama."""
+        from transcribe.providers.factory import KNOWN_PROVIDERS
+
+        pid = str(getattr(self.provider, "provider_id", None) or "ollama")
+        return pid if pid in KNOWN_PROVIDERS else "ollama"
+
+    def _provider_for(self, base_url: str, provider_id: str = "ollama") -> VisionOCRProvider:
+        """Provider for a run. A resumed run rebuilds the backend it recorded."""
         if self.provider is not None:
             return self.provider
-        if self.provider_factory is not None:
+        if self.provider_factory is not None and provider_id == "ollama":
             return self.provider_factory(base_url)
-        from transcribe.providers.ollama import OllamaVisionProvider
+        from transcribe.providers.factory import build_vision_provider
 
-        return OllamaVisionProvider(base_url)
+        return build_vision_provider(provider_id, base_url)
 
     def _run_batch(self, state: _BatchState) -> None:
         run = self.store.load(state.run.ocr_run_id if state.run else "")
         settings = OCRSettings.from_dict(run.settings)
-        provider = self._provider_for(settings.base_url)
+        provider = self._provider_for(settings.base_url, run.provider_id)
         total = len(run.items)
         is_multipass = run.mode == "multipass"
 
@@ -374,27 +383,32 @@ class BatchOcrCoordinator:
                     item.state = "skipped"
                     item.pages_total = 0
                     continue
+                prior = OCRSettings.from_dict(project.settings.as_dict())
                 merged = OCRSettings.from_dict(settings.as_dict())
                 project = projects.save_settings(project, merged)
                 coord.provider = provider
 
-                if is_multipass:
-                    self._run_multipass_item(
-                        state=state,
-                        run=run,
-                        item=item,
-                        label=label,
-                        projects=projects,
-                        coord=coord,
-                    )
-                else:
-                    self._run_single_item(
-                        state=state,
-                        run=run,
-                        item=item,
-                        label=label,
-                        coord=coord,
-                    )
+                try:
+                    if is_multipass:
+                        self._run_multipass_item(
+                            state=state,
+                            run=run,
+                            item=item,
+                            label=label,
+                            projects=projects,
+                            coord=coord,
+                        )
+                    else:
+                        self._run_single_item(
+                            state=state,
+                            run=run,
+                            item=item,
+                            label=label,
+                            coord=coord,
+                        )
+                finally:
+                    if getattr(provider, "provider_id", "") == "paddleocr":
+                        restore_ollama_host_settings(projects, prior)
             except (JobConflictError, TranscribeError, OSError, ValueError) as exc:
                 item.state = "failed"
                 item.error_message = str(exc)
@@ -592,6 +606,23 @@ class BatchOcrCoordinator:
             except ValueError:
                 pass
         return resolve_notebook_root(self.corpus, item.notebook_id)
+
+
+def restore_ollama_host_settings(projects: Any, prior: OCRSettings) -> None:
+    """Put a notebook's Ollama host and model back after a sidecar run.
+
+    A job reads its host and model from notebook settings, so a ``paddleocr``
+    run has to write the sidecar URL there. The UI is Ollama-only and reads the
+    same fields; leaving the sidecar URL behind would point it at the wrong API.
+    """
+    project = projects.load()
+    current = project.settings
+    if (current.base_url, current.model_name) == (prior.base_url, prior.model_name):
+        return
+    current.base_url = prior.base_url
+    current.model_name = prior.model_name
+    current.allow_non_loopback = prior.allow_non_loopback
+    projects.save_settings(project, current)
 
 
 def build_batch_ocr_coordinator(

@@ -1,5 +1,7 @@
 # OCR / vision assessments
 
+**Latest whole-product assessment:** [2026-11-16-transcribe-assessment.md](2026-11-16-transcribe-assessment.md) (tests, architecture, security, docs, roadmap honesty; findings tracked as M1–M8 in [ROADMAP.md](../docs/ROADMAP.md#open-maintenance--from-the-2026-11-16-assessment)).
+
 Public pack at repo-root `/assessments/`. Maintainer surveys of Transcribe vs TranscriptX live in [`docs/assessments/`](../docs/assessments/README.md). This folder holds corpus rollups, Nightshift scrapes, live Ollama probes, and the model-assessment narrative (hardware-labelled; notebook titles and page ids appear in the JSON).
 
 ## Pins (2026-11-10)
@@ -32,6 +34,7 @@ Collector semantics match Nightshift `list_tier.py`: `:latest` stripped, vision 
 
 | Path | |
 |------|--|
+| [2026-11-16-transcribe-assessment.md](2026-11-16-transcribe-assessment.md) | Whole-product assessment at `main` @ `4853226` (not a model report) |
 | [2026-11-10-model-assessment.md](2026-11-10-model-assessment.md) | Narrative: performance, errors, Nightshift backlog recipe, `feat/selective-remote-ocr` spec |
 | [data/corpus-stats.json](data/corpus-stats.json) | Pages, tiers, per-notebook completion |
 | [data/error-by-model.json](data/error-by-model.json) | Attempt status + `error.code` histogram |

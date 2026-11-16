@@ -697,6 +697,7 @@ class JobCoordinator:
     ) -> None:
         sealed_provider = self._seal_provider(plan, start_provider or self.provider)
         state.plan = plan
+        backend = "the PaddleOCR sidecar" if plan.provider_id == "paddleocr" else "Ollama"
         state.provider = sealed_provider
         self._persist_job_record(state, terminal=False)
 
@@ -778,7 +779,7 @@ class JobCoordinator:
                         current_page_ids=[page_id],
                         current_labels=[label],
                         message=(
-                            f"Waiting on Ollama for {label} "
+                            f"Waiting on {backend} for {label} "
                             f"({index + 1}/{len(work)})…"
                             + (
                                 " first page can take several minutes if the model must load"
@@ -840,7 +841,7 @@ class JobCoordinator:
                         current_page_ids=ids,
                         current_labels=labels,
                         message=(
-                            f"Waiting on Ollama for {shown} "
+                            f"Waiting on {backend} for {shown} "
                             f"({len(futures)} pages)…"
                             " model load / first page can take several minutes"
                         ),

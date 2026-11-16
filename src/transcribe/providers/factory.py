@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from transcribe.errors import ProviderError
 from transcribe.providers.base import VisionOCRProvider
-from transcribe.providers.ollama import normalize_base_url
+from transcribe.providers.ollama import is_local_machine_host, normalize_base_url
 
 KNOWN_PROVIDERS = ("ollama", "paddleocr")
+DEFAULT_PADDLEOCR_BASE_URL = "http://127.0.0.1:8112"
 
 
 def normalize_provider_id(provider_id: str | None) -> str:
@@ -31,6 +32,12 @@ def build_vision_provider(
 
         return OllamaVisionProvider(url, **kwargs)
     if pid == "paddleocr":
+        # The sidecar has no remote acknowledgement: page images stay on this machine.
+        if not is_local_machine_host(url):
+            raise ProviderError(
+                "Refusing non-local paddleocr sidecar (page images would leave this machine).",
+                code="provider_remote_refused",
+            )
         from transcribe.providers.paddleocr import PaddleocrVisionProvider
 
         return PaddleocrVisionProvider(url, **kwargs)

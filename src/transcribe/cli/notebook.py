@@ -5,7 +5,12 @@ from __future__ import annotations
 import argparse
 import sys
 
-from transcribe.providers.factory import build_vision_provider, normalize_provider_id
+from transcribe.domain.models import OCRSettings
+from transcribe.providers.factory import (
+    DEFAULT_PADDLEOCR_BASE_URL,
+    build_vision_provider,
+    normalize_provider_id,
+)
 from transcribe.providers.ollama import (
     OllamaVisionProvider,
     is_local_machine_host,
@@ -167,12 +172,13 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
     if args.cmd == "run":
         project = projects.load()
         settings = project.settings
+        prior_settings = OCRSettings.from_dict(settings.as_dict())
         settings.model_name = args.model
         provider_id = normalize_provider_id(getattr(args, "provider", None))
         if args.base_url:
             settings.base_url = normalize_base_url(args.base_url)
         elif provider_id == "paddleocr":
-            settings.base_url = normalize_base_url("http://127.0.0.1:8112")
+            settings.base_url = normalize_base_url(DEFAULT_PADDLEOCR_BASE_URL)
         settings.max_workers = max(1, min(2, args.workers))
         url = normalize_base_url(settings.base_url)
         if provider_id == "paddleocr":
@@ -180,6 +186,12 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
                 print(
                     "Refusing non-local paddleocr sidecar "
                     "(page images would leave this machine).",
+                    file=sys.stderr,
+                )
+                return 2
+            if args.allow_remote_ollama:
+                print(
+                    "error: --allow-remote-ollama does not apply to --provider paddleocr",
                     file=sys.stderr,
                 )
                 return 2
@@ -203,20 +215,29 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
                 file=sys.stderr,
             )
             return 2
-        project = projects.save_settings(project, settings)
         coord.provider = build_vision_provider(provider_id, settings.base_url)
+        if provider_id == "paddleocr":
+            # Fail once, up front, instead of once per page when the sidecar is down.
+            coord.provider.healthcheck()
+        project = projects.save_settings(project, settings)
 
-        if args.retry_failed:
-            from transcribe.services.job_outcome import retry_failed_page_ids
+        try:
+            if args.retry_failed:
+                from transcribe.services.job_outcome import retry_failed_page_ids
 
-            project = projects.load()
-            page_ids = retry_failed_page_ids(project, projects)
-            if not page_ids:
-                print("no failed, interrupted, or empty_output pages to retry")
-                return 0
-            progress = coord.run_blocking(page_ids=page_ids, force=args.force)
-        else:
-            progress = coord.run_blocking(force=args.force)
+                project = projects.load()
+                page_ids = retry_failed_page_ids(project, projects)
+                if not page_ids:
+                    print("no failed, interrupted, or empty_output pages to retry")
+                    return 0
+                progress = coord.run_blocking(page_ids=page_ids, force=args.force)
+            else:
+                progress = coord.run_blocking(force=args.force)
+        finally:
+            if provider_id == "paddleocr":
+                from transcribe.services.batch_ocr import restore_ollama_host_settings
+
+                restore_ollama_host_settings(projects, prior_settings)
         from transcribe.services.job_outcome import classify_job_outcome
 
         outcome = classify_job_outcome(
@@ -280,7 +301,11 @@ def dispatch_notebook(args: argparse.Namespace, *, clock, ids) -> int | None:
                 print(f"{info.detector_id}\tv{info.version}\t{info.title}")
             return 0
         svc = DetectionService(projects)
-        result = svc.run_detector(args.detector, force=args.force, auto_tag=args.auto_tag)
+        try:
+            result = svc.run_detector(args.detector, force=args.force, auto_tag=args.auto_tag)
+        except ValueError as exc:  # unknown detector id
+            print(f"error: {exc} (see `transcribe detect <project> --list`)", file=sys.stderr)
+            return 2
         findings = result.get("findings") or []
         page_counts = result.get("page_counts") or []
         if page_counts:

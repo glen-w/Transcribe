@@ -694,8 +694,8 @@ def _render_new_notebook(runtime, archive: ArchiveService) -> None:
             sync_notebook_selector(str(sample_root))
             st.toast(f"Opened “{SAMPLE_TITLE}”")
             set_ui_mode("Reading")
-        except TranscribeError as exc:
-            st.error(str(exc))
+        except (TranscribeError, OSError) as exc:
+            st.error(f"Could not open the sample notebook: {exc}")
 
 
 def main() -> None:

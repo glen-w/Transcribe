@@ -33,6 +33,7 @@ def _cmd_bulk_import(args: argparse.Namespace, *, clock, ids) -> int:
             ids=ids,
             title=args.title,
             import_policy_id=policy,
+            corpus_paths=corpus,
         )
         print(
             f"plan_id={plan.plan_id} items={len(plan.items)} "
@@ -139,7 +140,11 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
     from transcribe.corpus.ocr_run import OcrBatchRunStore
     from transcribe.corpus.paths import CorpusPaths
     from transcribe.domain.models import OCRSettings
-    from transcribe.providers.factory import build_vision_provider, normalize_provider_id
+    from transcribe.providers.factory import (
+        DEFAULT_PADDLEOCR_BASE_URL,
+        build_vision_provider,
+        normalize_provider_id,
+    )
     from transcribe.providers.ollama import (
         is_local_machine_host,
         normalize_base_url,
@@ -167,6 +172,7 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
         print(
             f"ocr_run_id={run.ocr_run_id} status={run.status} mode={run.mode} "
             f"models={models} force={run.force} items={len(run.items)}"
+            + (f" provider={run.provider_id}" if run.provider_id != "ollama" else "")
         )
         if run.import_run_id:
             print(f"import_run_id={run.import_run_id}")
@@ -189,8 +195,11 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
             print(f"  {item.notebook_id} {item.state}")
         return 0 if run.status in {"completed", "partial"} else 1
 
-    url = normalize_base_url(args.base_url or default_ollama_base_url())
     provider_id = normalize_provider_id(getattr(args, "provider", None))
+    default_url = (
+        DEFAULT_PADDLEOCR_BASE_URL if provider_id == "paddleocr" else default_ollama_base_url()
+    )
+    url = normalize_base_url(args.base_url or default_url)
     if provider_id == "paddleocr":
         if not is_local_machine_host(url):
             print(
@@ -199,8 +208,12 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
                 file=sys.stderr,
             )
             return 2
-        if not args.base_url:
-            url = normalize_base_url("http://127.0.0.1:8112")
+        if args.allow_remote_ollama:
+            print(
+                "error: --allow-remote-ollama does not apply to --provider paddleocr",
+                file=sys.stderr,
+            )
+            return 2
     elif not is_local_machine_host(url) and not args.allow_remote_ollama:
         print(
             "Refusing non-local Ollama host without --allow-remote-ollama "
@@ -234,6 +247,9 @@ def _cmd_bulk_run(args: argparse.Namespace, *, clock, ids) -> int:
         auto_activate_composite=not bool(getattr(args, "no_auto_composite", False)),
     )
     coord.provider = build_vision_provider(provider_id, url)
+    if provider_id == "paddleocr":
+        # Fail once, up front, instead of once per page when the sidecar is down.
+        coord.provider.healthcheck()
     candidates = list_candidates(corpus, clock=clock, ids=ids)
     import_run_id = None
     if args.bulk_run_cmd == "pending":

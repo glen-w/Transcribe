@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-11-16
+
+Fix release on 1.4.0. It is not the durable-notebook **1.4 proof** or **1.5 keep** step.
+
+### Added
+
+- **PaddleOCR-VL sidecar provider:** `transcribe run` and `transcribe bulk-run` accept `--provider paddleocr` (loopback MLX sidecar, default `http://127.0.0.1:8112`). Ollama stays the default and the only UI backend. A non-local sidecar is refused; there is no remote override. Stored text is recognized page text only (layout dumps are stripped). The provider id is part of the OCR skip fingerprint.
+- Root `assessments/` pack: model/corpus reports, collectors, and the 2026-11-16 whole-product assessment.
+
+### Fixed
+
+- **Open sample notebook** works from a wheel and in the Docker image. The fixture is now package data, placeholder pages are generated in memory (nothing is written into the install), and the notebook is built in a staging folder and renamed into place, so an interrupted install leaves nothing behind. A folder named `sample-notebook` that is not a notebook is refused with a message and left untouched.
+- `bulk-run resume` rebuilds the backend the run started with. `transcribe.ocr-batch-run` gains an optional `provider_id` (absent means `ollama`).
+- `bulk-run --provider paddleocr` no longer refuses a local sidecar when the Ollama default host is remote.
+- A `--provider paddleocr` run no longer leaves the sidecar URL and model in notebook settings; the notebook's Ollama host and model are restored when the run ends.
+- Non-UTF-8 bytes from Ollama or the sidecar are reported as `bad_response` instead of an unhandled decode error.
+- `transcribe detect --detector <unknown>` exits 2 and points at `--list` instead of raising a traceback.
+- A second `bulk-import folder` on a folder whose notebook already exists is refused before an ImportRun is recorded, with a readable reason (CLI and Import page). It used to record a failed run with an id-mismatch message.
+
 ### Changed
+
+- `--provider paddleocr` checks the sidecar once before starting and exits 1 if it is unreachable, instead of failing every page. `--allow-remote-ollama` with `--provider paddleocr` is an error. The provider factory itself refuses a non-local sidecar.
+- OCR progress names the backend in use ("Waiting on the PaddleOCR sidecar…").
+- Docker release smoke opens the sample notebook inside the built image (`scripts/release/image_sample_check.sh`).
+- **Nightly workflow** runs the offline smoke lane only. The scheduled acceptance, contracts, scale, and `pip-audit` + CycloneDX SBOM steps described under 1.2.0 and 1.3.0 below no longer run on a schedule; `make test-acceptance` and `make test-scale` remain local lanes.
 
 - OCR skip fingerprints omit recipe `repeat_penalty` and `stop`; stored attempts still rehash compatibly so deploy and recipe tuning do not mass re-OCR successes. Non-`force` jobs defer pages after three fingerprint-compatible `token_repeat` failures for the same model (Review **Retry these** still forces retries).
 

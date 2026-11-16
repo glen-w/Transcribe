@@ -137,12 +137,24 @@ def plan_from_folder(
     import_policy_id: str = POLICY_SKIP_EXISTING_V1,
     notebook_id: str | None = None,
     op: str = OP_CREATE_NOTEBOOK,
+    corpus_paths: CorpusPaths | None = None,
 ) -> ImportPlan:
     """Build a create_notebook or import_into_notebook plan from a flat folder.
 
     Natural sort (filesystem name order) is the proposed page order. Duplicate
-    basenames are refused as ordering ambiguity.
+    basenames are refused as ordering ambiguity. With ``corpus_paths``, a
+    create plan whose target folder already holds a notebook is refused here,
+    before an ImportRun is recorded, instead of failing mid-commit.
     """
+    if corpus_paths is not None and op == OP_CREATE_NOTEBOOK and notebook_id is None:
+        rel = managed_relpath or Path(folder).name
+        existing = _lookup_existing(rel, corpus_paths=corpus_paths)
+        if existing is not None:
+            raise ValidationError(
+                f"a notebook named {rel!r} already exists ({existing.title!r}, "
+                f"id {existing.notebook_id}). Rename the folder to import it as a new "
+                "notebook, or use `bulk-import folders --on-existing overwrite` to replace it."
+            )
     items = _items_from_folder(
         folder,
         ids=ids,

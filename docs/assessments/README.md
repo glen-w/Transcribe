@@ -19,6 +19,13 @@ These notes compare Transcribe (this repo) with the sibling product TranscriptX.
 | [2026-10-23-drift.md](2026-10-23-drift.md) | Shared patterns, naming pairs, and gap severity |
 | [2026-10-23-v1-gap-register.md](2026-10-23-v1-gap-register.md) | Execution checklist for the v1 wave programme |
 
+Later whole-product surveys (not TranscriptX comparisons):
+
+| Doc | Use |
+|-----|-----|
+| [2026-11-03-assess.md](2026-11-03-assess.md) | Maturity survey at package 1.4.0 (`b0ea9fc`) |
+| [2026-11-16 assessment](../../assessments/2026-11-16-transcribe-assessment.md) | Current assessment at `4853226`; lives in the root `assessments/` pack |
+
 The lag is **release maturity**, not a missing audio stack. Transcribe must not import TranscriptX. Do not edit the TranscriptX tree from this programme.
 
 ## Related

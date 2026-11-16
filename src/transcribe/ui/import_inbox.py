@@ -143,6 +143,7 @@ def _render_single_folder(
                     ids=ids,
                     title=title.strip() or None,
                     import_policy_id=_policy_id(policy),
+                    corpus_paths=corpus,
                 )
                 st.write(
                     f"Plan `{plan.plan_id}` · {len(plan.items)} item(s) · "

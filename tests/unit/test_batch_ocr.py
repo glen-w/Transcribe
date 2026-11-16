@@ -381,3 +381,117 @@ def test_finalize_status_partial_when_cancelled_after_success() -> None:
         ],
     )
     assert finalize_ocr_batch_status(run) == "partial"
+
+
+def test_batch_run_records_provider_and_resume_rebuilds_it(tmp_path: Path, monkeypatch) -> None:
+    """A resumed paddleocr run must not fall back to the Ollama client (M2)."""
+    corpus = _corpus(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("prov")
+    _make_notebook(corpus, "alpha", clock=clock, ids=ids)
+    paddle = FakeVisionOCRProvider(provider_id="paddleocr")
+    coord = BatchOcrCoordinator(corpus, clock=clock, ids=ids, provider=paddle)
+    selected = select_pending(list_candidates(corpus, clock=clock, ids=ids))
+    settings = OCRSettings(model_name="fake-vision", base_url="http://127.0.0.1:8112")
+    run = coord.create_run(selected, settings=settings)
+    assert run.provider_id == "paddleocr"
+    stored = OcrBatchRunStore(corpus).load(run.ocr_run_id)
+    assert stored.provider_id == "paddleocr"
+    assert stored.as_dict()["provider_id"] == "paddleocr"
+
+    built: list[tuple[str, str]] = []
+    rebuilt = FakeVisionOCRProvider(provider_id="paddleocr")
+
+    def fake_build(provider_id, base_url, **_kwargs):
+        built.append((provider_id, base_url))
+        return rebuilt
+
+    monkeypatch.setattr("transcribe.providers.factory.build_vision_provider", fake_build)
+    fresh = BatchOcrCoordinator(corpus, clock=clock, ids=ids)  # as `bulk-run resume` does
+    progress = fresh.resume(run.ocr_run_id, blocking=True)
+    assert progress.status == "completed"
+    assert built and set(built) == {("paddleocr", "http://127.0.0.1:8112")}
+    assert rebuilt.calls == 1
+
+
+def test_batch_run_provider_defaults_to_ollama_and_is_omitted(tmp_path: Path) -> None:
+    corpus = _corpus(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("dflt")
+    _make_notebook(corpus, "alpha", clock=clock, ids=ids)
+    coord = BatchOcrCoordinator(corpus, clock=clock, ids=ids, provider=FakeVisionOCRProvider())
+    selected = select_pending(list_candidates(corpus, clock=clock, ids=ids))
+    run = coord.create_run(selected, settings=OCRSettings(model_name="fake-vision"))
+    assert run.provider_id == "ollama"  # unknown test ids are not persisted
+    payload = run.as_dict()
+    assert "provider_id" not in payload  # additive: pre-existing readers see no new key
+    from transcribe.corpus.ocr_run import OcrBatchRun
+
+    assert OcrBatchRun.from_dict(payload).provider_id == "ollama"
+
+
+def test_batch_run_rejects_unknown_provider_id(tmp_path: Path) -> None:
+    from transcribe.corpus.ocr_run import validate_ocr_batch_run
+
+    corpus = _corpus(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("badp")
+    _make_notebook(corpus, "alpha", clock=clock, ids=ids)
+    coord = BatchOcrCoordinator(corpus, clock=clock, ids=ids, provider=FakeVisionOCRProvider())
+    selected = select_pending(list_candidates(corpus, clock=clock, ids=ids))
+    run = coord.create_run(selected, settings=OCRSettings(model_name="fake-vision"))
+    run.provider_id = "cloud-thing"
+    with pytest.raises(ValidationError):
+        validate_ocr_batch_run(run)
+
+
+def test_resumed_paddleocr_run_refuses_remote_sidecar(tmp_path: Path) -> None:
+    """A hand-edited run record cannot send page images to a remote sidecar."""
+    from transcribe.errors import ProviderError
+
+    corpus = _corpus(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("rem")
+    _make_notebook(corpus, "alpha", clock=clock, ids=ids)
+    paddle = FakeVisionOCRProvider(provider_id="paddleocr")
+    coord = BatchOcrCoordinator(corpus, clock=clock, ids=ids, provider=paddle)
+    selected = select_pending(list_candidates(corpus, clock=clock, ids=ids))
+    settings = OCRSettings(model_name="fake-vision", base_url="http://203.0.113.9:8112")
+    run = coord.create_run(selected, settings=settings)
+    fresh = BatchOcrCoordinator(corpus, clock=clock, ids=ids)
+    with pytest.raises(ProviderError):
+        fresh.resume(run.ocr_run_id, blocking=True)
+
+
+def test_paddleocr_batch_restores_notebook_ollama_settings(tmp_path: Path) -> None:
+    """A sidecar run must not leave the sidecar URL as the notebook's Ollama host."""
+    corpus = _corpus(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("rst")
+    root = _make_notebook(corpus, "alpha", clock=clock, ids=ids)
+    projects = ProjectService(open_project_paths(root), clock=clock, ids=ids)
+    before = projects.load().settings
+    assert before.model_name == "fake-vision"
+
+    paddle = FakeVisionOCRProvider(provider_id="paddleocr")
+    paddle.base_url = "http://127.0.0.1:8112"  # matches the plan, so the job keeps this fake
+    coord = BatchOcrCoordinator(corpus, clock=clock, ids=ids, provider=paddle)
+    selected = select_pending(list_candidates(corpus, clock=clock, ids=ids))
+    settings = OCRSettings(model_name="PaddleOCR-VL-1.6", base_url="http://127.0.0.1:8112")
+    run = coord.create_run(selected, settings=settings)
+    assert coord.run_blocking(run.ocr_run_id).status == "completed"
+    assert paddle.calls == 1
+
+    after = projects.load().settings
+    assert after.base_url == before.base_url
+    assert after.model_name == "fake-vision"
+    page = projects.load().pages[0]
+    assert projects.load_page_result(page.page_id).status == "succeeded"
+
+
+def test_ollama_batch_still_persists_run_settings(tmp_path: Path) -> None:
+    """Unchanged behaviour for the default backend: batch settings stay on the notebook."""
+    corpus = _corpus(tmp_path)
+    clock, ids = FakeClock(), SequentialIds("keep")
+    root = _make_notebook(corpus, "alpha", clock=clock, ids=ids)
+    coord = BatchOcrCoordinator(corpus, clock=clock, ids=ids, provider=FakeVisionOCRProvider())
+    selected = select_pending(list_candidates(corpus, clock=clock, ids=ids))
+    run = coord.create_run(selected, settings=OCRSettings(model_name="other-vision"))
+    coord.run_blocking(run.ocr_run_id)
+    projects = ProjectService(open_project_paths(root), clock=clock, ids=ids)
+    assert projects.load().settings.model_name == "other-vision"

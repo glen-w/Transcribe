@@ -137,7 +137,8 @@ live progress.
 ./transcribe.sh cli bulk-run import-run <import_run_id> --model glm-ocr
 ./transcribe.sh cli bulk-run pending --model vision-a --model vision-b --text-model qwen2.5
 ./transcribe.sh cli bulk-run status|resume <ocr_run_id>
-# Optional local MLX sidecar (feat/paddleocr-mlx; not overnight Nightshift):
+# Optional local MLX sidecar (CLI only, since 1.4.1; not overnight Nightshift).
+# `bulk-run resume` rebuilds the provider the run recorded:
 # transcribe bulk-run notebooks "$NB" --provider paddleocr \
 #   --base-url http://127.0.0.1:8112 --model PaddleOCR-VL-1.6
 ```

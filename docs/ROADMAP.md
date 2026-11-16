@@ -11,6 +11,7 @@
 **Analysis porting map:** [dev/analysis_module_porting.md](dev/analysis_module_porting.md)  
 **Core delivery history:** [archive/plans/analysis_wave1_plan.md](archive/plans/analysis_wave1_plan.md)  
 **TranscriptX handoff (future):** [INTEGRATION_SEAM.md](INTEGRATION_SEAM.md) — post–TX 1.0; not a dependency. A reverse file-import of TX exports is **not** a Transcribe release; it lives in the parked autobiography write-up (old label 1.6).  
+**Latest assessment:** [assessments/2026-11-16-transcribe-assessment.md](../assessments/2026-11-16-transcribe-assessment.md) — findings feed [Open maintenance](#open-maintenance--from-the-2026-11-16-assessment)  
 **Indexes:** [USER_INDEX.md](USER_INDEX.md) · [DEV_INDEX.md](DEV_INDEX.md) · [CONTRACT_INDEX.md](CONTRACT_INDEX.md)  
 **Architecture candidates (not 0.9):** [reviews/architecture_from_evidence.md](reviews/architecture_from_evidence.md) · [Later — Architecture follow-ups](#later--architecture-follow-ups-from-evidence-review--candidates)
 
@@ -41,7 +42,9 @@
 
 ## Status at a glance
 
-**Package:** **1.4.0**. Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **1.3.0** shipped [durability and OCR truth](dev/expansion_hardening_wave_1_3.md). **1.4.0** tags [durable notebook](dev/durable_notebook_1_3.md) **1.3 correct** (W1–W8). It is not the ladder’s **1.4 proof** (hand shelf). Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading. **1.2** folded in the 1.1 deepen waves.
+**Package:** **1.4.1** (fix release on 1.4.0). Notebook freeze tagged **1.0.0**; **1.0.1** is layering/decoupling ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). **1.3.0** shipped [durability and OCR truth](dev/expansion_hardening_wave_1_3.md). **1.4.0** tags [durable notebook](dev/durable_notebook_1_3.md) **1.3 correct** (W1–W8). It is not the ladder’s **1.4 proof** (hand shelf). Open: **1.4** hand shelf / bring-back report, **1.5** continue-reading. **1.2** folded in the 1.1 deepen waves.
+
+**1.4.1 (2026-11-16)** is a fix release on 1.4.0: the opt-in `--provider paddleocr` sidecar backend on `run` / `bulk-run`, OCR skip fingerprints that ignore recipe sampler keys, a defer rule for chronic `token_repeat` pages, the smoke-only nightly, the root `assessments/` pack, and the fixes from the [2026-11-16 assessment](#open-maintenance--from-the-2026-11-16-assessment). It is a patch number so that it is not mistaken for ladder **1.4** or **1.5**: no hand-shelf or reading-pin code has landed. GitHub **Latest release** still shows `v0.1.0`.
 
 ```text
 0.6.x → 0.7.0 → 0.8.0 → 0.8.5 → 0.8.6 → 0.8.7 → 0.8.8 → 0.9.0 → 1.0.0 → 1.0.1 → 1.2.0 → 1.3 → 1.4 → 1.5
@@ -51,7 +54,7 @@
 
 | Horizon | Status | What it means |
 |---------|--------|---------------|
-| **Now** | [~] | Package **1.4.0** tagged 1.3 correct (W1–W8) on [the durable notebook](dev/durable_notebook_1_3.md). Open: ladder **1.4** hand shelf / bring-back report, **1.5** continue-reading (restore-one and declutter v6 already shipped) |
+| **Now** | [~] | Package **1.4.1** (1.4.0 tagged 1.3 correct, W1–W8; 1.4.1 is fixes) on [the durable notebook](dev/durable_notebook_1_3.md). Open: ladder **1.4** hand shelf / bring-back report, **1.5** continue-reading (restore-one and declutter v6 already shipped) |
 | **1.2.0** | [x] | **Expansion & hardening** ([dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md)): L2 load default, failure/security/scale hardening, search + collections + export expansion, quality loop, declutter v5 |
 | **0.9.0** | [x] | Changelog cut — U2 + I0–I6 |
 | **1.0** | [x] | Notebook workbench freeze (`v1.0.0`); **1.0.1** is the decoupling patch; Track C signed off |
@@ -65,7 +68,7 @@
 | Usability **U0–U1** (trust + Analyse UX) | [x] | [usability_wave_plan.md](usability_wave_plan.md) |
 | Usability **U3** (daily workbench) | [x] | same |
 | Usability **U4** (corpus / inbox gate) | [x] gate green | [corpus-integrity](contracts/corpus-integrity.md); Inbox polish may continue |
-| Usability **U2** (first-run) | [x] | Home, Diagnostics, sample notebook (`samples/demo-notebook/`), first-run docs |
+| Usability **U2** (first-run) | [x] | Home, Diagnostics, sample notebook (`src/transcribe/samples/demo-notebook/`), first-run docs |
 | Infra **I0–I6** | [x] | [infrastructure_wave_0_9_plan.md](infrastructure_wave_0_9_plan.md) — I6 nightly / Docker smoke / issue templates |
 | Detection fine-tune export | [x] | [detection-finetune-export](contracts/detection-finetune-export.md) |
 | Ignore pages (Reader) | [x] | `ui.hide_ignored_pages`; Show ignored; Review mark/unmark |
@@ -120,6 +123,7 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 | **1.0.1** | Layering and decoupling on the frozen notebook ([dev/refactor_waves_1_0_1.md](dev/refactor_waves_1_0_1.md)). |
 | **1.2.0** | Expansion and hardening on shipped surfaces ([dev/expansion_hardening_wave_1_2.md](dev/expansion_hardening_wave_1_2.md)). Search, collections, export filters and custom fonts, collect-only quality ratings, declutter v5, L2 load default. No separate 1.1.0 tag. |
 | **1.3** | **Correct.** Cleanup becomes a verdict, misses can be retried as a set, drawings can be kept scans, confirmed spellings suggest and never write. [Wave plan](dev/durable_notebook_1_3.md). |
+| **1.4.1** | Package fix release on 1.4.0 (PaddleOCR sidecar provider, first-run and CLI fixes). Not a ladder step. |
 | **1.4** | **Proof.** A personal shelf of corrected pages scores an installed hand model against `edited_text`. The report does not switch the workspace model. Training stays outside. |
 | **1.5** | **Keep.** Restore one notebook out of a workspace ZIP, export a longevity bundle, declutter v6 outside the page, continue reading. |
 | **Parked** | Autobiography write-up — [on file](#after-10--notebook-anchored-autobiography-workbench----on-file). Future separate product. Its labels 1.1–2.0 are not rows on this ladder. Package 1.3 is not “People”. |
@@ -143,9 +147,30 @@ Older sentences in this repo that say “after 1.0, Transcribe grows into an aut
 
 **Next, not open:** 1.4 shelf and bring-back report · 1.5 continue-reading and remaining keep work (restore-one and declutter v6 already shipped in 1.3.0). Do not crop shelf pages mid-1.4.
 
-**Later, not the 1.4 shelf:** [selective remote OCR](#later--selective-remote-ocr-feature-branch) (`feat/selective-remote-ocr`) and an optional local third vision tag (PaddleOCR-VL) after a recipe. Corpus throughput stays a **Nightshift** job, not a Transcribe provider.
+**Later, not the 1.4 shelf:** [selective remote OCR](#later--selective-remote-ocr-feature-branch) (`feat/selective-remote-ocr`, not started). The optional local PaddleOCR-VL backend is on `main` as CLI-only `--provider paddleocr` (unreleased); promoting it to a Nightshift `MODEL_B` still waits on the probe write-up. Corpus throughput stays a **Nightshift** job, not a Transcribe provider.
 
 **Landed (no longer backlog):** 0.9.0 package cut · Track C freeze checks (signed off on 1.0.0) · U2.2 sample notebook · U2.4 first-run docs · I6 sustaining lanes · Ignore pages (Reader) · Detection fine-tune export · 1.0.1 decoupling · 1.1 deepen W1–W9 ([dev/deepen_waves_1_1.md](dev/deepen_waves_1_1.md): Cover Open, dirty leave, auto-tag suppression, Detect cancel, Inbox polish, declutter v4, reorder, hand-model docs) · **1.2 expansion & hardening (H1–H4, E1–E5)** · **1.3 correct (W1–W8)**.
+
+---
+
+## Open maintenance — from the 2026-11-16 assessment
+
+Defects and hygiene found by the [2026-11-16 assessment](../assessments/2026-11-16-transcribe-assessment.md). These are fixes on shipped surfaces. They are not new waves and they do not reorder 1.4 / 1.5. Evidence and severity reasoning live in that file.
+
+| # | Item | Status | Severity | Detail |
+|---|------|--------|----------|--------|
+| M1 | **Sample notebook missing from the wheel** | [x] | High | Fixed 2026-11-16. The manifest is package data (`transcribe.samples`), pages are generated in memory, and the install is staged then renamed. `scripts/release/image_sample_check.sh` opens the sample inside the image as part of the Docker smoke |
+| M2 | **`bulk-run resume` forgets the provider** | [x] | Medium | Fixed 2026-11-16. `OcrBatchRun.provider_id` is additive (absent means `ollama`); resume rebuilds through the provider factory, which refuses a non-local sidecar |
+| M3 | **`bulk-run --provider paddleocr` checks the wrong URL** | [x] | Low | Fixed 2026-11-16. The sidecar default is resolved before the locality check |
+| M9 | **Sidecar run rewrote notebook settings** | [x] | Medium | Found while fixing M2. A `paddleocr` run left the sidecar URL and model in notebook settings, which the Ollama-only UI reads. Host and model are now restored after the run |
+| M10 | **`transcribe run` exits 0 when every page fails** | [ ] | Low | Only a tripped circuit gives exit 1. Left unchanged because scheduled jobs may rely on it; the sidecar pre-flight covers the unreachable-backend case for `paddleocr` only |
+| M4 | **GitHub Latest release is `v0.1.0`** | [ ] | Medium (public) | Tag and package are 1.4.1. Publish a release for the current tag or mark the old one as not latest |
+| M5 | **Unreleased work on `main`** | [x] | Low | Released as **1.4.1** on 2026-11-16, a patch number so the ladder's 1.4 and 1.5 stay free |
+| M6 | **Dependency and PR backlog** | [ ] | Low | Ten open Dependabot PRs (#61–#70); stale PRs #4 and #60. No scheduled `pip-audit` since 2026-11-04 — see Nightly CI depth under [Later candidates](#later-candidates--uncommitted--) |
+| M7 | **Local paths in tracked assessment data** | [ ] | Low | `assessments/data/*.json` and two reports carry absolute home paths and notebook titles; four tracked docs link to the gitignored `reviews/nightshift_vision_models.md`. Scrub or accept, and either track that review or drop the links |
+| M8 | **CLI test depth** | [~] | Low | `tests/unit/test_cli_commands.py` runs command bodies end to end through `main`. `cli/` coverage rose from 73% to 91% (`notebook.py` 48% → 88%, `bulk.py` 54% → 90%, `export_cmd.py` 60% → 94%); `multipass` success paths and `rag` (75%) remain thin |
+| M11 | **Unknown detector id crashed the CLI** | [x] | Low | `transcribe detect --detector <unknown>` raised a traceback; it now exits 2 and points at `--list` |
+| M12 | **Repeat single-folder import failed mid-commit** | [x] | Low | A second `bulk-import folder` on the same folder recorded a failed ImportRun with an id-mismatch message. The plan is now refused up front (CLI and Import page) with a readable reason |
 
 ---
 
@@ -283,7 +308,7 @@ Not a 1.4/1.5 wave. Not bulk cloud of the library. Evidence: [`assessments/2026-
 
 Cheap remote order-of-magnitude (research, not a quote): Document AI / Mistral OCR / Gemini Flash-Lite class is dollars per hundred hard pages, not a reason to delay local nights. Merge bar: local-first default unchanged; privacy copy reviewed; overnight Nightshift still loopback Ollama.
 
-**Optional local `MODEL_B`.** Do not put `glm-ocr` back on the night job. Official Apple Silicon PaddleOCR-VL is **not** the Ollama GGUF tag: it is `feat/paddleocr-mlx` (`--provider paddleocr` → loopback sidecar wrapping `PaddleOCRVL` + resident `mlx_vlm.server`). Ollama stays the product default. A Nightshift one-shot (`jobs/paddle-probe`, paused by default) probes one notebook after the 5-year ASAP job; promotion to overnight `MODEL_B` waits on that write-up.
+**Optional local `MODEL_B`.** Do not put `glm-ocr` back on the night job. Official Apple Silicon PaddleOCR-VL is **not** the Ollama GGUF tag: it is `--provider paddleocr` (loopback sidecar wrapping `PaddleOCRVL` + resident `mlx_vlm.server`), merged to `main` from `feat/paddleocr-mlx` on 2026-11-10 and unreleased. It is CLI-only (`run`, `bulk-run`), refuses a non-local sidecar, and has two open defects ([M2, M3](#open-maintenance--from-the-2026-11-16-assessment)). Ollama stays the product default. A Nightshift one-shot (`jobs/paddle-probe`, paused by default) probes one notebook after the 5-year ASAP job; promotion to overnight `MODEL_B` waits on that write-up.
 
 **Optional local `MODEL_B` (Ollama GGUF).** Community `paddleocr-vl-1.6` remains a fallback compare candidate only. The measured path on this Mac is MLX.
 
@@ -313,7 +338,7 @@ I0–I6 (infra wave)           ─┘
 |------|--------|------|
 | U2.1 Home | [x] | Create / Import + Ollama health; no sample wizard on empty Home |
 | U2.3 Diagnostics | [x] | Workspace / notebook doctor in System → Diagnostics |
-| **U2.2 Sample notebook** | [x] | Fixture under `samples/demo-notebook/`; Home **Open sample** via init/import; pre-seeded text for offline Analyse Quick |
+| **U2.2 Sample notebook** | [x] | Fixture is package data under `src/transcribe/samples/demo-notebook/`; Home **Open sample** via init/import; pre-seeded text for offline Analyse Quick |
 | **U2.4 First-run docs** | [x] | “First notebook in 15 minutes” in README (**Docker preferred**); port **8510**, known first-run bites |
 
 **U2 exit:** sample path smoke; README / user guide first-run without reading contracts — **met**.
@@ -1214,7 +1239,7 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 - **Detection fine-tune export** — shipped (approved/rejected Detect labels → external training datasets)
 - **Custom / native UI host** (SPA, Tauri, Qt, …) — uncommitted; not a 1.x track. Working default is Streamlit through 2.0. Reopen only with 1.8–1.9 evidence via [UI host](#ui-host-working-default--reopen-with-evidence); do not schedule a rewrite from this list.
 - **Nightly CI depth** — restore scheduled `make test-acceptance`, `make test-contracts`, `make test-scale`, and supply-chain `pip-audit` + CycloneDX SBOM when dependency pins are stable. PR CI already runs smoke, default offline suite, coverage (3.11), docs, and `release-checks` (Docker, secrets, wheel import).
-- **Selective remote OCR** (`feat/selective-remote-ocr`) — LiteLLM/OpenRouter vision for a named miss-desk page list only; optional local `paddleocr-vl-1.6` as `MODEL_B` after a recipe. See [Later — selective remote OCR](#later--selective-remote-ocr-feature-branch). Not 1.4/1.5.
+- **Selective remote OCR** (`feat/selective-remote-ocr`) — LiteLLM/OpenRouter vision for a named miss-desk page list only; not started. The local PaddleOCR-VL sidecar backend (`--provider paddleocr`) is already on `main`; only its Nightshift `MODEL_B` promotion is pending. See [Later — selective remote OCR](#later--selective-remote-ocr-feature-branch). Not 1.4/1.5.
 
 ---
 
@@ -1237,4 +1262,5 @@ Worth recording without scheduling. Rows that used to point at the autobiography
 | 2026-11-03 | **1.3 correct W1–W8 implemented** (cleanup verdict, divergence banner, miss desk, kept scan, unsure/gloss, confirmed spellings, batch-meta). Stretch included (gloss export, cleanup-hint). No version bump/tag until an explicit release request. Next open: 1.4 shelf | Treating W1–W8 as still the ranked Now backlog |
 | 2026-11-04 | **Nightly workflow** simplified to offline smoke only so the schedule stays green; acceptance/contracts/scale/audit moved to Later candidates | Nightly as full acceptance + pip-audit gate |
 | 2026-11-10 | **Selective remote OCR** and PaddleOCR-VL `MODEL_B` recorded as later (`feat/selective-remote-ocr`), not the 1.4 shelf. 5-year ASAP backlog is Nightshift ops (`SKIP_REST=1`, qwen7b + granite) | Landing LiteLLM vision on `main`, or bulk-cloud of the library |
-
+| 2026-11-10 | **PaddleOCR-VL sidecar provider** merged to `main` as opt-in CLI `--provider paddleocr`; Ollama remains default and the only UI backend | Reading the 2026-11-10 row above as “no second local provider on `main`” (that row bars remote/LiteLLM vision only) |
+| 2026-11-16 | **Whole-product assessment** recorded; defects go to [Open maintenance](#open-maintenance--from-the-2026-11-16-assessment) (M1–M12; M1–M3, M5, M9, M11, M12 closed in **1.4.1**) and do not reorder 1.4 / 1.5 | Treating the 2026-11-03 survey as current |

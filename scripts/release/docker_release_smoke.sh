@@ -26,4 +26,6 @@ if [[ "${TRANSCRIBE_SKIP_IMAGE_PIP_CHECK:-0}" != "1" ]]; then
   bash "$ROOT_DIR/scripts/release/image_pip_check.sh"
 fi
 
+bash "$ROOT_DIR/scripts/release/image_sample_check.sh"
+
 echo "OK: Docker release smoke passed"

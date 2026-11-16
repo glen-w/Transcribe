@@ -27,7 +27,7 @@ Lane names here match the root `Makefile` and `.github/workflows/ci.yml`. Defaul
 
 **Nightly (I6):** `.github/workflows/nightly.yml` runs `make test-smoke` on a schedule (offline sanity check; no live Ollama). Heavier lanes (`test-acceptance`, contracts, scale, supply-chain audit) are roadmap candidates — run locally via Makefile before release. Manual: Actions → Nightly → Run workflow.
 
-**PR add-ons (I6):** `release-checks` runs `scripts/release/docker_release_smoke.sh` (Compose image build + bind assert + image pip check). Skips with reason when Docker is missing.
+**PR add-ons (I6):** `release-checks` runs `scripts/release/docker_release_smoke.sh` (Compose image build + bind assert + image pip check + open the sample notebook inside the image). Skips with reason when Docker is missing.
 
 Time budgets (target ceilings):
 
