@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 # Builder
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim AS builder
+FROM python:3.15-slim AS builder
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # -----------------------------------------------------------------------------
 # Runtime
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim AS production
+FROM python:3.15-slim AS production
 
 ARG GIT_SHA=
 ARG TRANSCRIBE_VERSION=
