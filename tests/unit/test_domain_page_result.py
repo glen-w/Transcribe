@@ -275,3 +275,24 @@ def test_prune_attempts_when_protected_exceeds_max_retained() -> None:
     assert "a1" in ids
     assert len(kept) == 3
     assert [a.started_at for a in kept] == sorted(a.started_at for a in kept)
+
+
+def test_prune_attempts_retains_composite_source_visions() -> None:
+    vision_a = _attempt("v1")
+    vision_b = _attempt("v2")
+    composite = _attempt("c1")
+    composite.attempt_kind = "composite"
+    composite.source_attempt_ids = ["v1", "v2"]
+    composite.pass_id = "pass1"
+    filler = [_attempt(f"f{i}") for i in range(50)]
+    attempts = filler + [vision_a, vision_b, composite]
+    kept = prune_attempts(
+        attempts,
+        active_attempt_id="c1",
+        preferred_attempt_id=None,
+        max_retained=10,
+    )
+    ids = {a.attempt_id for a in kept}
+    assert "c1" in ids
+    assert "v1" in ids
+    assert "v2" in ids

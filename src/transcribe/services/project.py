@@ -28,7 +28,7 @@ from transcribe.domain.models import (
     prune_attempts,
 )
 from transcribe.domain.validation import validate_page_result, validate_project
-from transcribe.errors import JobConflictError, ProjectError
+from transcribe.errors import JobConflictError, ProjectError, ValidationError
 from transcribe.corpus.paths import CorpusPaths
 from transcribe.paths import ProjectPaths
 from transcribe.persistence.atomic import read_json, write_json_atomic
@@ -655,12 +655,22 @@ class ProjectService:
             return current
 
     def _load_page_result_unlocked(self, page_id: str) -> PageResult | None:
+        result = self._load_page_result_for_repair(page_id)
+        if result is None:
+            return None
+        validate_page_result(result, expected_page_id=page_id)
+        return result
+
+    def _load_page_result_for_repair(self, page_id: str) -> PageResult | None:
         path = self.paths.result_path(page_id)
         if not path.exists():
             return None
         payload = require_format(read_json(path), "transcribe.page-result")
         result = PageResult.from_dict(payload)
-        validate_page_result(result, expected_page_id=page_id)
+        if result.page_id != page_id:
+            raise ValidationError(
+                f"page-result page_id {result.page_id!r} != expected {page_id!r}"
+            )
         return result
 
     def load_page_result(self, page_id: str) -> PageResult | None:
@@ -896,6 +906,9 @@ class ProjectService:
 
     def repair_truncated_repetition_successes(self, page_id: str) -> PageResult | None:
         return self._review.repair_truncated_repetition_successes(page_id)
+
+    def repair_orphan_composite_sources(self, page_id: str) -> PageResult | None:
+        return self._review.repair_orphan_composite_sources(page_id)
 
     def repair_review_validity(self, page_id: str) -> str:
         return self._review.repair_review_validity(page_id)

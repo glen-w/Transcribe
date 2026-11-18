@@ -103,6 +103,67 @@ class ProjectReviewRepair:
             self._invalidate_review_unlocked(page_id, before=before, after=existing)
             return existing
 
+    def repair_orphan_composite_sources(self, page_id: str) -> PageResult | None:
+        """Drop composite attempts whose source_attempt_ids point at missing rows.
+
+        Prune retention or manual deletes can leave composites referencing
+        vision attempts that are no longer on disk; ranking then fails validation.
+        """
+        with mutation_lock(self._svc.paths.mutation_lock):
+            existing = self._svc._load_page_result_for_repair(page_id)
+            if existing is None:
+                return None
+            before = PageResult.from_dict(existing.as_dict())
+            known = {a.attempt_id for a in existing.attempts}
+            kept: list = []
+            removed: set[str] = set()
+            changed = False
+            for attempt in existing.attempts:
+                if (attempt.attempt_kind or "vision") != "composite":
+                    kept.append(attempt)
+                    continue
+                missing = [
+                    sid
+                    for sid in (attempt.source_attempt_ids or [])
+                    if sid not in known
+                ]
+                if missing:
+                    removed.add(attempt.attempt_id)
+                    changed = True
+                    continue
+                kept.append(attempt)
+            if not changed:
+                return existing
+            existing.attempts = kept
+            if existing.active_attempt_id in removed:
+                from transcribe.services.project import (
+                    _latest_succeeded_with_text,
+                    _origin_from_active,
+                )
+
+                prior = _latest_succeeded_with_text(existing.attempts)
+                existing.active_attempt_id = (
+                    prior.attempt_id if prior is not None else None
+                )
+                if existing.edited_text is None:
+                    existing.effective_text_origin = _origin_from_active(existing)
+            if existing.preferred_attempt_id in removed:
+                existing.preferred_attempt_id = None
+            if existing.comparison is not None:
+                ranked = [
+                    rid
+                    for rid in existing.comparison.ranked_attempt_ids
+                    if rid in known and rid not in removed
+                ]
+                if ranked != existing.comparison.ranked_attempt_ids:
+                    existing.comparison.ranked_attempt_ids = ranked
+                    changed = True
+            existing.updated_at = to_iso(self._svc.clock.now())
+            validate_page_result(existing, expected_page_id=page_id)
+            write_json_atomic(self._svc.paths.result_path(page_id), existing.as_dict())
+            self._invalidate_review_unlocked(page_id, before=before, after=existing)
+            return existing
+
     def repair_truncated_repetition_successes(self, page_id: str) -> PageResult | None:
         """Demote truncated+looping vision successes so they do not skip forever.
 

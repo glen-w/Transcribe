@@ -379,6 +379,8 @@ class BatchOcrCoordinator:
                 )
                 # Deliberate reopen (L2): reconcile orphaned runs before freezing/starting.
                 project = projects.load(reconcile=True)
+                for page in project.pages:
+                    projects.repair_orphan_composite_sources(page.page_id)
                 if not project.pages:
                     item.state = "skipped"
                     item.pages_total = 0

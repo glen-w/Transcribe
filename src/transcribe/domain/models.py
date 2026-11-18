@@ -1000,6 +1000,8 @@ def prune_attempts(
         protected.add(attempt.attempt_id)
     for attempt in latest_composite_by_pass.values():
         protected.add(attempt.attempt_id)
+        for sid in attempt.source_attempt_ids or []:
+            protected.add(sid)
 
     ordered = sorted(attempts, key=lambda a: a.started_at, reverse=True)
     if len(protected) > max_retained:
