@@ -132,7 +132,16 @@ CLI: omit `--no-auto-composite` (default on) or pass `--no-auto-composite`.
 **Transcribe imported notebooks**). Single-model or compare across notebooks;
 live progress.
 
+Night queues should list via **`transcribe ocr-queue`**, not a second “needs OCR”
+script. A page×model slot drops off that list after a succeeded vision read **or**
+three fingerprint-compatible durable failures (`token_repeat`, `empty_output`,
+rank `validate` / `rank_failed`) until `--force`. Untried pages stay schedulable.
+Rollup / glance still count **succeeded** runs only, so deferred holes stay
+visible.
+
 ```bash
+./transcribe.sh cli ocr-queue --projects-dir "$TRANSCRIBE_PROJECTS_DIR" \
+  --model qwen2.5vl:7b --model granite3.2-vision --tier recent
 ./transcribe.sh cli bulk-run pending --model glm-ocr
 ./transcribe.sh cli bulk-run import-run <import_run_id> --model glm-ocr
 ./transcribe.sh cli bulk-run pending --model vision-a --model vision-b --text-model qwen2.5

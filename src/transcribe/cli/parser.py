@@ -316,6 +316,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write the change. Without this flag the command is a dry run.",
     )
 
+    p_ocr_queue = sub.add_parser(
+        "ocr-queue",
+        help="List notebooks with schedulable OCR (excludes deferred error tails)",
+    )
+    p_ocr_queue.add_argument(
+        "--projects-dir",
+        type=Path,
+        default=None,
+        help="Managed notebook roots (default: TRANSCRIBE_PROJECTS_DIR)",
+    )
+    p_ocr_queue.add_argument(
+        "--model",
+        action="append",
+        dest="models",
+        required=True,
+        help="Vision model that should still be scheduled (repeat)",
+    )
+    p_ocr_queue.add_argument(
+        "--tier",
+        choices=["recent", "from_2023", "rest"],
+        default=None,
+        help="Date tier from newest page diary year (omit = all tiers)",
+    )
+    p_ocr_queue.add_argument(
+        "--max",
+        type=int,
+        default=0,
+        help="Cap how many notebooks to emit (0 = no limit)",
+    )
+
     p_status = sub.add_parser("status", help="Show project page statuses")
     p_status.add_argument("project", type=Path)
 

@@ -17,6 +17,7 @@ from transcribe.cli.export_cmd import (
     _cmd_export_finetune,
 )
 from transcribe.cli.notebook import dispatch_notebook
+from transcribe.cli.ocr_queue import cmd_ocr_queue
 from transcribe.cli.parser import build_parser
 from transcribe.cli.rag import _cmd_rag
 from transcribe.cli.workspace_cmd import (
@@ -71,6 +72,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_saved_search(args, clock=clock, ids=ids)
         if args.cmd == "quality":
             return _cmd_quality(args, clock=clock, ids=ids)
+        if args.cmd == "ocr-queue":
+            return cmd_ocr_queue(args)
         if args.cmd == "export":
             return _cmd_export(args, clock=clock, ids=ids)
         if args.cmd == "export-finetune":

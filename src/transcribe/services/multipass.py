@@ -10,15 +10,24 @@ from typing import Any, Callable
 from transcribe.domain.models import (
     DEFAULT_PREFER_MODE,
     PREFER_MODES,
+    AttemptError,
+    OCRAttempt,
     page_label,
 )
-from transcribe.errors import JobConflictError, TranscribeError
+from transcribe.errors import JobConflictError, TranscribeError, ValidationError
 from transcribe.persistence.atomic import write_json_atomic
 from transcribe.persistence.locks import JobLock
 from transcribe.ports import Clock, IdGenerator, to_iso
 from transcribe.services.job import JobCoordinator
-from transcribe.services.ocr_composite_state import current_composite_attempt, merge_input_vision_attempts
+from transcribe.services.ocr_composite_state import (
+    comparison_matches_merge_inputs,
+    count_rank_failures_for_current_sources,
+    current_composite_attempt,
+    merge_input_vision_attempts,
+    should_skip_rank,
+)
 from transcribe.services.ocr_rank_merge import rank_and_composite_page
+from transcribe.services.ocr_schedule import RANK_FAIL_DEFER_THRESHOLD
 from transcribe.services.project import ProjectService
 
 _log = logging.getLogger(__name__)
@@ -50,6 +59,7 @@ class MultiPassProgress:
     message: str = ""
     pages_ranked: int = 0
     pages_composite: int = 0
+    pages_rank_failed: int = 0
     pages_total: int = 0
     cancel_requested: bool = False
 
@@ -468,22 +478,18 @@ class MultiPassCoordinator:
                         cancelled = True
                         break
 
-            # Rank + composite per page (skip pages already compared for this pass).
+            # Rank + composite per page. Skip when comparison/composite already
+            # matches current vision texts (not this job's pass_id UUID).
             # Cancel does not skip rank: pages that already have ≥2 vision successes
             # still get rank/composite.
             for page_id in targets:
                 existing = self.projects.load_page_result(page_id)
-                has_comparison = bool(
-                    existing and existing.comparison and existing.comparison.pass_id == plan.pass_id
-                )
-                has_composite = bool(
-                    existing and current_composite_attempt(existing) is not None
-                )
-                if has_comparison and (has_composite or not plan.auto_activate_composite):
-                    if has_comparison:
-                        progress.pages_ranked += 1
-                    if has_composite:
-                        progress.pages_composite += 1
+                if should_skip_rank(existing):
+                    if existing is not None:
+                        if comparison_matches_merge_inputs(existing):
+                            progress.pages_ranked += 1
+                        if current_composite_attempt(existing) is not None:
+                            progress.pages_composite += 1
                     continue
                 self._emit(
                     progress,
@@ -507,6 +513,11 @@ class MultiPassCoordinator:
                 else (
                     f"Done — ranked {progress.pages_ranked}, "
                     f"composite {progress.pages_composite}"
+                    + (
+                        f", rank_failed {progress.pages_rank_failed}"
+                        if progress.pages_rank_failed
+                        else ""
+                    )
                 )
             )
             self._emit(
@@ -530,6 +541,44 @@ class MultiPassCoordinator:
             return progress
 
     def _rank_and_composite_page(
+        self,
+        *,
+        page_id: str,
+        plan: MultiPassPlan,
+        prior_active_id: str | None,
+        progress: MultiPassProgress,
+    ) -> None:
+        result = self.projects.load_page_result(page_id)
+        if result is None:
+            return
+        if (
+            not plan.force
+            and count_rank_failures_for_current_sources(result) >= RANK_FAIL_DEFER_THRESHOLD
+        ):
+            progress.pages_rank_failed += 1
+            return
+        try:
+            self._rank_and_composite_page_once(
+                page_id=page_id,
+                plan=plan,
+                prior_active_id=prior_active_id,
+                progress=progress,
+            )
+        except ValidationError:
+            self.projects.repair_orphan_composite_sources(page_id)
+            try:
+                self._rank_and_composite_page_once(
+                    page_id=page_id,
+                    plan=plan,
+                    prior_active_id=prior_active_id,
+                    progress=progress,
+                )
+            except Exception as exc:  # noqa: BLE001 — page skip, keep the notebook
+                self._note_rank_page_failure(page_id, plan, exc, progress)
+        except Exception as exc:  # noqa: BLE001
+            self._note_rank_page_failure(page_id, plan, exc, progress)
+
+    def _rank_and_composite_page_once(
         self,
         *,
         page_id: str,
@@ -573,6 +622,41 @@ class MultiPassCoordinator:
         if outcome.composited:
             progress.pages_composite += 1
 
+    def _note_rank_page_failure(
+        self,
+        page_id: str,
+        plan: MultiPassPlan,
+        exc: BaseException,
+        progress: MultiPassProgress,
+    ) -> None:
+        _log.exception("rank/composite failed for page %s", page_id)
+        progress.pages_rank_failed += 1
+        result = self.projects.load_page_result(page_id)
+        sources = (
+            [a.attempt_id for a in merge_input_vision_attempts(result)] if result else []
+        )
+        code = "validate" if isinstance(exc, ValidationError) else "rank_failed"
+        now = to_iso(self.clock.now())
+        attempt = OCRAttempt(
+            attempt_id=self.ids.new_id(),
+            status="failed",
+            input_fingerprint=f"rank-fail:{plan.pass_id}:{page_id}",
+            fingerprint_payload={"kind": "rank", "pass_id": plan.pass_id},
+            raw_text=None,
+            provenance=None,
+            provider_metadata={},
+            started_at=now,
+            completed_at=now,
+            error=AttemptError(code=code, message=str(exc)[:500], retriable=False),
+            attempt_kind="composite",
+            pass_id=plan.pass_id,
+            source_attempt_ids=sources,
+        )
+        try:
+            self.projects.record_generation(page_id, attempt, activate=False)
+        except Exception:  # noqa: BLE001
+            _log.exception("could not persist rank failure on %s", page_id)
+
     def _persist(
         self,
         plan: MultiPassPlan,
@@ -600,6 +684,7 @@ class MultiPassCoordinator:
             "model_index": progress.model_index,
             "pages_ranked": progress.pages_ranked,
             "pages_composite": progress.pages_composite,
+            "pages_rank_failed": progress.pages_rank_failed,
             "message": progress.message,
             "ended_at": to_iso(self.clock.now()) if terminal else None,
         }

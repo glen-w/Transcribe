@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `transcribe ocr-queue` lists notebooks that still have **schedulable** vision OCR. Pages with three fingerprint-compatible durable failures (`token_repeat`, `empty_output`, …) are deferred until `--force` and drop off the night queue; succeeded-only rollups still show the holes.
+
+### Fixed
+
+- Multipass rank/composite skips when a current comparison or composite already matches the succeeded vision texts (not a new `pass_id` UUID). A rank/`ValidationError` on one page no longer fails the notebook.
+
+### Changed
+
+- Non-force OCR defers after three fingerprint-compatible durable failures of any of those codes, not only `token_repeat`. Timeout and model-load circuits still apply only to the current job’s remaining untried pages.
+
 ## [1.4.1] - 2026-11-16
 
 Fix release on 1.4.0. It is not the durable-notebook **1.4 proof** or **1.5 keep** step.

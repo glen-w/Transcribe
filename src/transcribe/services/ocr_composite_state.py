@@ -72,6 +72,49 @@ def merge_input_ids(result: PageResult) -> frozenset[str]:
     return frozenset(attempt.attempt_id for attempt in merge_input_vision_attempts(result))
 
 
+def comparison_matches_merge_inputs(result: PageResult) -> bool:
+    """True when the stored ranking is for the current succeeded vision set."""
+    if result.comparison is None:
+        return False
+    sources = merge_input_ids(result)
+    if len(sources) < 2:
+        return False
+    ranked = frozenset(result.comparison.ranked_attempt_ids or [])
+    return ranked == sources
+
+
+def should_skip_rank(result: PageResult | None) -> bool:
+    """Skip rank when <2 texts exist, or comparison/composite already matches."""
+    if result is None:
+        return True
+    vision = merge_input_vision_attempts(result)
+    if len(vision) < 2:
+        return True
+    if current_composite_attempt(result) is not None:
+        return True
+    return comparison_matches_merge_inputs(result)
+
+
+def count_rank_failures_for_current_sources(result: PageResult) -> int:
+    """Failed composite attempts whose sources match the current merge inputs."""
+    sources = merge_input_ids(result)
+    if len(sources) < 2:
+        return 0
+    n = 0
+    for attempt in result.attempts:
+        if (attempt.attempt_kind or "vision") != "composite":
+            continue
+        if attempt.status != "failed":
+            continue
+        code = attempt.error.code if attempt.error is not None else ""
+        if code not in {"validate", "rank_failed"}:
+            continue
+        if frozenset(attempt.source_attempt_ids or []) != sources:
+            continue
+        n += 1
+    return n
+
+
 def is_composite_current(attempt: OCRAttempt, result: PageResult) -> bool:
     if (attempt.attempt_kind or "vision") != "composite":
         return False

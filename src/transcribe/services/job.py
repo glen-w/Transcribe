@@ -44,6 +44,10 @@ from transcribe.services.ocr_cleanup import (
     resolve_cleanup_plan_config,
     run_ocr_cleanup,
 )
+from transcribe.services.ocr_schedule import (
+    OCR_FAIL_DEFER_THRESHOLD,
+    count_durable_failures,
+)
 from transcribe.services.project import ProjectService
 
 _log = logging.getLogger(__name__)
@@ -52,7 +56,7 @@ TIMEOUT_CIRCUIT_THRESHOLD = 3
 # Fatal model-load errors (architecture unsupported / loader crash) never recover
 # mid-job — trip after one so multipass does not burn every page.
 MODEL_LOAD_CIRCUIT_THRESHOLD = 1
-TOKEN_REPEAT_DEFER_THRESHOLD = 3
+TOKEN_REPEAT_DEFER_THRESHOLD = OCR_FAIL_DEFER_THRESHOLD
 
 _CIRCUIT_MSG_TIMEOUT = (
     f"Stopped remaining pages after {TIMEOUT_CIRCUIT_THRESHOLD} consecutive Ollama timeouts"
@@ -708,7 +712,7 @@ class JobCoordinator:
             if not plan.force and self._should_skip(project, page_id, plan):
                 skipped += 1
                 continue
-            if not plan.force and self._should_defer_token_repeat(project, page_id, plan):
+            if not plan.force and self._should_defer_failures(project, page_id, plan):
                 skipped += 1
                 deferred += 1
                 continue
@@ -716,7 +720,7 @@ class JobCoordinator:
 
         msg = f"{len(work)} page(s) to process ({skipped} skipped)"
         if deferred:
-            msg += f" · {deferred} deferred (token_repeat>={TOKEN_REPEAT_DEFER_THRESHOLD})"
+            msg += f" · {deferred} deferred (fail>={OCR_FAIL_DEFER_THRESHOLD})"
         self._update_progress(
             state,
             on_progress=on_progress,
@@ -968,30 +972,7 @@ class JobCoordinator:
             return JobCoordinator._normalize_ocr_model_name(str(payload.get("model_name") or ""))
         return ""
 
-    def _count_compatible_token_repeat_failures(
-        self,
-        result,
-        *,
-        model_name: str,
-        current_digest: str,
-    ) -> int:
-        target = self._normalize_ocr_model_name(model_name)
-        count = 0
-        for attempt in result.attempts:
-            if attempt.status != "failed":
-                continue
-            if (attempt.attempt_kind or "vision") != "vision":
-                continue
-            if self._attempt_model_name(attempt) != target:
-                continue
-            if attempt.error is None or attempt.error.code != TOKEN_REPEAT_CODE:
-                continue
-            if not self._attempt_fingerprint_matches(attempt, current_digest):
-                continue
-            count += 1
-        return count
-
-    def _should_defer_token_repeat(
+    def _should_defer_failures(
         self, project: Project, page_id: str, plan: JobPlan
     ) -> bool:
         if plan.force:
@@ -1001,13 +982,19 @@ class JobCoordinator:
             return False
         current_digest = self._compute_fingerprint(project, page_id, plan)[0]
         return (
-            self._count_compatible_token_repeat_failures(
-                result,
+            count_durable_failures(
+                result.as_dict(),
                 model_name=plan.model_name,
                 current_digest=current_digest,
             )
-            >= TOKEN_REPEAT_DEFER_THRESHOLD
+            >= OCR_FAIL_DEFER_THRESHOLD
         )
+
+    def _should_defer_token_repeat(
+        self, project: Project, page_id: str, plan: JobPlan
+    ) -> bool:
+        """Compat alias — defer is any durable fail code, not only token_repeat."""
+        return self._should_defer_failures(project, page_id, plan)
 
     def _compute_fingerprint(
         self, project: Project, page_id: str, plan: JobPlan

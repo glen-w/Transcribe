@@ -94,6 +94,27 @@ def test_prompt_change_after_three_repeats_reruns(tmp_path: Path):
     assert progress.skipped == 0
 
 
+def test_third_empty_output_then_non_force_skips(tmp_path: Path):
+    paths, projects, clock, ids, project = _project_with_one_page(tmp_path)
+    page_id = project.pages[0].page_id
+    for _ in range(TOKEN_REPEAT_DEFER_THRESHOLD):
+        provider = FakeVisionOCRProvider(
+            fail_codes=["empty_output"],
+            digest="digest-aaa",
+            verified=True,
+        )
+        coord = JobCoordinator(paths, projects, provider, clock=clock, ids=ids)
+        progress = coord.run_blocking(page_ids=[page_id], force=True)
+        assert progress.failed == 1
+
+    provider = FakeVisionOCRProvider(digest="digest-aaa", verified=True)
+    coord = JobCoordinator(paths, projects, provider, clock=clock, ids=ids)
+    progress = coord.run_blocking(page_ids=[page_id])
+    assert provider.calls == 0
+    assert progress.skipped == 1
+    assert "deferred" in progress.message.lower()
+
+
 def test_compatible_success_still_skips_not_defers(tmp_path: Path):
     paths, projects, clock, ids, project = _project_with_one_page(tmp_path)
     page_id = project.pages[0].page_id

@@ -94,6 +94,7 @@ Bulk-import generation is **runtime-normative**; the [acceptance gate](contracts
 | CLI `bulk-run pending` | `transcribe bulk-run pending --model …` (repeat `--model` for multipass) | OCR notebooks with untranscribed/failed pages |
 | CLI `bulk-run import-run <id>` | `transcribe bulk-run import-run … --model …` | OCR notebooks committed by an ImportRun |
 | CLI `bulk-run notebooks …` | `transcribe bulk-run notebooks <id-or-path> … --model …` | Explicit notebook list |
+| CLI `ocr-queue` | `transcribe ocr-queue --projects-dir … --model … [--model …] [--tier recent\|from_2023\|rest] [--max N]` | Newest-first notebooks with **schedulable** page×model slots. Deferred repeat-error tails (until `--force`) are omitted; succeeded-only rollups still show those holes |
 | CLI `bulk-run status\|resume <id>` | `transcribe bulk-run status\|resume …` | Inspect or resume an OcrBatchRun |
 | CLI `bulk-analyse pending` | `transcribe bulk-analyse pending --preset …` | Analyse notebooks needing analysis |
 | CLI `bulk-analyse import-run <id>` | `transcribe bulk-analyse import-run …` | Analyse notebooks committed by an ImportRun |
